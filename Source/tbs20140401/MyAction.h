@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "MyAction.generated.h"
 
+class AMy_Pawn;
 class AMyPlayerActions;
 
 UCLASS(Abstract)
@@ -19,12 +20,14 @@ public:
 
 protected:
 	UPROPERTY()
-	AMyPlayerActions* MyPlayerActions;
+	AMy_Pawn* MyPlayerPawn;
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	virtual void ExecuteAction(const FIntPoint& index){}
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void ExecuteAction(const FIntPoint& index){}
 
 };

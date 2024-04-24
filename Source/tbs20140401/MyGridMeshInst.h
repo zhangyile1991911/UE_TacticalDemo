@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "MyGridMeshInst.generated.h"
+enum class ETileState;
 
 UCLASS()
 class TBS20140401_API AMyGridMeshInst : public AActor
@@ -32,5 +33,6 @@ public:
 	void AddInstance(FTransform& instancedTransform,FIntPoint index,const TArray<ETileState>& states);
 	void RemoveInstance(FIntPoint);
 	void UpdateInstance(FIntPoint,const TArray<ETileState>& states);
+	void UpdateInstanceTransform(const FIntPoint& index,const FTransform& Transform);
 	FLinearColor GetColorFromStates(const TArray<ETileState>& states,float& isFilled);
 };

@@ -81,20 +81,43 @@ void AMyGridVisual::AddTileVisual(FTileData data)
 }
 
 
-void AMyGridVisual::UpdateTileVisual(FTileData data)
+void AMyGridVisual::UpdateTileVisual(FTileData data,EGriUpdateMode mode)//0 state 1 tiletype 2 transform
 {
 	// if(myGridMeshInst != nullptr)
 	// {
 	// 	// UE_LOG(LogTemp,Log,TEXT("AMyGridVisual::UpdateTileVisual remove x = %d y = %d"),data.Index.X,data.Index.Y)
 	// 	myGridMeshInst->RemoveInstance(data.Index);	
 	// }
-	
-	if(IsTileTypeWalkable(data.TileType))
+	if(data.TileType == ETileType::None)
 	{
-		// UE_LOG(LogTemp,Log,TEXT("AMyGridVisual::UpdateTileVisual add x = %d y = %d"),data.Index.X,data.Index.Y)
-		// myGridMeshInst->UpdateInstance(data.Transform,data.Index,data.States);
+		myGridMeshInst->RemoveInstance(data.Index);
+		return;
+	}
+	if(mode == EGriUpdateMode::UpdateState)
+	{
+		if(IsTileTypeWalkable(data.TileType))
+		{
+			// UE_LOG(LogTemp,Log,TEXT("AMyGridVisual::UpdateTileVisual add x = %d y = %d"),data.Index.X,data.Index.Y)
+			// myGridMeshInst->UpdateInstance(data.Transform,data.Index,data.States);
+			myGridMeshInst->UpdateInstance(data.Index,data.States);
+		}	
+	}
+
+	if(mode == EGriUpdateMode::UpdateTileType)
+	{
 		myGridMeshInst->UpdateInstance(data.Index,data.States);
 	}
+
+	if(mode == EGriUpdateMode::UpdateTransform)
+	{
+		myGridMeshInst->UpdateInstanceTransform(data.Index,data.Transform);
+	}
+	
+}
+
+void AMyGridVisual::RemoveTIle(FIntPoint index)
+{
+	myGridMeshInst->RemoveInstance(index);
 }
 
 void AMyGridVisual::SetOffsetFromGround(float offset)

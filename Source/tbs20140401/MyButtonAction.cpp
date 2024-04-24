@@ -9,13 +9,14 @@
 void UMyButtonAction::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+	UE_LOG(LogTemp,Log,TEXT("UMyButtonAction::NativeOnInitialized()"))
 	myText->SetText(ButtonText);
 }
 
 void UMyButtonAction::NativeConstruct()
 {
 	Super::NativeConstruct();
-
+	UE_LOG(LogTemp,Log,TEXT("UMyButtonAction::NativeConstruct()"))
 	myButton->OnClicked.AddDynamic(this,&UMyButtonAction::OnButtonClick);
 
 }
@@ -23,6 +24,7 @@ void UMyButtonAction::NativeConstruct()
 void UMyButtonAction::NativeDestruct()
 {
 	Super::NativeDestruct();
+	UE_LOG(LogTemp,Log,TEXT("UMyButtonAction::NativeDestruct()"))
 }
 
 void UMyButtonAction::OnButtonClick()
@@ -30,18 +32,27 @@ void UMyButtonAction::OnButtonClick()
 	selected = !selected;
 	if(selected)
 	{
-		myButton->SetBackgroundColor(FLinearColor::Black);
+		myButton->SetBackgroundColor(FLinearColor::Blue);
 	}
 	else
 	{
-		myButton->SetBackgroundColor(FLinearColor::Blue);
+		myButton->SetBackgroundColor(FLinearColor::Gray);
 	}
-	
+	ButtonActionCB.Broadcast();
 }
 
 #ifdef UE_EDITOR
+void UMyButtonAction::SetUnSelected()
+{
+	selected = false;
+	
+	myButton->SetBackgroundColor(FLinearColor::Gray);
+	
+}
+
 void UMyButtonAction::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
+	UE_LOG(LogTemp,Log,TEXT("UMyButtonAction::PostEditChangeProperty()"))
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	if(PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UMyButtonAction,ButtonText))

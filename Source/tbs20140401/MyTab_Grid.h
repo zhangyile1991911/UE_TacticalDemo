@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "MyTab_Grid.generated.h"
 
+class AMy_Pawn;
+class UMyButtonAction;
 class UMySpinBox_WithName;
 class AMyLevelLoading;
 class UTextBlock;
@@ -67,11 +69,29 @@ protected:
 	TObjectPtr<UCheckBox> CheckHoveredTile;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
 	TObjectPtr<UTextBlock> HoveredTile;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
+	TObjectPtr<UMyButtonAction> SelectTileBtn;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
+	TObjectPtr<UMyButtonAction> AddRemoveBtn;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
+	TObjectPtr<UMyButtonAction> IncreaseBtn;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
+	TObjectPtr<UMyButtonAction> SetTileType;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
+	TObjectPtr<UComboBoxString> TileType;
 	
 	TObjectPtr<AGrid>	MyGrid;
+	TObjectPtr<AMy_Pawn> My_Pawn;
+	
 	TObjectPtr<AMyLevelLoading> MyLevelLoading;
 protected:
 	TObjectPtr<AGrid> GetMyGrid();
+	TObjectPtr<AMy_Pawn> GetMyPawn();
 	TObjectPtr<AMyLevelLoading> GetMyLevelLoading();
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -106,7 +126,20 @@ protected:
 	UFUNCTION()
 	void RepeatedDrawDebugLine();
 
+	UFUNCTION()
+	void OnSelectTileButtonClick();
 
+	UFUNCTION()
+	void OnAddRemoveButtonClick();
+
+	UFUNCTION()
+	void OnIncreaseButtonClick();
+
+	UFUNCTION()
+	void OnSetTileTYpeClick();
+
+	UFUNCTION()
+	void OnTileTypeChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
 
 	FTimerHandle MyTimerHandle;
 };

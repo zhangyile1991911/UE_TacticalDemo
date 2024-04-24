@@ -3,6 +3,10 @@
 
 #include "MyAction.h"
 
+#include "Action_SelectTile.h"
+#include "My_Pawn.h"
+#include "Kismet/GameplayStatics.h"
+
 // Sets default values
 AMyAction::AMyAction()
 {
@@ -15,7 +19,8 @@ AMyAction::AMyAction()
 void AMyAction::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMy_Pawn::StaticClass());
+	MyPlayerPawn = Cast<AMy_Pawn>(actor);
 }
 
 // Called every frame

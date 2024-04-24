@@ -66,15 +66,19 @@ void AMyGridMeshInst::UpdateInstance(FIntPoint index,const TArray<ETileState>& s
 		
 		float filled = 0;
 		FLinearColor color = GetColorFromStates(states,filled);
-		UE_LOG(LogTemp,Log,TEXT("AMyGridMeshInst::UpdateInstance local = (%d,%d) result = %d 1"),index.X,index.Y,result);
-		InstancedStaticMeshComponent->SetCustomDataValue(result,0,color.R,true);
-		InstancedStaticMeshComponent->SetCustomDataValue(result,1,color.G,true);
-		InstancedStaticMeshComponent->SetCustomDataValue(result,2,color.B,true);
+		// UE_LOG(LogTemp,Log,TEXT("AMyGridMeshInst::UpdateInstance local = (%d,%d) result = %d 1"),index.X,index.Y,result);
+		InstancedStaticMeshComponent->SetCustomDataValue(result,0,color.R,false);
+		InstancedStaticMeshComponent->SetCustomDataValue(result,1,color.G,false);
+		InstancedStaticMeshComponent->SetCustomDataValue(result,2,color.B,false);
 		InstancedStaticMeshComponent->SetCustomDataValue(result,3,filled,true);
 		// InstancedStaticMeshComponent->MarkRenderInstancesDirty();
-		
 	}
-	
+}
+
+void AMyGridMeshInst::UpdateInstanceTransform(const FIntPoint& index,const FTransform& Transform)
+{
+	auto result = InstancedIndexes.Find(index);
+	InstancedStaticMeshComponent->UpdateInstanceTransform(result,Transform,false,true);
 }
 
 FLinearColor AMyGridMeshInst::GetColorFromStates(const TArray<ETileState>& states,float& isFilled)

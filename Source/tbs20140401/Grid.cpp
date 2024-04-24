@@ -8,6 +8,7 @@
 #include "MyGridVisual.h"
 #include "My_Utilities.h"
 #include "TileData.h"
+#include "Chaos/ClusterUnionManager.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/DataTable.h"
 
@@ -348,7 +349,20 @@ bool ConvertMouseLocationToWorldSpace(APlayerController* Controller, FVector& Ou
 	return false;
 }
 
-FVector AGrid::GetCursorLocationOnGrid(TObjectPtr<APlayerController> playerIndex,bool traceForGround)
+bool AreVectorsParallel(const FVector& VectorA, const FVector& VectorB)
+{
+	if (VectorA.IsZero() || VectorB.IsZero())
+		return false; // 零向量与任何向量都不平行
+
+	float DotProduct = FVector::DotProduct(VectorA, VectorB);
+	float MagnitudeProduct = VectorA.Size() * VectorB.Size();
+
+	// 由于浮点数运算的精度问题，我们不能直接比较DotProduct和MagnitudeProduct
+	// 我们检查它们的差的绝对值是否小于一个很小的数（epsilon），例如1e-6
+	return FMath::Abs(DotProduct - MagnitudeProduct) < 1e-6 || FMath::Abs(DotProduct + MagnitudeProduct) < 1e-6;
+}
+
+FVector AGrid::GetCursorLocationOnGrid(TObjectPtr<APlayerController> playerIndex,bool traceForGround,bool traceForEmptySpace)
 {
 	FHitResult HitResult;
 	
@@ -366,28 +380,33 @@ FVector AGrid::GetCursorLocationOnGrid(TObjectPtr<APlayerController> playerIndex
 			return HitResult.Location;
 		}
 	}
+
+	if(traceForEmptySpace)
+	{
+		FVector worldLocation,WorldDirection;
+		ConvertMouseLocationToWorldSpace(playerIndex,worldLocation,WorldDirection);
+		
+		FVector endLine = WorldDirection*100000000.0f + worldLocation;
+		FVector LineDir = endLine - worldLocation;
+		FVector PlaneNormal(0,0,1);
+		//计算投影 垂直是0
+		// double Denominator = LineDir | PlaneNormal;
+		
+		if (AreVectorsParallel(LineDir,PlaneNormal))  // 检测分母是否非常接近于零
+		{//不会相交
+			return FVector(-999,-999,-999);
+		}
+		
+		return FMath::LinePlaneIntersection<double>(worldLocation,endLine,GridCenterLocation,PlaneNormal);	
+	}
+	
 	return FVector(-999,-999,-999);
-	// FVector worldLocation,WorldDirection;
- //    ConvertMouseLocationToWorldSpace(playerIndex,worldLocation,WorldDirection);
- //
-	// FVector startLine = worldLocation;
-	// FVector endLine = worldLocation*999999;
-	// FVector LineDir = endLine - startLine;
-	// FVector PlaneNormal(0,0,1);
-	// double Denominator = LineDir | PlaneNormal;
- //
-	// if (FMath::Abs(Denominator) <= KINDA_SMALL_NUMBER)  // 检测分母是否非常接近于零
-	// {//不会相交
-	// 	return FVector(-999,-999,-999);
-	// }
- //
-	//
-	// return FMath::LinePlaneIntersection<double>(startLine,endLine,GridCenterLocation,PlaneNormal);	
+		
 }
 
-FIntPoint AGrid::GetTileIndexUnderCursor(TObjectPtr<APlayerController> playerIndex, bool traceForGround)
+FIntPoint AGrid::GetTileIndexUnderCursor(TObjectPtr<APlayerController> playerIndex, bool traceForGround,bool traceForEmptySpace)
 {
-	FVector location = GetCursorLocationOnGrid(playerIndex,traceForGround);
+	FVector location = GetCursorLocationOnGrid(playerIndex,traceForGround,traceForEmptySpace);
 	return GetTileIndexFromWorldLocation(location);
 }
 
@@ -462,7 +481,7 @@ void AGrid::AddStateToTile(FIntPoint index, ETileState stat)
 		if(result->States.AddUnique(stat) >= 0)
 		{
 			// UE_LOG(LogTemp,Log,TEXT("result->States.AddUnique(stat) >= 0"))
-			GridVisual->UpdateTileVisual(*result);
+			GridVisual->UpdateTileVisual(*result,EGriUpdateMode::UpdateState);
 		}
 	}
 }
@@ -474,8 +493,108 @@ void AGrid::RemoveStateFromTile(FIntPoint index, ETileState stat)
 	{
 		if(result->States.Remove(stat) > 0)
 		{
-			GridVisual->UpdateTileVisual(*result);
+			GridVisual->UpdateTileVisual(*result,EGriUpdateMode::UpdateState);
 		}
 	}
+}
+
+void AGrid::AddNewOneTIle(FIntPoint index)
+{
+	auto result = GridTiles.Find(index);
+	if(result != nullptr)return;
+
+	if (GridShape == EGridShape::None)
+	{
+		return;
+	}
+	
+	GridVisual = Cast<AMyGridVisual>(ChildActor_GridVisual->GetChildActor());	
+	
+	CurGridTileSize = GridTileSize;
+	switch (GridShape)
+	{
+	case EGridShape::Triangle:
+		CurGridTileSize.X *= 2.0f;
+		CurGridTileSize.Y *= 1.0f;
+		CurGridTileSize.Z *= 1.0f;
+		break;
+	case EGridShape::Hexagon:
+		CurGridTileSize.X *= 1.5f;
+		CurGridTileSize.Y *= 1.0f;
+		CurGridTileSize.Z *= 1.0f;
+		break;
+	case EGridShape::Square:
+		break;
+	}
+
+	GridTileCount.X = FMathf::Round(GridTileCount.X);
+	GridTileCount.Y = FMathf::Round(GridTileCount.Y);
+	
+	
+	FGridShapeData* curGridShape = GetShapeData(GridShape);
+	FTransform TileTransform;
+	
+	FVector loc = GetTileLocationFromGridIndex(index);
+	FQuat rot = GetTileRotationFromGridIndex(index);
+	FVector scal = GridTileSize / curGridShape->MeshSize;
+	TileTransform.SetLocation(loc);
+	TileTransform.SetRotation(rot);
+	TileTransform.SetScale3D(scal);
+	FTileData data;
+	data.Index = index;
+	data.TileType = ETileType::Normal;
+	data.Transform = TileTransform;
+	if(UseEnvironment)
+	{
+		data.TileType = TraceForGround(TileTransform);
+		data.Transform = TileTransform;
+	}
+	UE_LOG(LogTemp,Log,TEXT("grid type = %d location = %s"),data.TileType,*data.Transform.GetLocation().ToString());
+	AddGridTile(data);
+}
+
+void AGrid::RemoveOneTIle(FIntPoint index)
+{
+	auto result = GridTiles.Find(index);
+	if(result == nullptr)return;
+	GridTiles.Remove(index);
+	GridVisual->RemoveTIle(index);
+}
+
+void AGrid::SetTileTypeByIndex(FIntPoint index, ETileType tileType)
+{
+	auto result = GridTiles.Find(index);
+	if(result != nullptr)return;
+
+	if(tileType == ETileType::None)
+	{
+		RemoveOneTIle(index);
+	}
+	else
+	{
+		result->TileType = tileType;
+		GridVisual->UpdateTileVisual(*result,EGriUpdateMode::UpdateTileType);	
+	}
+}
+
+
+bool AGrid::IsValidGridIndex(const FIntPoint& index)
+{
+	return GridTiles.Find(index) != nullptr;
+}
+
+
+void AGrid::IncreaseDecreaseTileHeight(const FIntPoint& index,bool increase)
+{
+	FTileData* data = GridTiles.Find(index);
+	if(data == nullptr)
+	{
+		return;
+	}
+	auto curLocation = data->Transform.GetLocation();
+	curLocation.Z += GridTileSize.Z * (increase? 1.0f : -1.0f);
+	
+	data->Transform.SetLocation(curLocation);
+	GridVisual->UpdateTileVisual(*data,EGriUpdateMode::UpdateTransform);
 }
 

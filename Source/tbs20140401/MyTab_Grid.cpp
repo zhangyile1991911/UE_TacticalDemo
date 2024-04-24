@@ -3,8 +3,11 @@
 
 #include "MyTab_Grid.h"
 
+#include "AsyncTreeDifferences.h"
 #include "IContentBrowserSingleton.h"
+#include "MyButtonAction.h"
 #include "MySpinBox_WithName.h"
+#include "My_Pawn.h"
 #include "Components/CheckBox.h"
 #include "Components/ComboBoxString.h"
 #include "Components/TextBlock.h"
@@ -23,6 +26,17 @@ TObjectPtr<AGrid> UMyTab_Grid::GetMyGrid()
 		MyGrid = Cast<AGrid>(actor);
 	}
 	return MyGrid;
+}
+
+TObjectPtr<AMy_Pawn> UMyTab_Grid::GetMyPawn()
+{
+	if(My_Pawn == NULL)
+	{
+		auto world = GetWorld();
+		auto actor = UGameplayStatics::GetActorOfClass(world,AMy_Pawn::StaticClass());
+		My_Pawn = Cast<AMy_Pawn>(actor);
+	}
+	return My_Pawn;
 }
 
 TObjectPtr<AMyLevelLoading> UMyTab_Grid::GetMyLevelLoading()
@@ -50,7 +64,15 @@ void UMyTab_Grid::NativeConstruct()
 	CheckBottomLeft->OnCheckStateChanged.AddDynamic(this,&UMyTab_Grid::OnBottomLeftCheckChanged);
 	CheckUseEnvironment->OnCheckStateChanged.AddDynamic(this,&UMyTab_Grid::OnUseEnvironmentCheckChanged);
 	LevelType->OnSelectionChanged.AddDynamic(this,&UMyTab_Grid::OnLevelTypeChanged);
+
+	SelectTileBtn->ButtonActionCB.AddUObject(this,&UMyTab_Grid::OnSelectTileButtonClick);
+	AddRemoveBtn->ButtonActionCB.AddUObject(this,&UMyTab_Grid::OnAddRemoveButtonClick);
+	IncreaseBtn->ButtonActionCB.AddUObject(this,&UMyTab_Grid::OnIncreaseButtonClick);
+	SetTileType->ButtonActionCB.AddUObject(this,&UMyTab_Grid::OnSetTileTYpeClick);
+
+	TileType->OnSelectionChanged.AddDynamic(this,&UMyTab_Grid::OnTileTypeChanged);
 	
+	TileType->SetVisibility(ESlateVisibility::Collapsed);
 	// GetMyGrid();
 	// if(MyGrid)
 	// {
@@ -187,17 +209,95 @@ void UMyTab_Grid::RepeatedDrawDebugLine()
 
 	if(CheckMouseLocation->IsChecked())
 	{
-		FVector location = GetMyGrid()->GetCursorLocationOnGrid(GetWorld()->GetFirstPlayerController(),true);	
+		FVector location = GetMyGrid()->GetCursorLocationOnGrid(GetWorld()->GetFirstPlayerController(),true,GetMyPawn()->CanHoverEmptySpace());	
 		DrawDebugSphere(GetWorld(),location,20,5,FColor::Yellow);
 		MouseLocation->SetText(FText::Format(NSLOCTEXT("","","{0},{1},{2}"),location.X,location.Y,location.Z));
 	}
 
 	if(CheckHoveredTile->IsChecked())
 	{
-		FIntPoint TileIndex = GetMyGrid()->GetTileIndexUnderCursor(GetWorld()->GetFirstPlayerController(),true);
+		FIntPoint TileIndex = GetMyGrid()->GetTileIndexUnderCursor(GetWorld()->GetFirstPlayerController(),true,GetMyPawn()->CanHoverEmptySpace());
 		HoveredTile->SetText(FText::Format(NSLOCTEXT("", "","({0},{1})"), TileIndex.X, TileIndex.Y));
 	}
 	
 }
 
+void UMyTab_Grid::OnSelectTileButtonClick()
+{
+	AddRemoveBtn->SetUnSelected();
+	
+	SetTileType->SetUnSelected();
+	if(SelectTileBtn->IsSelected())
+	{
+		GetMyPawn()->SetSelectedActions(SelectTileBtn->GetLeftAction(),SelectTileBtn->GetRightAction());
+	}
+	else
+	{
+		GetMyPawn()->SetSelectedActions(nullptr,nullptr);
+	}
+}
 
+void UMyTab_Grid::OnAddRemoveButtonClick()
+{
+	
+	SelectTileBtn->SetUnSelected();
+	SetTileType->SetUnSelected();
+	IncreaseBtn->SetUnSelected();
+	if(AddRemoveBtn->IsSelected())
+	{
+		GetMyPawn()->SetSelectedActions(AddRemoveBtn->GetLeftAction(),AddRemoveBtn->GetRightAction());
+	}
+	else
+	{
+		GetMyPawn()->SetSelectedActions(nullptr,nullptr);
+	}
+}
+
+void UMyTab_Grid::OnIncreaseButtonClick()
+{
+	SelectTileBtn->SetUnSelected();
+	SetTileType->SetUnSelected();
+	AddRemoveBtn->SetUnSelected();
+	if(IncreaseBtn->IsSelected())
+	{
+		GetMyPawn()->SetSelectedActions(IncreaseBtn->GetLeftAction(),IncreaseBtn->GetRightAction());
+	}
+	else
+	{
+		GetMyPawn()->SetSelectedActions(nullptr,nullptr);
+	}
+	
+}
+
+
+void UMyTab_Grid::OnSetTileTYpeClick()
+{
+	AddRemoveBtn->SetUnSelected();
+	SelectTileBtn->SetUnSelected();
+	IncreaseBtn->SetUnSelected();
+	if(SetTileType->IsSelected())
+	{
+		GetMyPawn()->SetSelectedActions(AddRemoveBtn->GetLeftAction(),AddRemoveBtn->GetRightAction());
+		TileType->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		GetMyPawn()->SetSelectedActions(nullptr,nullptr);
+	}
+}
+
+void UMyTab_Grid::OnTileTypeChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
+{
+	if(SelectedItem.Equals(TEXT("None")))
+	{
+		GetMyPawn()->SetCurrentTileType(ETileType::None);
+	}
+	else if(SelectedItem.Equals(TEXT("Normal")))
+	{
+		GetMyPawn()->SetCurrentTileType(ETileType::Normal);
+	}
+	else if(SelectedItem.Equals(TEXT("Obstacle")))
+	{
+		GetMyPawn()->SetCurrentTileType(ETileType::Obstacle);
+	}
+}

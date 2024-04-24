@@ -3,17 +3,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GridShapeData.h"
 #include "InputActionValue.h"
 #include "GameFramework/Pawn.h"
 #include "Math/Vector2D.h"
 
 #include "My_Pawn.generated.h"
 
+enum class ETileType;
+class AMyAction;
+enum class ETileState;
 class AGrid;
 class USpringArmComponent;
 class UCameraComponent;
 struct FInputActionValue;
 class UInputAction;
+
+// DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTileTypeChanged,ETileType,newTipe);
 
 UCLASS()
 class TBS20140401_API AMy_Pawn : public APawn
@@ -37,19 +43,22 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UInputAction> CamMoveAction;
 
+	UPROPERTY()
+	TObjectPtr<UInputAction> MouseLeftClickAction;
+	UPROPERTY()
+	TObjectPtr<UInputAction> MouseRightClickAction;
+
 	float m_curArmLength;
 	FVector m_locationDesired;
 	FRotator m_rotationDesired;
 
 	UPROPERTY()
 	AGrid* MyGrid;
-	UPROPERTY()
-	TObjectPtr<UInputAction> MouseLeftClick;
-	UPROPERTY()
-	TObjectPtr<UInputAction> MouseRightClick;
+	
 	FIntPoint HoveredTile = FIntPoint(-1,-1);
 	FIntPoint SelectedTile = FIntPoint(-1,-1);
-	
+
+	ETileType CurSetTileType = ETileType::Normal;
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	float Location_Speed = 20.0f;
@@ -65,13 +74,24 @@ public:
 	float Zoom_Interp = 2.0f;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FVector2f MaxMin_ArmLength = FVector2f(500.0f,5000.0f);
-	
+
+	UPROPERTY()
+	AMyAction* LeftAction = nullptr;
+
+	UPROPERTY()
+	AMyAction* RightAction = nullptr;
+
+	UFUNCTION()
+	void SetCurrentTileType(ETileType ttype){CurSetTileType = ttype;}
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	void MouseZooming(const FInputActionValue& Value);
 	void CamClockWise(const FInputActionValue& Value);
 	void CamMove(const FInputActionValue& value);
+	void MouseLeftClick(const FInputActionValue& value);
+	void MouseRightClick(const FInputActionValue& value);
+	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -82,7 +102,16 @@ public:
 	void UpdateTileUnderCursor();
 	void UpdateTIleByIndex(const FIntPoint& index,ETileState state);
 	void RemoveTileStateByIndex(const FIntPoint& index,ETileState state);
-	const FIntPoint& GetHoveredTile(){return HoveredTile;}
-	const FIntPoint& GetSelectedTile(){return SelectedTile;}
+	const FIntPoint& GetHoveredTile() const {return HoveredTile;}
+	const FIntPoint& GetSelectedTile() const {return SelectedTile;}
 	void SetSelectedActions(UClass* left,UClass* right);
+	void AddNewTileUnderCursor();
+	// void RemoveTileUnderCursor();
+	void RemoveTileUnderCursor(const FIntPoint& index);
+	bool CanHoverEmptySpace();
+	bool CanHoverGround();
+	void UpdateTileTypeUnderCursor(FIntPoint index);
+
+	AGrid* GetMyGrid(){return MyGrid;}
+	// FTileTypeChanged OnTileTYpeChanged;
 };

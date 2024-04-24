@@ -73,21 +73,30 @@ public:
 	void SpawnGridTileCount(FVector2D tileCount);
 	void SpawnGridLocation(FVector location);
 	void SpawnGridSize(FVector size);
-	FVector GetGridTileSize(){return GridTileSize;}
-	FVector GetGridCenterLocation(){return GridCenterLocation;}
-	FVector GetGridBottomLeft(){return GridBottomLeftCornerLocation;}
-	FVector2D GetGridTileCount(){return GridTileCount;}
+	FVector GetGridTileSize()const{return GridTileSize;}
+	FVector GetGridCenterLocation()const{return GridCenterLocation;}
+	FVector GetGridBottomLeft()const{return GridBottomLeftCornerLocation;}
+	FVector2D GetGridTileCount()const{return GridTileCount;}
 	FGridShapeData* GetGridShape();
 	void AddGridTile(FTileData data);
 	void DestroyGrid();
-	FVector GetCursorLocationOnGrid(TObjectPtr<APlayerController> playerIndex,bool traceForGround);
-	FIntPoint GetTileIndexUnderCursor(TObjectPtr<APlayerController> playerIndex,bool traceForGround);
+	FVector GetCursorLocationOnGrid(TObjectPtr<APlayerController> playerIndex,bool traceForGround,bool traceForEmptySpace);
+	FIntPoint GetTileIndexUnderCursor(TObjectPtr<APlayerController> playerIndex,bool traceForGround,bool traceForEmptySpace);
 	FIntPoint GetTileIndexFromWorldLocation(FVector location);
 	void SetUseEnvironment(bool bis);
 	void SetOffsetFromGround(float offset);
 	
 	void AddStateToTile(FIntPoint index,ETileState stat);
 	void RemoveStateFromTile(FIntPoint index,ETileState stat);
+
+	void AddNewOneTIle(FIntPoint index);
+	void RemoveOneTIle(FIntPoint index);
+
+	void SetTileTypeByIndex(FIntPoint index,ETileType tileType);
+	bool IsValidGridIndex(const FIntPoint&);
+
+	void IncreaseDecreaseTileHeight(const FIntPoint& index,bool increase);
+	
 };
 
 

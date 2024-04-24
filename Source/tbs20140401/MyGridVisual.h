@@ -10,6 +10,14 @@ struct FTileData;
 class AMyGridMeshInst;
 class AGrid;
 
+UENUM(BlueprintType)
+enum class EGriUpdateMode
+{
+	UpdateState,
+	UpdateTileType,
+	UpdateTransform,
+};
+
 UCLASS()
 class TBS20140401_API AMyGridVisual : public AActor
 {
@@ -43,7 +51,8 @@ public:
 	void InitializedGridVisual(AGrid* grid);
 	// void SetOffsetFromGround(float offset);
 	void DestroyGridVisual();
-	void UpdateTileVisual(FTileData);
+	void UpdateTileVisual(FTileData,EGriUpdateMode mode);
+	void RemoveTIle(FIntPoint);
 	void AddTileVisual(FTileData);
 	void SetOffsetFromGround(float offset);
 };

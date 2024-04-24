@@ -27,6 +27,10 @@ void UMySpinBox_WithName::NativePreConstruct()
 	
 	SpinBox_Value->SetDelta(Delta);
 	
+}
+
+void UMySpinBox_WithName::NativeConstruct()
+{
 	SpinBox_Value->OnValueChanged.AddDynamic(this,&UMySpinBox_WithName::ListenOnValueChange);
 }
 
