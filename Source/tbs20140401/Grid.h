@@ -96,6 +96,10 @@ public:
 	bool IsValidGridIndex(const FIntPoint&);
 
 	void IncreaseDecreaseTileHeight(const FIntPoint& index,bool increase);
+
+	const FTileData* GetTileDataByIndex(const FIntPoint& index);
+
+	const TMap<FIntPoint,FTileData>& GetGridTiles(){return GridTiles;}
 	
 };
 

@@ -598,3 +598,8 @@ void AGrid::IncreaseDecreaseTileHeight(const FIntPoint& index,bool increase)
 	GridVisual->UpdateTileVisual(*data,EGriUpdateMode::UpdateTransform);
 }
 
+const FTileData* AGrid::GetTileDataByIndex(const FIntPoint& index)
+{
+	return GridTiles.Find(index);
+}
+
