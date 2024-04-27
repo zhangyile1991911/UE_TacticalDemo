@@ -19,6 +19,7 @@ enum class ETileType
 	None UMETA(DisplayName="None"),
 	Normal UMETA(DisplayName="Normal"),
 	Obstacle UMETA(DisplayName="Obstacle"),
+	
 };
 
 UENUM(BlueprintType)
@@ -26,7 +27,8 @@ enum class ETileState
 {
 	None UMETA(DisplayName="None"),
 	Hovered UMETA(DisplayName="Hovered"),
-	Selected UMETA(DisplayName="Selected")
+	Selected UMETA(DisplayName="Selected"),
+	IsNeighbor UMETA(Displayname="IsNeighbor")
 };
 
 USTRUCT(BlueprintType)

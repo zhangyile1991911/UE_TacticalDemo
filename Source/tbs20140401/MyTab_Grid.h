@@ -84,8 +84,11 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
 	TObjectPtr<UComboBoxString> TileType;
-	
+
+	UPROPERTY()
 	TObjectPtr<AGrid>	MyGrid;
+
+	UPROPERTY()
 	TObjectPtr<AMy_Pawn> My_Pawn;
 	
 	TObjectPtr<AMyLevelLoading> MyLevelLoading;

@@ -101,6 +101,11 @@ FLinearColor AMyGridMeshInst::GetColorFromStates(const TArray<ETileState>& state
 			isFilled = 1.0f;
 			return FLinearColor(0.55f,0.75f,0.351f);
 		}
+		if(s == ETileState::IsNeighbor)
+		{
+			isFilled = 1.0f;
+			return FLinearColor::Yellow;
+		}
 	}
 	return FLinearColor::Black;
 }
