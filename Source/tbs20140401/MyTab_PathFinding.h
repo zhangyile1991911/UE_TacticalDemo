@@ -28,6 +28,15 @@ protected:
 	TObjectPtr<UCheckBox> CheckIncludeDiagonals;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
+	TObjectPtr<UCheckBox> CheckShowCost;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
+	TObjectPtr<UCheckBox> CheckShowFromStart;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
+	TObjectPtr<UCheckBox> CheckShowToTarget;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
 	TObjectPtr<UMyButtonAction> ShowTileNeighborsBtn;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))

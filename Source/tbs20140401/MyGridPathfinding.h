@@ -8,7 +8,9 @@
 #include "MyGridPathfinding.generated.h"
 
 
+class AMyDebugTextAndColorsOnTiles;
 class AGrid;
+DECLARE_DELEGATE_OneParam(FPathFindingCompleted,TArray<FIntPoint>);
 
 UCLASS()
 class TBS20140401_API AMyGridPathfinding : public AActor
@@ -22,6 +24,9 @@ protected:
 
 	UPROPERTY()
 	AGrid* MyGrid;
+
+	UPROPERTY()
+	AMyDebugTextAndColorsOnTiles* MyDebugTextAndColorsOnTiles;
 	
 	bool IncludeDiagonals;
 	FIntPoint CurSelectedPoint;
@@ -34,7 +39,19 @@ protected:
 
 	FIntPoint StartPoint;
 	FIntPoint TargetPoint;
+
+	bool IsShowCost;
+	bool IsShowStart;
+	bool IsShowTarget;
+
+
+	// TArray<FIntPoint> Path;
+
+	// FTimerHandle FindPathHandle;
+	bool IsPathFinding = false;
+	FPathFindingCompleted FindPathCb;
 protected:
+	void FindPathInterval();
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	TArray<FIntPoint> GetNeighborIndexesForSquare(const FIntPoint& index);
@@ -59,7 +76,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	TArray<FIntPoint> GetValidTileNeighbors(const FIntPoint& index);
 	void FindPathSetting(bool isIncludeDiagonals);
-	TArray<FIntPoint> FindPath(const FIntPoint& start,const FIntPoint& target);
+	void FindPath(const FIntPoint& start,const FIntPoint& target,FPathFindingCompleted completed);
+
+	void SetShowDebugOption(bool ShowCost,bool ShowStart,bool ShowTarget)
+	{
+		IsShowCost = ShowCost;
+		IsShowStart = ShowStart;
+		IsShowTarget = ShowTarget;
+	}
 };
 
 

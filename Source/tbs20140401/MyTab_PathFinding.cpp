@@ -43,7 +43,13 @@ void UMyTab_PathFinding::NativeConstruct()
 	Super::NativeConstruct();
 
 	CheckShowIndexes->OnCheckStateChanged.AddDynamic(this,&UMyTab_PathFinding::OnCheckIndexesChanged);
+	CheckShowCost->OnCheckStateChanged.AddDynamic(this,&UMyTab_PathFinding::OnCheckIndexesChanged);
+	CheckShowFromStart->OnCheckStateChanged.AddDynamic(this,&UMyTab_PathFinding::OnCheckIndexesChanged);
+	CheckShowToTarget->OnCheckStateChanged.AddDynamic(this,&UMyTab_PathFinding::OnCheckIndexesChanged);
+	
 	CheckIncludeDiagonals->OnCheckStateChanged.AddDynamic(this,&UMyTab_PathFinding::OnCheckDiagonals);
+	
+	
 	SelectAndFindBtn->ButtonActionCB.AddUObject(this,&UMyTab_PathFinding::OnSelectAndFindClick);
 	
 	auto actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyDebugTextAndColorsOnTiles::StaticClass());
@@ -62,6 +68,10 @@ void UMyTab_PathFinding::OnCheckIndexesChanged(bool isChecked)
 {
 	ShowTilesIndexes = isChecked;
 	MyDebugTextAndColorsOnTiles->SetShowTileText(ShowTilesIndexes);
+
+	GetMyPathFinding()->SetShowDebugOption(CheckShowCost->IsChecked(),
+		CheckShowFromStart->IsChecked(),
+		CheckShowToTarget->IsChecked());
 }
 
 void UMyTab_PathFinding::OnCheckDiagonals(bool isChecked)

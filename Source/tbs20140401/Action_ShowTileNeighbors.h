@@ -24,4 +24,5 @@ protected:
 	virtual void ExecuteAction(const FIntPoint& index) override;
 	virtual void BeginDestroy() override;
 	virtual void Destroyed() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;	
 };

@@ -15,6 +15,15 @@ void AAction_FindPath::BeginPlay()
 	MyGridPathfinding = Cast<AMyGridPathfinding>(actor);
 }
 
+void AAction_FindPath::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	for(const FIntPoint& one : Path)
+    {
+    	MyPlayerPawn->GetMyGrid()->RemoveStateFromTile(one,ETileState::PathFinding);
+    }
+}
+
 void AAction_FindPath::ExecuteAction(const FIntPoint& index)
 {
 	Super::ExecuteAction(index);
@@ -26,9 +35,15 @@ void AAction_FindPath::ExecuteAction(const FIntPoint& index)
 		MyPlayerPawn->GetMyGrid()->RemoveStateFromTile(one,ETileState::PathFinding);
 	}
 	
-	Path = MyGridPathfinding->FindPath(Start,Finish);
+	MyGridPathfinding->FindPath(Start,Finish,FPathFindingCompleted::CreateUObject(this,&AAction_FindPath::WaitPathFinding));
+	
+}
+
+void AAction_FindPath::WaitPathFinding(TArray<FIntPoint> path)
+{
+	Path = MoveTemp(path);
 	for(const FIntPoint& one : Path)
-	{
-		MyPlayerPawn->GetMyGrid()->AddStateToTile(one,ETileState::PathFinding);	
-	}
+    {
+    	MyPlayerPawn->GetMyGrid()->AddStateToTile(one,ETileState::PathFinding);	
+    }
 }

@@ -43,6 +43,25 @@ void AAction_ShowTileNeighbors::BeginDestroy()
 	Super::BeginDestroy();
 	UE_LOG(LogTemp,Log,TEXT("AAction_SelectTile::BeginDestroy()"))
 
+	// if(MyPlayerPawn == nullptr)return;
+	//
+	// MyPlayerPawn->RemoveTileStateByIndex(selectedIndex,ETileState::IsNeighbor);
+	// for(const FIntPoint& one : CurNeighbors)
+	// {
+	// 	MyPlayerPawn->RemoveTileStateByIndex(one,ETileState::IsNeighbor);
+	// }
+}
+
+void AAction_ShowTileNeighbors::Destroyed()
+{
+	Super::Destroyed();
+	UE_LOG(LogTemp,Log,TEXT("AAction_SelectTile::Destroyed()"))
+}
+
+void AAction_ShowTileNeighbors::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
 	if(MyPlayerPawn == nullptr)return;
 
 	MyPlayerPawn->RemoveTileStateByIndex(selectedIndex,ETileState::IsNeighbor);
@@ -50,10 +69,4 @@ void AAction_ShowTileNeighbors::BeginDestroy()
 	{
 		MyPlayerPawn->RemoveTileStateByIndex(one,ETileState::IsNeighbor);
 	}
-}
-
-void AAction_ShowTileNeighbors::Destroyed()
-{
-	Super::Destroyed();
-	UE_LOG(LogTemp,Log,TEXT("AAction_SelectTile::Destroyed()"))
 }

@@ -3,9 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MyPathFindingData.h"
 #include "GameFramework/Actor.h"
 #include "MyDebugTextAndColorsOnTiles.generated.h"
 
+class AMyGridPathfinding;
+struct FMyPathFindingData;
 struct FTileData;
 class AGrid;
 class ATextRenderActor;
@@ -25,8 +28,10 @@ protected:
 	virtual void BeginPlay() override;
 	UPROPERTY()
 	TObjectPtr<AGrid> myGrid;
+
 	
 	TMap<FIntPoint,ATextRenderActor*> SpawnedTexts;
+	bool IsShowIndex;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -37,4 +42,8 @@ public:
 	void UpdateStateOnTile(const FIntPoint&);
 	void UpdateIndexTextOnTile(const FIntPoint& index,const FTileData& data);
 	void SetShowTileText(bool ShowIndex);
+
+	void ShowDebugInfos(TArray<FMyPathFindingData> grids,bool ShowCost,bool ShowStart,bool ShowTarget);
+	void ShowDebugInfo(const FMyPathFindingData& FindingData,bool ShowCost,bool ShowStart,bool ShowTarget);
+	void ClearDebugInfo(const FMyPathFindingData& FindingData);
 };

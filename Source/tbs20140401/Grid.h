@@ -70,7 +70,7 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	EGridShape GetGridShapeType(){return GridShape;}
+	EGridShape GetGridShapeType()const{return GridShape;}
 	void SpawnGridShape(EGridShape GridShape);
 	void SpawnGridTileCount(FVector2D tileCount);
 	void SpawnGridLocation(FVector location);

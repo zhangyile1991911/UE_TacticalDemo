@@ -113,10 +113,85 @@ void AMyDebugTextAndColorsOnTiles::UpdateIndexTextOnTile(const FIntPoint& index,
 	}
 }
 
+
 void AMyDebugTextAndColorsOnTiles::SetShowTileText(bool ShowIndex)
 {
+	IsShowIndex = ShowIndex;
 	if(ShowIndex)
 	{
 		UpdateStateOnTile(ShowIndex);
+	}
+}
+
+void AMyDebugTextAndColorsOnTiles::ShowDebugInfos(TArray<FMyPathFindingData> grids, bool ShowCost, bool ShowStart,
+	bool ShowTarget)
+{
+	for(const FMyPathFindingData& one : grids)
+	{
+		auto actor = GetTextActor(one.Index);
+
+		const FTileData* pTileData = myGrid->GetTileDataByIndex(one.Index);
+		FString DebugText;
+		DebugText.Appendf(TEXT("(%d,%d)"),one.Index.X,one.Index.Y);
+		if(ShowCost)
+		{
+			DebugText.Appendf(TEXT("\nCost:%d"),one.CostToEnterTile);
+		}
+		if(ShowStart)
+		{
+			DebugText.Appendf(TEXT("\nStart:%d"),one.CostFromStart);
+		}
+		if(ShowTarget)
+		{
+			DebugText.Appendf(TEXT("\nTarget:%d"),one.MinimumCostToTarget);
+		}
+		FVector pos = pTileData->Transform.GetLocation();
+		pos.Z += 10.0f;
+		actor->GetTextRender()->SetText(FText::FromString(DebugText));
+		actor->SetActorLocation(pos);
+		actor->SetActorRotation(FRotator(90,180,0));
+	}
+}
+
+void AMyDebugTextAndColorsOnTiles::ShowDebugInfo(const FMyPathFindingData& FindingData, bool ShowCost, bool ShowStart,
+	bool ShowTarget)
+{
+	auto actor = GetTextActor(FindingData.Index);
+
+	const FTileData* pTileData = myGrid->GetTileDataByIndex(FindingData.Index);
+	FString DebugText;
+	DebugText.Appendf(TEXT("(%d,%d)"),FindingData.Index.X,FindingData.Index.Y);
+	if(ShowCost)
+	{
+		DebugText.Appendf(TEXT("\nCost:%d"),FindingData.CostToEnterTile);
+	}
+	if(ShowStart)
+	{
+		DebugText.Appendf(TEXT("\nStart:%d"),FindingData.CostFromStart);
+	}
+	if(ShowTarget)
+	{
+		DebugText.Appendf(TEXT("\nTarget:%d"),FindingData.MinimumCostToTarget);
+	}
+	FVector pos = pTileData->Transform.GetLocation();
+	pos.Z += 10.0f;
+	actor->GetTextRender()->SetText(FText::FromString(DebugText));
+	actor->SetActorLocation(pos);
+	actor->SetActorRotation(FRotator(90,180,0));
+}
+
+void AMyDebugTextAndColorsOnTiles::ClearDebugInfo(const FMyPathFindingData& FindingData)
+{
+	auto actor = GetTextActor(FindingData.Index);
+	if(IsShowIndex)
+	{
+		actor->GetTextRender()->SetText(FText::Format(
+			FText::FromString(TEXT("({0},{1})")),
+			FText::AsNumber(FindingData.Index.X),
+			FText::AsNumber(FindingData.Index.Y)));	
+	}
+	else
+	{
+		actor->GetTextRender()->SetText(FText::GetEmpty());	
 	}
 }

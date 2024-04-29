@@ -23,7 +23,8 @@ protected:
 	FIntPoint Finish;
 protected:
 	virtual void BeginPlay() override;
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	void WaitPathFinding(TArray<FIntPoint>);
 public:
 	virtual void ExecuteAction(const FIntPoint& index) override;
 };
