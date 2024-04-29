@@ -104,6 +104,7 @@ public:
 	void RemoveTileStateByIndex(const FIntPoint& index,ETileState state);
 	const FIntPoint& GetHoveredTile() const {return HoveredTile;}
 	const FIntPoint& GetSelectedTile() const {return SelectedTile;}
+	void SetSelectedTile(const FIntPoint& point){SelectedTile = point;}
 	void SetSelectedActions(UClass* left,UClass* right);
 	void AddNewTileUnderCursor();
 	// void RemoveTileUnderCursor();

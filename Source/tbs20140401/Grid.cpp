@@ -580,7 +580,15 @@ void AGrid::SetTileTypeByIndex(FIntPoint index, ETileType tileType)
 
 bool AGrid::IsValidGridIndex(const FIntPoint& index)
 {
-	return GridTiles.Find(index) != nullptr;
+	return GridTiles.Contains(index);
+}
+
+bool AGrid::IsTileWalkable(const FIntPoint& index)
+{
+	if(!IsValidGridIndex(index))return false;
+
+	auto tile = GridTiles.Find(index);
+	return IsTileTypeWalkable(tile->TileType);
 }
 
 

@@ -106,6 +106,12 @@ FLinearColor AMyGridMeshInst::GetColorFromStates(const TArray<ETileState>& state
 			isFilled = 1.0f;
 			return FLinearColor::Yellow;
 		}
+
+		if(s == ETileState::PathFinding)
+		{
+			isFilled = 1.0f;
+			return FLinearColor::White;
+		}
 	}
 	return FLinearColor::Black;
 }

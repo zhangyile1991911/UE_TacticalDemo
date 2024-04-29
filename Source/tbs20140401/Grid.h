@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "GridShapeData.h"
+#include "MyGridMeshInst.h"
+#include "MyGridVisual.h"
 #include "tbs20140401/TileData.h"
 #include "Grid.generated.h"
 
@@ -94,12 +96,14 @@ public:
 
 	void SetTileTypeByIndex(FIntPoint index,ETileType tileType);
 	bool IsValidGridIndex(const FIntPoint&);
+	bool IsTileWalkable(const FIntPoint&);
 
 	void IncreaseDecreaseTileHeight(const FIntPoint& index,bool increase);
 
 	const FTileData* GetTileDataByIndex(const FIntPoint& index);
 
 	const TMap<FIntPoint,FTileData>& GetGridTiles(){return GridTiles;}
+	TObjectPtr<AMyGridVisual> GetGridVisual(){return GridVisual;}
 	
 };
 

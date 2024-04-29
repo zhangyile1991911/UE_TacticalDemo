@@ -29,6 +29,9 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
 	TObjectPtr<UMyButtonAction> ShowTileNeighborsBtn;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
+	TObjectPtr<UMyButtonAction> SelectAndFindBtn;
 	
 	UPROPERTY()
 	AMyDebugTextAndColorsOnTiles* MyDebugTextAndColorsOnTiles;
@@ -56,6 +59,7 @@ protected:
 	UFUNCTION()
 	void OnCheckDiagonals(bool isChecked);
 
+	void OnSelectAndFindClick();
 	UFUNCTION()
 	void ShowTileNeighborsClicked();
 };

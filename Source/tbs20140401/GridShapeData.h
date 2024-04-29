@@ -28,7 +28,8 @@ enum class ETileState
 	None UMETA(DisplayName="None"),
 	Hovered UMETA(DisplayName="Hovered"),
 	Selected UMETA(DisplayName="Selected"),
-	IsNeighbor UMETA(Displayname="IsNeighbor")
+	IsNeighbor UMETA(Displayname="IsNeighbor"),
+	PathFinding UMETA(Displayname="PathFinding")
 };
 
 USTRUCT(BlueprintType)
