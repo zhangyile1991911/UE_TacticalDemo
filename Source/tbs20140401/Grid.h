@@ -52,6 +52,7 @@ protected:
 	// float total;
 	TMap<FIntPoint,FTileData> GridTiles;
 
+	float OffsetFromGround = 5.0f;
 	bool UseEnvironment;
 public:	
 	// Sets default values for this actor's properties

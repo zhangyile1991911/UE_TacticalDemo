@@ -82,7 +82,7 @@ void AGrid::SpawnGridTileCount(FVector2D tileCount)
 void AGrid::SpawnGridLocation(FVector location)
 {
 	GridCenterLocation = location;
-	SetActorLocation(location);
+	// SetActorLocation(location);
 	SpawnGrid();
 }
 
@@ -122,19 +122,19 @@ void AGrid::SpawnGrid()
 	GridTileCount.X = FMathf::Round(GridTileCount.X);
 	GridTileCount.Y = FMathf::Round(GridTileCount.Y);
 	
-	FVector center = SnapVectorToVector(GridCenterLocation,CurGridTileSize);
-	GridCenterLocation = center;
+	GridCenterLocation = SnapVectorToVector(GridCenterLocation,CurGridTileSize);
+	// GridCenterLocation = center;
 	if(GridShape == EGridShape::Triangle)
 	{
 		FVector v1((GridTileCount.X - 1)/2.0f,(GridTileCount.X - 1)/4.0f,0.0f);
 		v1 *= GridTileSize;
-		GridBottomLeftCornerLocation = center - SnapVectorToVector(v1,CurGridTileSize);
+		GridBottomLeftCornerLocation = GridCenterLocation - SnapVectorToVector(v1,CurGridTileSize);
 	}
 	else if(GridShape == EGridShape::Hexagon)
 	{
 		FVector v1(GridTileCount.X/3.0f,GridTileCount.Y/2.0f,0);
 		v1 *= GridTileSize;
-		GridBottomLeftCornerLocation = center - SnapVectorToVector(v1,CurGridTileSize);
+		GridBottomLeftCornerLocation = GridCenterLocation - SnapVectorToVector(v1,CurGridTileSize);
 	}
 	else
 	{
@@ -145,7 +145,7 @@ void AGrid::SpawnGrid()
 		tmp /= 2;
 		FVector v1(tmp.X,tmp.Y,0);
 		v1 *= GridTileSize;
-		GridBottomLeftCornerLocation = center - v1;
+		GridBottomLeftCornerLocation = GridCenterLocation - v1;
 	}
 	
 	
@@ -178,6 +178,7 @@ void AGrid::SpawnGrid()
 			index.Y = y;
 
 			FVector loc = GetTileLocationFromGridIndex(index);
+			loc.Z += OffsetFromGround;
 			FQuat rot = GetTileRotationFromGridIndex(index);
 			FVector scal = GridTileSize / curGridShape->MeshSize;
 			TileTransform.SetLocation(loc);
@@ -249,9 +250,10 @@ FQuat AGrid::GetTileRotationFromGridIndex(FIntPoint GridIndex)
 ETileType AGrid::TraceForGround(FTransform& RTransform)
 {
 	float Radius = GridShape == EGridShape::Triangle ?  GridTileSize.X /5.0f : GridTileSize.X /4.0f;
-	
-	FVector start = RTransform.GetLocation() + FVector(0,0,100000.0f);
-	FVector end = RTransform.GetLocation() - FVector(0,0,100000.0f);
+
+	FVector location = RTransform.GetLocation();
+	FVector start = location + FVector(0,0,100000.0f);
+	FVector end = location - FVector(0,0,100000.0f);
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);//忽略自身
@@ -295,9 +297,8 @@ ETileType AGrid::TraceForGround(FTransform& RTransform)
 			}
 		}
 	}
-
-	FVector location = RTransform.GetLocation();
-	location.Z = retZ;
+	
+	location.Z += retZ;
 	RTransform.SetLocation(location);
 	
 	for(FHitResult& one : HitResults)
@@ -469,7 +470,7 @@ void AGrid::SetUseEnvironment(bool bis)
 
 void AGrid::SetOffsetFromGround(float offset)
 {
-	GridVisual->SetOffsetFromGround(offset);
+	
 	SpawnGrid();
 }
 

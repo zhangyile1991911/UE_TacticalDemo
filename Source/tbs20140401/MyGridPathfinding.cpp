@@ -210,12 +210,13 @@ FMyPathFindingData AMyGridPathfinding::PullCheapestTileOutOfDiscoveredList()
 	FIntPoint cheapest = DiscoveredTileIndexes[0];
 	for(FIntPoint one : DiscoveredTileIndexes)
 	{
-		const FMyPathFindingData& ct = PathFindingData[cheapest];
-		const FMyPathFindingData& ot = PathFindingData[one];
-		if(ot.CostFromStart + ot.CostToEnterTile + ot.MinimumCostToTarget < ct.CostFromStart + ct.CostToEnterTile+ct.MinimumCostToTarget)
+		const FMyPathFindingData& a = PathFindingData[cheapest];
+		const FMyPathFindingData& b = PathFindingData[one];
+		int aval = a.CostFromStart + a.CostToEnterTile + a.MinimumCostToTarget;
+		int bval = b.CostFromStart + b.CostToEnterTile + b.MinimumCostToTarget;
+		if(bval < aval)
 		{
-			cheapest = ot.Index;
-			break;
+			cheapest = b.Index;
 		}
 	}
 	DiscoveredTileIndexes.Remove(cheapest);
@@ -241,8 +242,15 @@ bool AMyGridPathfinding::DiscoverTile(const FMyPathFindingData& TilePathData)
 
 void AMyGridPathfinding::FindPathInterval()
 {
-	FMyPathFindingData currentTile = PullCheapestTileOutOfDiscoveredList();
-	bool isFound = DiscoverTile(currentTile);
+	bool isFound = false;
+	FMyPathFindingData currentTile;
+	for(int i = 0;i < 10;i++)
+	{
+		currentTile = PullCheapestTileOutOfDiscoveredList();
+		isFound = DiscoverTile(currentTile);
+		if(isFound)break;
+	}
+	
 
 	if(!isFound && !DiscoveredTileIndexes.IsEmpty())
 	{

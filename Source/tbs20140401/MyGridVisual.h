@@ -44,7 +44,7 @@ protected:
 	UPROPERTY(meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UChildActorComponent> ChildActor_GridInstMesh;
 
-	float OffsetFromGround = 5.0f;
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -54,7 +54,7 @@ public:
 	void UpdateTileVisual(FTileData,EGriUpdateMode mode);
 	void RemoveTIle(FIntPoint);
 	void AddTileVisual(FTileData);
-	void SetOffsetFromGround(float offset);
+
 };
 
 

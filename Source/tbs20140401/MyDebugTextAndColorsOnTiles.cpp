@@ -135,7 +135,7 @@ void AMyDebugTextAndColorsOnTiles::ShowDebugInfos(TArray<FMyPathFindingData> gri
 		DebugText.Appendf(TEXT("(%d,%d)"),one.Index.X,one.Index.Y);
 		if(ShowCost)
 		{
-			DebugText.Appendf(TEXT("\nCost:%d"),one.CostToEnterTile);
+			DebugText.Appendf(TEXT("\nCost:%d"),one.CostFromStart+one.MinimumCostToTarget+one.CostToEnterTile);
 		}
 		if(ShowStart)
 		{
@@ -148,6 +148,7 @@ void AMyDebugTextAndColorsOnTiles::ShowDebugInfos(TArray<FMyPathFindingData> gri
 		FVector pos = pTileData->Transform.GetLocation();
 		pos.Z += 10.0f;
 		actor->GetTextRender()->SetText(FText::FromString(DebugText));
+		actor->GetTextRender()->TextRenderColor = FColor::Red;
 		actor->SetActorLocation(pos);
 		actor->SetActorRotation(FRotator(90,180,0));
 	}
@@ -163,7 +164,7 @@ void AMyDebugTextAndColorsOnTiles::ShowDebugInfo(const FMyPathFindingData& Findi
 	DebugText.Appendf(TEXT("(%d,%d)"),FindingData.Index.X,FindingData.Index.Y);
 	if(ShowCost)
 	{
-		DebugText.Appendf(TEXT("\nCost:%d"),FindingData.CostToEnterTile);
+		DebugText.Appendf(TEXT("\nCost:%d"),FindingData.CostFromStart+FindingData.MinimumCostToTarget+FindingData.CostToEnterTile);
 	}
 	if(ShowStart)
 	{
@@ -176,6 +177,8 @@ void AMyDebugTextAndColorsOnTiles::ShowDebugInfo(const FMyPathFindingData& Findi
 	FVector pos = pTileData->Transform.GetLocation();
 	pos.Z += 10.0f;
 	actor->GetTextRender()->SetText(FText::FromString(DebugText));
+	actor->GetTextRender()->TextRenderColor = FColor::Red;
+	actor->SetActorLocation(pos);
 	actor->SetActorLocation(pos);
 	actor->SetActorRotation(FRotator(90,180,0));
 }

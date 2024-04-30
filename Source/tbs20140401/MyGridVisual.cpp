@@ -53,7 +53,6 @@ void AMyGridVisual::InitializedGridVisual(AGrid* grid)
 	myGridMeshInst = Cast<AMyGridMeshInst>(ChildActor_GridInstMesh->GetChildActor());
 	myGridMeshInst->InitializeGridMeshInst(data->FlatMesh.Get(),data->FlatMaterial.Get(),FVector(0,0,0),ECollisionEnabled::Type::QueryOnly);
 	SetActorLocation(FVector::Zero());
-	SetOffsetFromGround(OffsetFromGround);
 }
 
 // void AMyGridVisual::SetOffsetFromGround(float offset)
@@ -118,10 +117,4 @@ void AMyGridVisual::UpdateTileVisual(FTileData data,EGriUpdateMode mode)//0 stat
 void AMyGridVisual::RemoveTIle(FIntPoint index)
 {
 	myGridMeshInst->RemoveInstance(index);
-}
-
-void AMyGridVisual::SetOffsetFromGround(float offset)
-{
-	OffsetFromGround = offset;
-	SetActorRelativeLocation(FVector(0,0,OffsetFromGround));
 }

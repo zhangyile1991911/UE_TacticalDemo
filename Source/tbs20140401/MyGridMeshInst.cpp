@@ -36,7 +36,7 @@ void AMyGridMeshInst::Tick(float DeltaTime)
 void AMyGridMeshInst::AddInstance(FTransform& instancedTransform,FIntPoint index,const TArray<ETileState>& states)
 {
 	RemoveInstance(index);
-	auto instIndex = InstancedStaticMeshComponent->AddInstance(instancedTransform);
+	auto instIndex = InstancedStaticMeshComponent->AddInstance(instancedTransform,true);
 	int one = InstancedIndexes.Add(index);
 	UE_LOG(LogTemp,Log,TEXT("AMyGridMeshInst::AddInstance local = (%d,%d) instIndex = %d one = %d"),index.X,index.Y,instIndex,one);
 	// float filled = 0;
