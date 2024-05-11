@@ -24,7 +24,7 @@ AGridModifier::AGridModifier()
 	// BoxCollision->SetCollisionResponseToChannel(ECC_GameTraceChannel1,ECR_Overlap);
 	
 	RootComponent->SetMobility(EComponentMobility::Movable);
-
+	AActor::SetActorHiddenInGame(true);
 	// static ConstructorHelpers::FObjectFinder<UDataTable> DataTableFinder(TEXT("DataTable'/Game/Core/Grid/GridShapes/DT_GridShapeData.DT_GridShapeData'"));
 	// if (DataTableFinder.Succeeded())
 	// {
@@ -77,6 +77,8 @@ void AGridModifier::OnConstruction(const FTransform& Transform)
 	{
 		StaticMesh->SetMaterial(0,row->FlatMaterial.Get());
 	}
+	// StaticMesh->SetScalarParameterValueOnMaterials(TEXT("IsFilled"),0.5f);
+	
 	switch (Type)
 	{
 	case ETileType::Normal:
@@ -84,6 +86,19 @@ void AGridModifier::OnConstruction(const FTransform& Transform)
 		break;
 	case ETileType::Obstacle:
 		StaticMesh->SetVectorParameterValueOnMaterials(TEXT("Color"),FVector(1.0f,0,0));
+			// StaticMesh->SetCustomPrimitiveDataFloat(0,1.0f);
+			// StaticMesh->SetCustomPrimitiveDataFloat(1,0);
+			// StaticMesh->SetCustomPrimitiveDataFloat(2,0);
+			// StaticMesh->SetCustomPrimitiveDataFloat(3,0.5f);
+			break;
+	case ETileType::FlyingUnitsOnly:
+		StaticMesh->SetVectorParameterValueOnMaterials(TEXT("Color"),FVector(0.3f,0.92f,1.0f));
+		break;
+	case ETileType::DoubleCost:
+		StaticMesh->SetVectorParameterValueOnMaterials(TEXT("Color"),FVector(1.0f,0.7389f,0.7289f));
+		break;
+	case ETileType::TripleCost:
+		StaticMesh->SetVectorParameterValueOnMaterials(TEXT("Color"),FVector(1.0f,0.83f,0.165));
 		break;
 	}
 	StaticMesh->SetScalarParameterValueOnMaterials(TEXT("IsFilled"),1.0f);

@@ -164,7 +164,7 @@ void AMyDebugTextAndColorsOnTiles::ShowDebugInfo(const FMyPathFindingData& Findi
 	DebugText.Appendf(TEXT("(%d,%d)"),FindingData.Index.X,FindingData.Index.Y);
 	if(ShowCost)
 	{
-		DebugText.Appendf(TEXT("\nCost:%d"),FindingData.CostFromStart+FindingData.MinimumCostToTarget+FindingData.CostToEnterTile);
+		DebugText.Appendf(TEXT("\nCost:%d"),FindingData.CostFromStart+FindingData.MinimumCostToTarget);
 	}
 	if(ShowStart)
 	{
@@ -196,5 +196,31 @@ void AMyDebugTextAndColorsOnTiles::ClearDebugInfo(const FMyPathFindingData& Find
 	else
 	{
 		actor->GetTextRender()->SetText(FText::GetEmpty());	
+	}
+}
+
+
+void AMyDebugTextAndColorsOnTiles::ShowAllTileType()
+{
+	auto allGrid = myGrid->GetGridTiles();
+	UEnum* EnumPtr = StaticEnum<ETileType>();
+	for(const auto& one : allGrid)
+	{
+		auto actor = GetTextActor(one.Value.Index);
+		if(one.Value.TileType == ETileType::Normal || one.Value.TileType == ETileType::None)continue;
+		auto debugText = FText::Format(FText::FromString(TEXT("TileType:\n{0}")),EnumPtr->GetDisplayNameTextByValue((int64)one.Value.TileType));
+		actor->GetTextRender()->SetText(debugText);
+		actor->GetTextRender()->TextRenderColor = FColor::Red;
+		const FTileData* pTileData = myGrid->GetTileDataByIndex(one.Value.Index);
+		actor->SetActorLocation(pTileData->Transform.GetLocation());
+        actor->SetActorRotation(FRotator(90,180,0));
+	}
+}
+
+void AMyDebugTextAndColorsOnTiles::ClearAllDebugInfo()
+{
+	for(const auto& one : SpawnedTexts)
+	{
+		one.Value->GetTextRender()->SetText(FText::GetEmpty());
 	}
 }

@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Grid.h"
 #include "MyAction.h"
+#include "MyCombatSystem.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -81,6 +82,8 @@ void AMy_Pawn::BeginPlay()
 	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(),AGrid::StaticClass());
 	MyGrid = Cast<AGrid>(actor);
 
+	actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyCombatSystem::StaticClass());
+	MyCombatSystem = Cast<AMyCombatSystem>(actor);
 	// OnTileTYpeChanged.AddDynamic(this,&AMy_Pawn::SetCurrentTileType);
 }
 

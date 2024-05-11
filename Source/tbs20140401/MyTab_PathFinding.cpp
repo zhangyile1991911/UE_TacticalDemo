@@ -4,8 +4,10 @@
 #include "MyTab_PathFinding.h"
 
 #include "MyButtonAction.h"
+#include "MyButtonList_Units.h"
 #include "MyDebugTextAndColorsOnTiles.h"
 #include "MyGridPathfinding.h"
+#include "MySpinBox_WithName.h"
 #include "My_Pawn.h"
 #include "Components/CheckBox.h"
 #include "Kismet/GameplayStatics.h"
@@ -48,7 +50,7 @@ void UMyTab_PathFinding::NativeConstruct()
 	CheckShowToTarget->OnCheckStateChanged.AddDynamic(this,&UMyTab_PathFinding::OnCheckIndexesChanged);
 	
 	CheckIncludeDiagonals->OnCheckStateChanged.AddDynamic(this,&UMyTab_PathFinding::OnCheckDiagonals);
-	
+	CheckCanFly->OnCheckStateChanged.AddDynamic(this,&UMyTab_PathFinding::OnCheckCanFly);
 	
 	SelectAndFindBtn->ButtonActionCB.AddUObject(this,&UMyTab_PathFinding::OnSelectAndFindClick);
 	
@@ -56,12 +58,32 @@ void UMyTab_PathFinding::NativeConstruct()
 	MyDebugTextAndColorsOnTiles = Cast<AMyDebugTextAndColorsOnTiles>(actor);
 
 	ShowTileNeighborsBtn->ButtonActionCB.AddUObject(this,&UMyTab_PathFinding::ShowTileNeighborsClicked);
+
+	MaxCalculation->TopicChanged.AddUObject(this,&UMyTab_PathFinding::OnCalculationChanged);
+
+	CheckShowTileType->OnCheckStateChanged.AddDynamic(this,&UMyTab_PathFinding::OnCheckTileTypeChanged);
+
+	AddRemoveUnitBtn->ButtonActionCB.AddUObject(this,&UMyTab_PathFinding::AddRemoveUnitClicked);
+
+	ButtonList_Units->OnUnitTypeChanged.BindDynamic(this,&UMyTab_PathFinding::OnUnitTypeChanged);
 }
 
 void UMyTab_PathFinding::NativeDestruct()
 {
 	Super::NativeDestruct();
 	
+}
+
+void UMyTab_PathFinding::OnCheckTileTypeChanged(bool isChecked)
+{
+	if(isChecked)
+	{
+		MyDebugTextAndColorsOnTiles->ShowAllTileType();
+	}
+	else
+	{
+		MyDebugTextAndColorsOnTiles->ClearAllDebugInfo();
+	}
 }
 
 void UMyTab_PathFinding::OnCheckIndexesChanged(bool isChecked)
@@ -77,6 +99,11 @@ void UMyTab_PathFinding::OnCheckIndexesChanged(bool isChecked)
 void UMyTab_PathFinding::OnCheckDiagonals(bool isChecked)
 {
 	GetMyPathFinding()->FindPathSetting(isChecked);
+}
+
+void UMyTab_PathFinding::OnCheckCanFly(bool isChecked)
+{
+	GetMyPathFinding()->CanFly(isChecked);
 }
 
 void UMyTab_PathFinding::OnSelectAndFindClick()
@@ -102,4 +129,27 @@ void UMyTab_PathFinding::ShowTileNeighborsClicked()
 	{
 		GetMyPawn()->SetSelectedActions(nullptr,nullptr);
 	}
+}
+
+void UMyTab_PathFinding::OnCalculationChanged(float val)
+{
+	GetMyPathFinding()->SetMaxCalculationPerFrame(val);
+}
+
+void UMyTab_PathFinding::AddRemoveUnitClicked()
+{
+	if(AddRemoveUnitBtn->IsSelected())
+	{
+		GetMyPawn()->SetCurrentSelectedUnitType(ButtonList_Units->GetCurrentSelectedType());
+		GetMyPawn()->SetSelectedActions(AddRemoveUnitBtn->GetLeftAction(),AddRemoveUnitBtn->GetRightAction());
+	}
+	else
+	{
+		GetMyPawn()->SetSelectedActions(nullptr,nullptr);
+	}
+}
+
+void UMyTab_PathFinding::OnUnitTypeChanged(EUnitType UnitType)
+{
+	GetMyPawn()->SetCurrentSelectedUnitType(UnitType);
 }

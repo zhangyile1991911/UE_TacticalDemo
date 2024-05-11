@@ -19,7 +19,9 @@ enum class ETileType
 	None UMETA(DisplayName="None"),
 	Normal UMETA(DisplayName="Normal"),
 	Obstacle UMETA(DisplayName="Obstacle"),
-	
+	DoubleCost UMETA(DisplayName="DoubleCost"),
+	TripleCost UMETA(DisplayName="TripleCost"),
+	FlyingUnitsOnly UMETA(DisplayName="FlyingUnitsOnly")
 };
 
 UENUM(BlueprintType)
@@ -28,9 +30,10 @@ enum class ETileState
 	None UMETA(DisplayName="None"),
 	Hovered UMETA(DisplayName="Hovered"),
 	Selected UMETA(DisplayName="Selected"),
-	IsNeighbor UMETA(Displayname="IsNeighbor"),
-	PathFinding UMETA(Displayname="PathFinding")
+	IsNeighbor UMETA(DisplayName="IsNeighbor"),
+	PathFinding UMETA(DisplayName="PathFinding")
 };
+
 
 USTRUCT(BlueprintType)
 struct FGridShapeData:public FTableRowBase

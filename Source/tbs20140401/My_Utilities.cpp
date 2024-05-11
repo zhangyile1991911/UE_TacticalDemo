@@ -3,6 +3,7 @@
 
 #include "My_Utilities.h"
 
+#include "UnitData.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 
@@ -37,6 +38,30 @@ bool IsIntEven(int i)
 }
 
 
+FUnitData* GetUnitData(const EUnitType unitType)
+{
+	static UDataTable* LoadedDataTable = nullptr;
+	if(LoadedDataTable == nullptr)
+	{
+		FSoftObjectPath MyAssetPath(TEXT("DataTable'/Game/Art/Units/DT_DefaultUnitDataPerType.DT_DefaultUnitDataPerType'"));
+		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+		LoadedDataTable = Cast<UDataTable>(Streamable.LoadSynchronous(MyAssetPath));
+	}
+	FUnitData* row = nullptr;
+	switch (unitType)
+	{
+	case EUnitType::Warrior:
+		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Warrior")),"");
+		break;
+	case EUnitType::Slime:
+		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Slime")),"");
+		break;
+	case EUnitType::Ranger:
+		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Ranger")),"");
+		break;
+	}
+	return row;
+}
 
 FGridShapeData* GetShapeData(const EGridShape shape)
 {
@@ -47,17 +72,6 @@ FGridShapeData* GetShapeData(const EGridShape shape)
 		FSoftObjectPath MyAssetPath(TEXT("DataTable'/Game/Core/Grid/GridShapes/DT_GridShapeData.DT_GridShapeData'"));
 		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
 		LoadedDataTable = Cast<UDataTable>(Streamable.LoadSynchronous(MyAssetPath));
-	
-		// static ConstructorHelpers::FObjectFinder<UDataTable> DataTableFinder(TEXT("DataTable'/Game/Core/Grid/GridShapes/DT_GridShapeData.DT_GridShapeData'"));
-		// if (DataTableFinder.Succeeded())
-		// {
-		// 	LoadedDataTable = DataTableFinder.Object;
-		// }
-		// else
-		// {
-		// 	UE_LOG(LogTemp,Log,TEXT("GetShapeData load failed"))
-		// 	return nullptr;
-		// }	
 	}
 	
 	FGridShapeData* row = nullptr;

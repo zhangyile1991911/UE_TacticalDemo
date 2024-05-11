@@ -112,8 +112,8 @@ TArray<FIntPoint> AMyGridPathfinding::GetValidTileNeighbors(const FIntPoint& ind
 		result = GetNeighborIndexesForTriangle(index);
 	}
 	CurSelectedPoint = index;
-	auto pCenterData = MyGrid->GetTileDataByIndex(index);
-	float cz = pCenterData->Transform.GetLocation().Z;
+	// auto pCenterData = MyGrid->GetTileDataByIndex(index);
+	// float cz = pCenterData->Transform.GetLocation().Z;
 	result.RemoveAll([this](const FIntPoint& one) { return ShouldRemovePoint(one); });
 	
 	return MoveTemp(result);
@@ -128,13 +128,22 @@ bool AMyGridPathfinding::ShouldRemovePoint(const FIntPoint& index)
 
 	auto pCenterData = MyGrid->GetTileDataByIndex(CurSelectedPoint);
 	float center_z = pCenterData->Transform.GetLocation().Z;
-	return FMathf::Abs(z - center_z) > MyGrid->GetGridTileSize().Z;
+	bool isRemove = FMathf::Abs(z - center_z) > MyGrid->GetGridTileSize().Z;
+	if(isRemove)return isRemove;
+
+	
+	return (pData->TileType == ETileType::FlyingUnitsOnly && !IsFlyUnit);
 }
 
 void AMyGridPathfinding::FindPathSetting(bool isIncludeDiagonals)
 {
 	IncludeDiagonals = isIncludeDiagonals;
 }
+
+void AMyGridPathfinding::CanFly(bool fly)
+{
+	IsFlyUnit = fly;
+} 
 
 //AStar path finding
 bool AMyGridPathfinding::IsInputDataValid(const FIntPoint& start, const FIntPoint& target)
@@ -163,13 +172,29 @@ FMyPathFindingData AMyGridPathfinding::TryNextNeighbor(const FMyPathFindingData&
 		return MoveTemp(data);
 	}
 
-	FMyPathFindingData data;
-	data.Index = index;
-	data.CostFromStart = GetMinimumCostBetweenTwoTiles(index,StartPoint,IncludeDiagonals);
-	// data.CostToEnterTile = GetMinimumCostBetweenTwoTiles(index,parent.Index,IncludeDiagonals);
-	data.MinimumCostToTarget = GetMinimumCostBetweenTwoTiles(index,TargetPoint,IncludeDiagonals);
-	data.PreviousIndex = parent.Index;
-	PathFindingData.Add(data.Index,data);
+	// FMyPathFindingData data;
+	// data.Index = index;
+	// data.CostFromStart = GetMinimumCostBetweenTwoTiles(index,StartPoint,IncludeDiagonals);
+	// data.MinimumCostToTarget = GetMinimumCostBetweenTwoTiles(index,TargetPoint,IncludeDiagonals);
+	auto data = AddPathFindingData(&parent,index);
+	// data.PreviousIndex = parent.Index;
+	// auto pTileData = MyGrid->GetTileDataByIndex(index);
+	// switch (pTileData->TileType)
+	// {
+	// case ETileType::None:
+	// case ETileType::Obstacle:
+	// case ETileType::FlyingUnitsOnly:
+	// 	break;
+	// case ETileType::Normal:
+	// 	data.CostToEnterTile = 1;
+	// 	break;
+	// case ETileType::DoubleCost:
+	// 	data.CostToEnterTile = 2;
+	// 	break;
+	// case ETileType::TripleCost:
+	// 	data.CostToEnterTile = 3;
+	// }
+	// PathFindingData.Add(data.Index,data);
 	DiscoveredTileIndexes.Add(index);
 
 	if(IsShowCost||IsShowStart||IsShowTarget)
@@ -179,6 +204,44 @@ FMyPathFindingData AMyGridPathfinding::TryNextNeighbor(const FMyPathFindingData&
 	
 	return MoveTemp(data);
 	
+}
+
+FMyPathFindingData AMyGridPathfinding::AddPathFindingData(const FMyPathFindingData* ParentData, const FIntPoint& Index)
+{
+	FMyPathFindingData data;
+	data.Index = Index;
+	auto pTileData = MyGrid->GetTileDataByIndex(Index);
+	switch (pTileData->TileType)
+	{
+	case ETileType::None:
+	case ETileType::Obstacle:
+	case ETileType::FlyingUnitsOnly:
+		break;
+	case ETileType::Normal:
+		data.CostToEnterTile = 1;
+		break;
+	case ETileType::DoubleCost:
+		data.CostToEnterTile = 2;
+		break;
+	case ETileType::TripleCost:
+		data.CostToEnterTile = 3;
+	}
+
+	if(ParentData == nullptr)
+	{
+		data.CostFromStart = 0;
+		data.MinimumCostToTarget = GetMinimumCostBetweenTwoTiles(Index,TargetPoint,IncludeDiagonals);
+		data.PreviousIndex = FIntPoint(-999,-999);
+	}
+	else
+	{
+		data.CostFromStart = ParentData->CostFromStart + data.CostToEnterTile;//GetMinimumCostBetweenTwoTiles(Index,StartPoint,IncludeDiagonals);
+		data.MinimumCostToTarget = GetMinimumCostBetweenTwoTiles(Index,TargetPoint,IncludeDiagonals);
+		data.PreviousIndex = ParentData->Index;	
+	}
+	
+	PathFindingData.Add(data.Index,data);
+	return MoveTemp(data);
 }
 
 int AMyGridPathfinding::GetMinimumCostBetweenTwoTiles(const FIntPoint& index1,const FIntPoint& index2,bool Diagonal)
@@ -212,8 +275,8 @@ FMyPathFindingData AMyGridPathfinding::PullCheapestTileOutOfDiscoveredList()
 	{
 		const FMyPathFindingData& a = PathFindingData[cheapest];
 		const FMyPathFindingData& b = PathFindingData[one];
-		int aval = a.CostFromStart + a.CostToEnterTile + a.MinimumCostToTarget;
-		int bval = b.CostFromStart + b.CostToEnterTile + b.MinimumCostToTarget;
+		int aval = a.CostFromStart + a.MinimumCostToTarget;
+		int bval = b.CostFromStart + b.MinimumCostToTarget;
 		if(bval < aval)
 		{
 			cheapest = b.Index;
@@ -244,7 +307,7 @@ void AMyGridPathfinding::FindPathInterval()
 {
 	bool isFound = false;
 	FMyPathFindingData currentTile;
-	for(int i = 0;i < 10;i++)
+	for(int i = 0;i < MaxCalculationPerFrame;i++)
 	{
 		currentTile = PullCheapestTileOutOfDiscoveredList();
 		isFound = DiscoverTile(currentTile);
@@ -292,12 +355,13 @@ void AMyGridPathfinding::FindPath(const FIntPoint& start, const FIntPoint& targe
 	StartPoint = start;
 	TargetPoint = target;
 	
-	FMyPathFindingData startData;
-	startData.Index = start;
-	startData.CostFromStart = 0;
-	startData.CostToEnterTile = 1;
-	startData.MinimumCostToTarget = GetMinimumCostBetweenTwoTiles(start,target,IncludeDiagonals);
-	PathFindingData.Add(startData.Index,startData);
+	// FMyPathFindingData startData;
+	// startData.Index = start;
+	// startData.CostFromStart = 0;
+	// startData.CostToEnterTile = 1;
+	// startData.MinimumCostToTarget = GetMinimumCostBetweenTwoTiles(start,target,IncludeDiagonals);
+	// PathFindingData.Add(startData.Index,startData);
+	AddPathFindingData(nullptr,start);
 	
 	DiscoveredTileIndexes.Add(start);
 

@@ -102,9 +102,13 @@ public:
 	void IncreaseDecreaseTileHeight(const FIntPoint& index,bool increase);
 
 	const FTileData* GetTileDataByIndex(const FIntPoint& index);
+	void RemoveTileDataUnitByIndex(const FIntPoint& index);
+	void AddTileDataUnitByIndex(const FIntPoint& index,TObjectPtr<AMyUnit> Unit);
 
 	const TMap<FIntPoint,FTileData>& GetGridTiles(){return GridTiles;}
 	TObjectPtr<AMyGridVisual> GetGridVisual(){return GridVisual;}
+
+	bool TileGridHasUnit(const FIntPoint& index);
 	
 };
 

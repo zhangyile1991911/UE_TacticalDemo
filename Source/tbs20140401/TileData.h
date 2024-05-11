@@ -2,6 +2,8 @@
 #include "GridShapeData.h"
 #include "TileData.generated.h"
 
+class AMyUnit;
+
 USTRUCT(BlueprintType)
 struct FTileData:public FTableRowBase
 {
@@ -21,4 +23,7 @@ struct FTileData:public FTableRowBase
 	FTransform Transform;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TArray<ETileState> States;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TObjectPtr<AMyUnit> UnitOnTile;
 };

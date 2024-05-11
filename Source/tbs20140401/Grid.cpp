@@ -6,6 +6,7 @@
 #include "BlueprintEditor.h"
 #include "GridModifier.h"
 #include "MyGridVisual.h"
+#include "MyUnit.h"
 #include "My_Utilities.h"
 #include "TileData.h"
 #include "Chaos/ClusterUnionManager.h"
@@ -301,20 +302,20 @@ ETileType AGrid::TraceForGround(FTransform& RTransform)
 	location.Z += retZ;
 	RTransform.SetLocation(location);
 	
-	for(FHitResult& one : HitResults)
-	{
-		DrawDebugSphere(
-			GetWorld(),
-			one.Location,     // 球心位置
-			Radius,     // 半径
-			8,         // 分段数（球面的平滑度）
-			FColor::Green, // 颜色
-			false,      // 是否保留
-			5.0f,       // 存在时间
-			0,          // 深度优先级
-			1.0f        // 线宽
-		);
-	}
+	// for(FHitResult& one : HitResults)
+	// {
+	// 	DrawDebugSphere(
+	// 		GetWorld(),
+	// 		one.Location,     // 球心位置
+	// 		Radius,     // 半径
+	// 		8,         // 分段数（球面的平滑度）
+	// 		FColor::Green, // 颜色
+	// 		false,      // 是否保留
+	// 		5.0f,       // 存在时间
+	// 		0,          // 深度优先级
+	// 		1.0f        // 线宽
+	// 	);
+	// }
 	return retType;
 }
 
@@ -558,8 +559,15 @@ void AGrid::RemoveOneTIle(FIntPoint index)
 {
 	auto result = GridTiles.Find(index);
 	if(result == nullptr)return;
+	
+	if(result->UnitOnTile)
+	{
+		RemoveTileDataUnitByIndex(index);
+	}
+
 	GridTiles.Remove(index);
 	GridVisual->RemoveTIle(index);
+	
 }
 
 void AGrid::SetTileTypeByIndex(FIntPoint index, ETileType tileType)
@@ -605,10 +613,41 @@ void AGrid::IncreaseDecreaseTileHeight(const FIntPoint& index,bool increase)
 	
 	data->Transform.SetLocation(curLocation);
 	GridVisual->UpdateTileVisual(*data,EGriUpdateMode::UpdateTransform);
+
+	if(data->UnitOnTile)
+	{
+		data->UnitOnTile->SetActorLocation(curLocation);
+	}
 }
 
 const FTileData* AGrid::GetTileDataByIndex(const FIntPoint& index)
 {
 	return GridTiles.Find(index);
+}
+
+void AGrid::RemoveTileDataUnitByIndex(const FIntPoint& index)
+{
+	if(!GridTiles.Contains(index))return;
+	FTileData* pData = GridTiles.Find(index);
+	if(pData->UnitOnTile)
+	{
+		pData->UnitOnTile->Destroy();
+		pData->UnitOnTile = nullptr;	
+	}
+}
+
+void AGrid::AddTileDataUnitByIndex(const FIntPoint& index,TObjectPtr<AMyUnit> Unit)
+{
+	if(!GridTiles.Contains(index))return;
+	FTileData* pData = GridTiles.Find(index);
+	pData->UnitOnTile = Unit;
+}
+
+bool AGrid::TileGridHasUnit(const FIntPoint& index)
+{
+	if(!GridTiles.Contains(index))return true;
+
+	const FTileData& p = GridTiles[index];
+	return p.UnitOnTile != nullptr;
 }
 

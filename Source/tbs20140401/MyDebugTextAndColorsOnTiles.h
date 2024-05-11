@@ -42,6 +42,8 @@ public:
 	void UpdateStateOnTile(const FIntPoint&);
 	void UpdateIndexTextOnTile(const FIntPoint& index,const FTileData& data);
 	void SetShowTileText(bool ShowIndex);
+	void ShowAllTileType();
+	void ClearAllDebugInfo();
 
 	void ShowDebugInfos(TArray<FMyPathFindingData> grids,bool ShowCost,bool ShowStart,bool ShowTarget);
 	void ShowDebugInfo(const FMyPathFindingData& FindingData,bool ShowCost,bool ShowStart,bool ShowTarget);

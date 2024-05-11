@@ -28,7 +28,8 @@ protected:
 	UPROPERTY()
 	AMyDebugTextAndColorsOnTiles* MyDebugTextAndColorsOnTiles;
 	
-	bool IncludeDiagonals;
+	bool IncludeDiagonals=false;
+	bool IsFlyUnit=false;
 	FIntPoint CurSelectedPoint;
 	
 	TArray<FIntPoint> DiscoveredTileIndexes;
@@ -43,13 +44,13 @@ protected:
 	bool IsShowCost;
 	bool IsShowStart;
 	bool IsShowTarget;
-
-
+	
 	// TArray<FIntPoint> Path;
 
 	// FTimerHandle FindPathHandle;
 	bool IsPathFinding = false;
 	FPathFindingCompleted FindPathCb;
+    int MaxCalculationPerFrame = 10;
 protected:
 	void FindPathInterval();
 	// Called when the game starts or when spawned
@@ -65,7 +66,7 @@ protected:
 	FMyPathFindingData PullCheapestTileOutOfDiscoveredList();
 	bool IsInputDataValid(const FIntPoint& start, const FIntPoint& target);
 	FMyPathFindingData TryNextNeighbor(const FMyPathFindingData& parent,const FIntPoint& index);
-	
+	FMyPathFindingData AddPathFindingData(const FMyPathFindingData* ParentData,const FIntPoint& Index);
 	// bool DiscoverNextNeighbor();
 	// bool AnalyseNextDiscoveredTile();
 	// TArray<FIntPoint> GeneratePath();
@@ -76,6 +77,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	TArray<FIntPoint> GetValidTileNeighbors(const FIntPoint& index);
 	void FindPathSetting(bool isIncludeDiagonals);
+	void CanFly(bool fly);
 	void FindPath(const FIntPoint& start,const FIntPoint& target,FPathFindingCompleted completed);
 
 	void SetShowDebugOption(bool ShowCost,bool ShowStart,bool ShowTarget)
@@ -83,6 +85,12 @@ public:
 		IsShowCost = ShowCost;
 		IsShowStart = ShowStart;
 		IsShowTarget = ShowTarget;
+	}
+	void SetMaxCalculationPerFrame(int count)
+	{
+		count = FMathf::Clamp(count,10,500);
+		UE_LOG(LogTemp,Log,TEXT("current max calculation per frame %d"),count);
+		MaxCalculationPerFrame = count;
 	}
 };
 

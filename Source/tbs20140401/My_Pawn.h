@@ -5,11 +5,13 @@
 #include "CoreMinimal.h"
 #include "GridShapeData.h"
 #include "InputActionValue.h"
+#include "MyButtonList_Units.h"
 #include "GameFramework/Pawn.h"
 #include "Math/Vector2D.h"
 
 #include "My_Pawn.generated.h"
 
+class AMyCombatSystem;
 enum class ETileType;
 class AMyAction;
 enum class ETileState;
@@ -54,6 +56,9 @@ protected:
 
 	UPROPERTY()
 	AGrid* MyGrid;
+
+	UPROPERTY()
+	AMyCombatSystem* MyCombatSystem;
 	
 	FIntPoint HoveredTile = FIntPoint(-1,-1);
 	FIntPoint SelectedTile = FIntPoint(-1,-1);
@@ -83,6 +88,8 @@ public:
 
 	UFUNCTION()
 	void SetCurrentTileType(ETileType ttype){CurSetTileType = ttype;}
+
+	EUnitType CurrentSelectedUnitType;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -113,6 +120,10 @@ public:
 	bool CanHoverGround();
 	void UpdateTileTypeUnderCursor(FIntPoint index);
 
-	AGrid* GetMyGrid(){return MyGrid;}
+	void SetCurrentSelectedUnitType(EUnitType UnitType){CurrentSelectedUnitType = UnitType;}
+	EUnitType GetCurrentSelectedUnitType()const{return CurrentSelectedUnitType;}
+	
+	AGrid* GetMyGrid()const{return MyGrid;}
+	AMyCombatSystem* GetMyCombatSystem()const{return MyCombatSystem;}
 	// FTileTypeChanged OnTileTYpeChanged;
 };

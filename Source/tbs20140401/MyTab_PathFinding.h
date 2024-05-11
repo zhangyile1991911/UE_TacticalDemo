@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "MyTab_PathFinding.generated.h"
 
+enum class EUnitType : uint8;
+class UMyButtonList_Units;
+class UMySpinBox_WithName;
 class AMyGridPathfinding;
 class AMy_Pawn;
 class UMyButtonAction;
@@ -35,12 +38,27 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
 	TObjectPtr<UCheckBox> CheckShowToTarget;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
+	TObjectPtr<UCheckBox> CheckShowTileType;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
+	TObjectPtr<UCheckBox> CheckCanFly;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
 	TObjectPtr<UMyButtonAction> ShowTileNeighborsBtn;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
 	TObjectPtr<UMyButtonAction> SelectAndFindBtn;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UMyButtonAction> AddRemoveUnitBtn;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UMyButtonList_Units> ButtonList_Units;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
+	TObjectPtr<UMySpinBox_WithName> MaxCalculation;
 	
 	UPROPERTY()
 	AMyDebugTextAndColorsOnTiles* MyDebugTextAndColorsOnTiles;
@@ -66,9 +84,23 @@ protected:
 	UFUNCTION()
 	void OnCheckIndexesChanged(bool isChecked);
 	UFUNCTION()
+	void OnCheckTileTypeChanged(bool isChecked);
+	UFUNCTION()
 	void OnCheckDiagonals(bool isChecked);
+	UFUNCTION()
+	void OnCheckCanFly(bool isChecked);
 
 	void OnSelectAndFindClick();
+	
 	UFUNCTION()
 	void ShowTileNeighborsClicked();
+
+	UFUNCTION()
+	void OnCalculationChanged(float val);
+
+	UFUNCTION()
+	void AddRemoveUnitClicked();
+
+	UFUNCTION()
+	void OnUnitTypeChanged(EUnitType UnitType);
 };
