@@ -11,6 +11,7 @@
 
 #include "My_Pawn.generated.h"
 
+class AMyUnit;
 class AMyCombatSystem;
 enum class ETileType;
 class AMyAction;
@@ -64,6 +65,10 @@ protected:
 	FIntPoint SelectedTile = FIntPoint(-1,-1);
 
 	ETileType CurSetTileType = ETileType::Normal;
+
+	TObjectPtr<AMyUnit> HoveredUnit;
+
+	TObjectPtr<AMyUnit> SelectedUnit;
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	float Location_Speed = 20.0f;
@@ -111,7 +116,7 @@ public:
 	void RemoveTileStateByIndex(const FIntPoint& index,ETileState state);
 	const FIntPoint& GetHoveredTile() const {return HoveredTile;}
 	const FIntPoint& GetSelectedTile() const {return SelectedTile;}
-	void SetSelectedTile(const FIntPoint& point){SelectedTile = point;}
+	// void SetSelectedTile(const FIntPoint& point){SelectedTile = point;}
 	void SetSelectedActions(UClass* left,UClass* right);
 	void AddNewTileUnderCursor();
 	// void RemoveTileUnderCursor();
@@ -125,5 +130,9 @@ public:
 	
 	AGrid* GetMyGrid()const{return MyGrid;}
 	AMyCombatSystem* GetMyCombatSystem()const{return MyCombatSystem;}
+
+	TObjectPtr<AMyUnit> GetUnitUnderCursor();
+
+	TObjectPtr<AMyUnit> GetSelectedUnit()const{return SelectedUnit;}
 	// FTileTypeChanged OnTileTYpeChanged;
 };

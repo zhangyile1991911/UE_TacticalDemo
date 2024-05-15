@@ -11,6 +11,7 @@
 #include "Grid.h"
 #include "MyAction.h"
 #include "MyCombatSystem.h"
+#include "MyUnit.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -120,7 +121,8 @@ void AMy_Pawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AMy_Pawn::UpdateTileUnderCursor()
 {
-	FIntPoint index = MyGrid->GetTileIndexUnderCursor(GetWorld()->GetFirstPlayerController(),true,CanHoverEmptySpace());
+	auto playerIndex = GetWorld()->GetFirstPlayerController();
+	FIntPoint index = MyGrid->GetTileIndexUnderCursor(playerIndex,true,CanHoverEmptySpace());
 	if(HoveredTile != index)
 	{
 		MyGrid->RemoveStateFromTile(HoveredTile,ETileState::Hovered);
@@ -128,11 +130,38 @@ void AMy_Pawn::UpdateTileUnderCursor()
 		
 		HoveredTile = index;
 	}
+
+	if(HoveredUnit)
+	{
+		HoveredUnit->SetHovered(false);
+	}
+	
+	auto pData = MyGrid->GetTileDataByIndex(index);
+	if(pData == nullptr)return;
+
+	if(pData->UnitOnTile == nullptr)return;
+
+	pData->UnitOnTile->SetHovered(true);
+	HoveredUnit = pData->UnitOnTile;
+	
 }
 
 void AMy_Pawn::UpdateTIleByIndex(const FIntPoint& index, ETileState state)
 {
+	MyGrid->RemoveStateFromTile(SelectedTile,ETileState::Selected);
 	MyGrid->AddStateToTile(index,state);
+	if(state == ETileState::Selected)
+	{
+		SelectedTile = index;
+	}
+	auto pData = MyGrid->GetTileDataByIndex(index);
+
+	if(SelectedUnit)SelectedUnit->SetSelected(false);
+	if(pData == nullptr)return;
+	if(pData->UnitOnTile == nullptr)return;
+
+	pData->UnitOnTile->SetSelected(true);
+	SelectedUnit = pData->UnitOnTile;
 }
 
 void AMy_Pawn::RemoveTileStateByIndex(const FIntPoint& index, ETileState state)
@@ -263,6 +292,20 @@ void AMy_Pawn::UpdateTileTypeUnderCursor(FIntPoint index)
 {
 	// FIntPoint index = MyGrid->GetTileIndexUnderCursor(GetWorld()->GetFirstPlayerController(),true,CanHoverEmptySpace());
 	MyGrid->SetTileTypeByIndex(index,CurSetTileType);
+}
 
+TObjectPtr<AMyUnit> AMy_Pawn::GetUnitUnderCursor()
+{
+	FHitResult HitResult;
+	auto playerIndex = GetWorld()->GetFirstPlayerController();
+	bool result = playerIndex->GetHitResultUnderCursorByChannel(TraceTypeQuery3,false,HitResult);
+	if(result)
+	{
+		return Cast<AMyUnit>(HitResult.GetActor());
+	}
+	
+	FIntPoint index = MyGrid->GetTileIndexUnderCursor(playerIndex,true,CanHoverEmptySpace());
+	const FTileData* pData = MyGrid->GetTileDataByIndex(index);
+	return pData ? pData->UnitOnTile : nullptr;
 }
 

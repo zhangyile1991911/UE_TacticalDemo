@@ -5,6 +5,7 @@
 
 #include "Grid.h"
 #include "MyGridPathfinding.h"
+#include "MyUnit.h"
 #include "My_Pawn.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -46,4 +47,5 @@ void AAction_FindPath::WaitPathFinding(TArray<FIntPoint> path)
     {
     	MyPlayerPawn->GetMyGrid()->AddStateToTile(one,ETileState::PathFinding);	
     }
+	MyPlayerPawn->GetSelectedUnit()->SetWalkPath(MoveTemp(Path));
 }

@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "MyCombatSystem.generated.h"
 
+class AMy_Pawn;
 class AMyUnit;
 class AGrid;
 
@@ -31,7 +32,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void AddUnitInCombat(const FIntPoint& Index,EUnitType UnitType);
+	void AddUnitInCombat(const FIntPoint& Index,TObjectPtr<AMy_Pawn> myPawn);
 	void RemoveUnitInCombat(const FIntPoint& Index);
 	void SetUnitIndexOnGrid(const FIntPoint& Index,TObjectPtr<AMyUnit> Unit);
 };

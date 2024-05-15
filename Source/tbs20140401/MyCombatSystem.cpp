@@ -5,6 +5,7 @@
 
 #include "Grid.h"
 #include "MyUnit.h"
+#include "My_Pawn.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -31,15 +32,17 @@ void AMyCombatSystem::Tick(float DeltaTime)
 
 }
 
-void AMyCombatSystem::AddUnitInCombat(const FIntPoint& Index, EUnitType UnitType)
+void AMyCombatSystem::AddUnitInCombat(const FIntPoint& Index, TObjectPtr<AMy_Pawn> myPawn)
 {
 	AActor* actor = GetWorld()->SpawnActor(AMyUnit::StaticClass());
 	TObjectPtr<AMyUnit> Unit = Cast<AMyUnit>(actor);
-	Unit->RefreshUnit(UnitType);
+	
 	auto pData = MyGrid->GetTileDataByIndex(Index);
 	Unit->SetActorLocation(pData->Transform.GetLocation());
 	UnitsInCombat.Add(Index,Unit);
 	MyGrid->AddTileDataUnitByIndex(Index,Unit);
+
+	Unit->RefreshUnit(myPawn,MyGrid,Index);
 }
 
 void AMyCombatSystem::RemoveUnitInCombat(const FIntPoint& Index)

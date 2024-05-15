@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "CoreMinimal.h"
 #include "UnitDataAsset.h"
+#include "UnitData_Stats.h"
 #include "UnitData.generated.h"
 
 UENUM(BlueprintType)
@@ -24,5 +25,7 @@ struct FUnitData:public FTableRowBase
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FUnitDataAsset Assets;
-	
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FUnitData_Stats Stats;
 };

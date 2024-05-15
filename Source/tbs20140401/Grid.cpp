@@ -572,8 +572,8 @@ void AGrid::RemoveOneTIle(FIntPoint index)
 
 void AGrid::SetTileTypeByIndex(FIntPoint index, ETileType tileType)
 {
-	auto result = GridTiles.Find(index);
-	if(result != nullptr)return;
+	auto pData = GridTiles.Find(index);
+	if(pData == nullptr)return;
 
 	if(tileType == ETileType::None)
 	{
@@ -581,8 +581,8 @@ void AGrid::SetTileTypeByIndex(FIntPoint index, ETileType tileType)
 	}
 	else
 	{
-		result->TileType = tileType;
-		GridVisual->UpdateTileVisual(*result,EGriUpdateMode::UpdateTileType);	
+		pData->TileType = tileType;
+		GridVisual->UpdateTileVisual(*pData,EGriUpdateMode::UpdateTileType);	
 	}
 }
 
@@ -622,7 +622,10 @@ void AGrid::IncreaseDecreaseTileHeight(const FIntPoint& index,bool increase)
 
 const FTileData* AGrid::GetTileDataByIndex(const FIntPoint& index)
 {
-	return GridTiles.Find(index);
+	if(GridTiles.Contains(index))
+		return GridTiles.Find(index);
+	
+	return nullptr;
 }
 
 void AGrid::RemoveTileDataUnitByIndex(const FIntPoint& index)
@@ -641,6 +644,7 @@ void AGrid::AddTileDataUnitByIndex(const FIntPoint& index,TObjectPtr<AMyUnit> Un
 	if(!GridTiles.Contains(index))return;
 	FTileData* pData = GridTiles.Find(index);
 	pData->UnitOnTile = Unit;
+	
 }
 
 bool AGrid::TileGridHasUnit(const FIntPoint& index)

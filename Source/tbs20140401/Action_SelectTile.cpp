@@ -9,10 +9,10 @@
 
 void AAction_SelectTile::ExecuteAction(const FIntPoint& index)
 {
-	MyPlayerPawn->RemoveTileStateByIndex(selectedIndex,ETileState::Selected);
+	// MyPlayerPawn->RemoveTileStateByIndex(selectedIndex,ETileState::Selected);
 	MyPlayerPawn->UpdateTIleByIndex(index,ETileState::Selected);
 	selectedIndex = index;
-	MyPlayerPawn->SetSelectedTile(index);
+	// MyPlayerPawn->SetSelectedTile(index);
 }
 
 void AAction_SelectTile::BeginDestroy()

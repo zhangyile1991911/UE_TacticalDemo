@@ -17,5 +17,6 @@ void AAction_AddUnit::ExecuteAction(const FIntPoint& index)
 	bool hasUnit = MyPlayerPawn->GetMyGrid()->TileGridHasUnit(index);
 	if(hasUnit)return;
 
-	MyPlayerPawn->GetMyCombatSystem()->AddUnitInCombat(index,MyPlayerPawn->GetCurrentSelectedUnitType());
+	MyPlayerPawn->GetMyCombatSystem()->AddUnitInCombat(index,MyPlayerPawn);
+	MyPlayerPawn->UpdateTIleByIndex(index,ETileState::Selected);
 }
