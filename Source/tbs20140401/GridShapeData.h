@@ -31,7 +31,9 @@ enum class ETileState
 	Hovered UMETA(DisplayName="Hovered"),
 	Selected UMETA(DisplayName="Selected"),
 	IsNeighbor UMETA(DisplayName="IsNeighbor"),
-	PathFinding UMETA(DisplayName="PathFinding")
+	PathFinding UMETA(DisplayName="PathFinding"),
+	Reachable UMETA(DisplayName="Reachable"),
+	Invalid UMETA(DisplayName="Invalid")
 };
 
 

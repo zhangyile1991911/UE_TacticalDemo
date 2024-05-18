@@ -15,10 +15,10 @@ class TBS20140401_API AAction_FindPath : public AMyAction
 {
 	GENERATED_BODY()
 protected:
-	UPROPERTY()
-	AMyGridPathfinding* MyGridPathfinding;
+	// UPROPERTY()
+	// AMyGridPathfinding* MyGridPathfinding;
 
-	TArray<FIntPoint> Path;
+	// TArray<FIntPoint> Path;
 	FIntPoint Start;
 	FIntPoint Finish;
 protected:

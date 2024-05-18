@@ -139,7 +139,7 @@ protected:
 	void OnIncreaseButtonClick();
 
 	UFUNCTION()
-	void OnSetTileTYpeClick();
+	void OnSetTileTypeClick();
 
 	UFUNCTION()
 	void OnTileTypeChanged(FString SelectedItem, ESelectInfo::Type SelectionType);

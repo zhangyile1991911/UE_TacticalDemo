@@ -11,6 +11,7 @@
 
 #include "My_Pawn.generated.h"
 
+class AMyGridPathfinding;
 class AMyUnit;
 class AMyCombatSystem;
 enum class ETileType;
@@ -60,6 +61,9 @@ protected:
 
 	UPROPERTY()
 	AMyCombatSystem* MyCombatSystem;
+
+	UPROPERTY()
+	AMyGridPathfinding* MyGridPathfinding;
 	
 	FIntPoint HoveredTile = FIntPoint(-1,-1);
 	FIntPoint SelectedTile = FIntPoint(-1,-1);
@@ -130,7 +134,8 @@ public:
 	
 	AGrid* GetMyGrid()const{return MyGrid;}
 	AMyCombatSystem* GetMyCombatSystem()const{return MyCombatSystem;}
-
+	AMyGridPathfinding* GetMyGridPathFinding()const{return MyGridPathfinding;}
+	
 	TObjectPtr<AMyUnit> GetUnitUnderCursor();
 
 	TObjectPtr<AMyUnit> GetSelectedUnit()const{return SelectedUnit;}

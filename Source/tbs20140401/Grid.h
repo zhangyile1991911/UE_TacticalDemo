@@ -91,6 +91,7 @@ public:
 	
 	void AddStateToTile(FIntPoint index,ETileState stat);
 	void RemoveStateFromTile(FIntPoint index,ETileState stat);
+	void RemoveStateAllTile(ETileState stat);
 
 	void AddNewOneTIle(FIntPoint index);
 	void RemoveOneTIle(FIntPoint index);
@@ -102,6 +103,14 @@ public:
 	void IncreaseDecreaseTileHeight(const FIntPoint& index,bool increase);
 
 	const FTileData* GetTileDataByIndex(const FIntPoint& index);
+	TObjectPtr<AMyUnit> GetUnitOnTile(const FIntPoint& index)const
+	{
+		if(GridTiles.Contains(index))
+		{
+			return GridTiles[index].UnitOnTile;
+		}
+		return nullptr;
+	}
 	void RemoveTileDataUnitByIndex(const FIntPoint& index);
 	void AddTileDataUnitByIndex(const FIntPoint& index,TObjectPtr<AMyUnit> Unit);
 

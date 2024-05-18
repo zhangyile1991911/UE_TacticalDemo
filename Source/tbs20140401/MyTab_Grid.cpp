@@ -68,7 +68,7 @@ void UMyTab_Grid::NativeConstruct()
 	SelectTileBtn->ButtonActionCB.AddUObject(this,&UMyTab_Grid::OnSelectTileButtonClick);
 	AddRemoveBtn->ButtonActionCB.AddUObject(this,&UMyTab_Grid::OnAddRemoveButtonClick);
 	IncreaseBtn->ButtonActionCB.AddUObject(this,&UMyTab_Grid::OnIncreaseButtonClick);
-	SetTileType->ButtonActionCB.AddUObject(this,&UMyTab_Grid::OnSetTileTYpeClick);
+	SetTileType->ButtonActionCB.AddUObject(this,&UMyTab_Grid::OnSetTileTypeClick);
 
 	TileType->OnSelectionChanged.AddDynamic(this,&UMyTab_Grid::OnTileTypeChanged);
 	
@@ -270,14 +270,14 @@ void UMyTab_Grid::OnIncreaseButtonClick()
 }
 
 
-void UMyTab_Grid::OnSetTileTYpeClick()
+void UMyTab_Grid::OnSetTileTypeClick()
 {
 	AddRemoveBtn->SetUnSelected();
 	SelectTileBtn->SetUnSelected();
 	IncreaseBtn->SetUnSelected();
 	if(SetTileType->IsSelected())
 	{
-		GetMyPawn()->SetSelectedActions(AddRemoveBtn->GetLeftAction(),AddRemoveBtn->GetRightAction());
+		GetMyPawn()->SetSelectedActions(SetTileType->GetLeftAction(),SetTileType->GetRightAction());
 		TileType->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
@@ -296,8 +296,16 @@ void UMyTab_Grid::OnTileTypeChanged(FString SelectedItem, ESelectInfo::Type Sele
 	{
 		GetMyPawn()->SetCurrentTileType(ETileType::Normal);
 	}
-	else if(SelectedItem.Equals(TEXT("Obstacle")))
+	else if(SelectedItem.Equals(TEXT("DoubleCost")))
 	{
-		GetMyPawn()->SetCurrentTileType(ETileType::Obstacle);
+		GetMyPawn()->SetCurrentTileType(ETileType::DoubleCost);
+	}
+	else if(SelectedItem.Equals(TEXT("TripleCost")))
+	{
+		GetMyPawn()->SetCurrentTileType(ETileType::TripleCost);
+	}
+	else if(SelectedItem.Equals(TEXT("FlyingUnitsOnly")))
+	{
+		GetMyPawn()->SetCurrentTileType(ETileType::FlyingUnitsOnly);
 	}
 }

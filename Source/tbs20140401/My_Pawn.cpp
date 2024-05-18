@@ -11,6 +11,7 @@
 #include "Grid.h"
 #include "MyAction.h"
 #include "MyCombatSystem.h"
+#include "MyGridPathfinding.h"
 #include "MyUnit.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -85,6 +86,9 @@ void AMy_Pawn::BeginPlay()
 
 	actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyCombatSystem::StaticClass());
 	MyCombatSystem = Cast<AMyCombatSystem>(actor);
+
+	actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyGridPathfinding::StaticClass());
+	MyGridPathfinding = Cast<AMyGridPathfinding>(actor);
 	// OnTileTYpeChanged.AddDynamic(this,&AMy_Pawn::SetCurrentTileType);
 }
 

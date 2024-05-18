@@ -480,8 +480,9 @@ void AGrid::AddStateToTile(FIntPoint index, ETileState stat)
 	auto result = GridTiles.Find(index);
 	if( result != nullptr)
 	{
-		if(result->States.AddUnique(stat) >= 0)
+		if(!result->States.Contains(stat))
 		{
+			result->States.Add(stat);
 			// UE_LOG(LogTemp,Log,TEXT("result->States.AddUnique(stat) >= 0"))
 			GridVisual->UpdateTileVisual(*result,EGriUpdateMode::UpdateState);
 		}
@@ -497,6 +498,17 @@ void AGrid::RemoveStateFromTile(FIntPoint index, ETileState stat)
 		{
 			GridVisual->UpdateTileVisual(*result,EGriUpdateMode::UpdateState);
 		}
+	}
+}
+
+void AGrid::RemoveStateAllTile(ETileState stat)
+{
+	for(auto& pair : GridTiles)
+	{
+		bool b = pair.Value.States.Contains(stat);
+		if(!b)continue;
+		pair.Value.States.Remove(stat);
+		GridVisual->UpdateTileVisual(pair.Value,EGriUpdateMode::UpdateState);
 	}
 }
 
@@ -582,7 +594,8 @@ void AGrid::SetTileTypeByIndex(FIntPoint index, ETileType tileType)
 	else
 	{
 		pData->TileType = tileType;
-		GridVisual->UpdateTileVisual(*pData,EGriUpdateMode::UpdateTileType);	
+		GridVisual->UpdateTileVisual(*pData,EGriUpdateMode::UpdateTileType);
+		UE_LOG(LogTemp,Log,TEXT("index = %s set tile type = %d"),*index.ToString(),tileType)
 	}
 }
 

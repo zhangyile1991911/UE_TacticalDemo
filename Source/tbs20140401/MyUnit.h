@@ -47,6 +47,7 @@ protected:
 	FUnitData_Stats MyStats;
 
 	TArray<FIntPoint> WalkPath;
+	TArray<FIntPoint> WalkableTiles;
 	int WalkPathIndex;
 
 	// UPROPERTY(EditAnywhere,BlueprintReadWrite)
@@ -95,9 +96,12 @@ public:
 	void SetSelected(bool h);
 
 	bool UnitCanWalkOnTile(ETileType TileType);
+	TArray<ETileType> UnitCanWalkTileType(){return MyStats.ValidTileTypes;}
 	bool CanDiagonally()const{return MyStats.CanMoveDiagonally;}
 
 	void SetWalkPath(TArray<FIntPoint>);
+	void SetWalkableTile(TArray<FIntPoint>);
+	bool IsInWalkableTile(const FIntPoint& point)const{return WalkableTiles.Find(point) != INDEX_NONE;}
 
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

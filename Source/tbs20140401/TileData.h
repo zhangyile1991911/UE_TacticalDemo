@@ -22,7 +22,7 @@ struct FTileData:public FTableRowBase
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FTransform Transform;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	TArray<ETileState> States;
+	TSet<ETileState> States;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TObjectPtr<AMyUnit> UnitOnTile;

@@ -33,7 +33,7 @@ void AMyGridMeshInst::Tick(float DeltaTime)
 
 }
 
-void AMyGridMeshInst::AddInstance(FTransform& instancedTransform,FIntPoint index,const TArray<ETileState>& states)
+void AMyGridMeshInst::AddInstance(FTransform& instancedTransform,FIntPoint index,const TSet<ETileState>& states)
 {
 	RemoveInstance(index);
 	auto instIndex = InstancedStaticMeshComponent->AddInstance(instancedTransform,true);
@@ -58,7 +58,7 @@ void AMyGridMeshInst::RemoveInstance(FIntPoint index)
 	}
 }
 
-void AMyGridMeshInst::UpdateInstance(FIntPoint index,const TArray<ETileState>& states)
+void AMyGridMeshInst::UpdateInstance(FIntPoint index,const TSet<ETileState>& states)
 {
 	auto result = InstancedIndexes.Find(index);
 	if(result != INDEX_NONE)
@@ -81,38 +81,44 @@ void AMyGridMeshInst::UpdateInstanceTransform(const FIntPoint& index,const FTran
 	InstancedStaticMeshComponent->UpdateInstanceTransform(result,Transform,false,true);
 }
 
-FLinearColor AMyGridMeshInst::GetColorFromStates(const TArray<ETileState>& states,float& isFilled)
+FLinearColor AMyGridMeshInst::GetColorFromStates(const TSet<ETileState>& states,float& isFilled)
 {
 	isFilled = 0;
 	if(states.IsEmpty())
 	{
 		return FLinearColor::Black;
 	}
-	for(auto s : states)
+	
+	
+	 if(states.Contains(ETileState::Selected))
+	 {
+		isFilled = 1.0f;
+		return FLinearColor(0.212f,1.0f,0.098f); 
+	 }
+		
+	if(states.Contains(ETileState::Hovered))
 	{
-		 if(s == ETileState::Selected)
-		 {
-		 	isFilled = 1.0f;
-		 	return FLinearColor(0.212f,1.0f,0.098f); 
-		 }
-		 	
-		if(s == ETileState::Hovered)
-		{
-			isFilled = 1.0f;
-			return FLinearColor(0.55f,0.75f,0.351f);
-		}
-		if(s == ETileState::IsNeighbor)
-		{
-			isFilled = 1.0f;
-			return FLinearColor::Yellow;
-		}
-
-		if(s == ETileState::PathFinding)
-		{
-			isFilled = 1.0f;
-			return FLinearColor::White;
-		}
+		isFilled = 1.0f;
+		return FLinearColor(0.55f,0.75f,0.351f);
 	}
+	if(states.Contains(ETileState::IsNeighbor))
+	{
+		isFilled = 1.0f;
+		return FLinearColor::Yellow;
+	}
+
+	if(states.Contains(ETileState::PathFinding))
+	{
+		isFilled = 1.0f;
+		return FLinearColor::White;
+	}
+
+	if(states.Contains(ETileState::Reachable))
+	{
+		isFilled = 0.5f;
+		return FLinearColor(0.019f,0.08f,0.25f);
+	}
+
 	return FLinearColor::Black;
 }
 

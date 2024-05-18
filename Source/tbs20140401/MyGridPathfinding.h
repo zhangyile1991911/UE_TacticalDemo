@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "MyPathFindingData.h"
+#include "TileData.h"
 #include "MyGridPathfinding.generated.h"
 
 
@@ -32,7 +33,7 @@ protected:
 	bool IsFlyUnit=false;
 	FIntPoint CurSelectedPoint;
 	
-	TArray<FIntPoint> DiscoveredTileIndexes;
+	TSet<FIntPoint> DiscoveredTileIndexes;
 	TArray<FIntPoint> AnalysedTileIndexes;
 
 	FMyPathFindingData CurrentDiscoveredTile;
@@ -61,6 +62,7 @@ protected:
 
 	bool ShouldRemovePoint(const FIntPoint& index);
 	bool DiscoverTile(const FMyPathFindingData&);
+	bool DiscoverTileByWalkableType(const FMyPathFindingData&,const TArray<ETileType>&);
 	int GetMinimumCostBetweenTwoTiles(const FIntPoint& index1,const FIntPoint& index2,bool Diagonal);
 	
 	FMyPathFindingData PullCheapestTileOutOfDiscoveredList();
@@ -70,7 +72,7 @@ protected:
 	// bool DiscoverNextNeighbor();
 	// bool AnalyseNextDiscoveredTile();
 	// TArray<FIntPoint> GeneratePath();
-	//AStar path finding
+	// AStar path finding
 	
 public:	
 	// Called every frame
@@ -79,7 +81,9 @@ public:
 	void FindPathSetting(bool isIncludeDiagonals);
 	void CanFly(bool fly);
 	void FindPath(const FIntPoint& start,const FIntPoint& target,FPathFindingCompleted completed);
-
+	
+	void UnitFindPath(const FIntPoint& Start,const FIntPoint& Target,TArray<ETileType> WalkableTileTypes,FPathFindingCompleted completed);
+	TArray<FIntPoint> UnitWalkablePath(const FIntPoint& Start,int MaxWalkPoint,TArray<ETileType> WalkableTileTypes);
 	void SetShowDebugOption(bool ShowCost,bool ShowStart,bool ShowTarget)
 	{
 		IsShowCost = ShowCost;
@@ -92,6 +96,7 @@ public:
 		UE_LOG(LogTemp,Log,TEXT("current max calculation per frame %d"),count);
 		MaxCalculationPerFrame = count;
 	}
+	
 };
 
 

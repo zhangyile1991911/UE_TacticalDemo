@@ -7,22 +7,17 @@
 #include "MyGridPathfinding.h"
 #include "MyUnit.h"
 #include "My_Pawn.h"
-#include "Kismet/GameplayStatics.h"
+
 
 void AAction_FindPath::BeginPlay()
 {
 	Super::BeginPlay();
-	auto actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyGridPathfinding::StaticClass());
-	MyGridPathfinding = Cast<AMyGridPathfinding>(actor);
 }
 
 void AAction_FindPath::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	for(const FIntPoint& one : Path)
-    {
-    	MyPlayerPawn->GetMyGrid()->RemoveStateFromTile(one,ETileState::PathFinding);
-    }
+	MyPlayerPawn->GetMyGrid()->RemoveStateAllTile(ETileState::PathFinding);
 }
 
 void AAction_FindPath::ExecuteAction(const FIntPoint& index)
@@ -30,22 +25,34 @@ void AAction_FindPath::ExecuteAction(const FIntPoint& index)
 	Super::ExecuteAction(index);
 	Start = MyPlayerPawn->GetSelectedTile();
 	Finish = index;
+	//清除上一次寻路的格子状态
+	MyPlayerPawn->GetMyGrid()->RemoveStateAllTile(ETileState::PathFinding);
 
-	for(const FIntPoint& one : Path)
+	auto Unit = MyPlayerPawn->GetMyGrid()->GetUnitOnTile(Start);
+	if(Unit != nullptr)
 	{
-		MyPlayerPawn->GetMyGrid()->RemoveStateFromTile(one,ETileState::PathFinding);
+		if(Unit->IsInWalkableTile(Finish))
+		{
+			const FTileData* pData = MyPlayerPawn->GetMyGrid()->GetTileDataByIndex(Start);
+			MyPlayerPawn->GetMyGridPathFinding()->UnitFindPath(Start,Finish,pData->UnitOnTile->UnitCanWalkTileType(),FPathFindingCompleted::CreateUObject(this,&AAction_FindPath::WaitPathFinding));	
+		}
+	}
+	else
+	{
+		MyPlayerPawn->GetMyGridPathFinding()->FindPath(Start,Finish,FPathFindingCompleted::CreateUObject(this,&AAction_FindPath::WaitPathFinding));	
 	}
 	
-	MyGridPathfinding->FindPath(Start,Finish,FPathFindingCompleted::CreateUObject(this,&AAction_FindPath::WaitPathFinding));
 	
 }
 
 void AAction_FindPath::WaitPathFinding(TArray<FIntPoint> path)
 {
-	Path = MoveTemp(path);
-	for(const FIntPoint& one : Path)
+	for(const FIntPoint& one : path)
     {
     	MyPlayerPawn->GetMyGrid()->AddStateToTile(one,ETileState::PathFinding);	
     }
-	MyPlayerPawn->GetSelectedUnit()->SetWalkPath(MoveTemp(Path));
+	// if(MyPlayerPawn->GetMyGrid()->TileGridHasUnit(Start))
+	// {
+	// 	MyPlayerPawn->GetSelectedUnit()->SetWalkPath(MoveTemp(path));
+	// }
 }

@@ -195,7 +195,7 @@ void AMyUnit::SetWalkPath(TArray<FIntPoint> path)
 {
 	WalkPath = path;
 	WalkPathIndex = 1;
-
+	if(path.IsEmpty())return;
 	auto pData = MyGrid->GetTileDataByIndex(WalkPath[WalkPathIndex]);
 	
 	StartRotateAngles = GetActorForwardVector().Rotation();
@@ -206,6 +206,11 @@ void AMyUnit::SetWalkPath(TArray<FIntPoint> path)
 	// UE_LOG(LogTemp,Log,TEXT("SetWalkPath StartRotateAngles = %f AngleDegrees = %f "),StartRotateAngles.Yaw,AngleDegrees)
 	FinishRotateAngles.Yaw = AngleDegrees - 90;
 	UnitMovement.PlayFromStart();
+}
+
+void AMyUnit::SetWalkableTile(TArray<FIntPoint> walkableTile)
+{
+	WalkableTiles =  MoveTemp(walkableTile);
 }
 
 

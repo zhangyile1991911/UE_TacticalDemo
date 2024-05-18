@@ -6,6 +6,7 @@
 #include "MyAction.h"
 #include "Action_SelectTile.generated.h"
 
+class AMyUnit;
 /**
  * 
  */
@@ -15,6 +16,7 @@ class TBS20140401_API AAction_SelectTile : public AMyAction
 	GENERATED_BODY()
 protected:
 	FIntPoint selectedIndex = FIntPoint(-1,-1);
+	TObjectPtr<AMyUnit> SelectedUnit;
 protected:
 	virtual void ExecuteAction(const FIntPoint& index) override;
 	// FIntPoint selected;
