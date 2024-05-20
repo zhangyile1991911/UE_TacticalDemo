@@ -87,6 +87,27 @@ void UMyDebugMenu::tab4()
 	}
 }
 
+
+void UMyDebugMenu::tab5()
+{
+	if(TabsContent->GetActiveWidgetIndex() == 5)
+	{
+		TabsContent->SetActiveWidgetIndex(0);
+	}
+	else
+	{
+		TabsContent->SetActiveWidgetIndex(5);	
+	}
+	for(int i = 0;i < TabButtons.Num();i++)
+	{
+		if(TabButtons[i] == nullptr)continue;
+		if(i == TabsContent->GetActiveWidgetIndex())
+			TabButtons[i]->SetBackgroundColor(FLinearColor::Blue);
+		else
+			TabButtons[i]->SetBackgroundColor(DefaultColor);
+	}
+}
+
 void UMyDebugMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -95,12 +116,14 @@ void UMyDebugMenu::NativeConstruct()
 	Button_Tab2->OnClicked.AddDynamic(this,&UMyDebugMenu::tab2);
 	Button_Tab3->OnClicked.AddDynamic(this,&UMyDebugMenu::tab3);
 	Button_Tab4->OnClicked.AddDynamic(this,&UMyDebugMenu::tab4);
+	Button_Tab5->OnClicked.AddDynamic(this,&UMyDebugMenu::tab5);
 
 	TabButtons.Add(nullptr);
 	TabButtons.Add(Button_Tab1);
 	TabButtons.Add(Button_Tab2);
 	TabButtons.Add(Button_Tab3);
 	TabButtons.Add(Button_Tab4);
+	TabButtons.Add(Button_Tab5);
 }
 
 void UMyDebugMenu::NativeDestruct()
@@ -109,6 +132,7 @@ void UMyDebugMenu::NativeDestruct()
 	Button_Tab2->OnClicked.Clear();
 	Button_Tab3->OnClicked.Clear();
 	Button_Tab4->OnClicked.Clear();
+	Button_Tab5->OnClicked.Clear();
 	TabButtons.Empty();
 	Super::NativeDestruct();
 }

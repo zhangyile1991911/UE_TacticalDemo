@@ -44,8 +44,14 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UCurveFloat> RotationCurve;
 
-	FUnitData_Stats MyStats;
+	UPROPERTY()
+	TObjectPtr<UCurveFloat> JumpCurve;
 
+	//属性相关
+	FUnitData_Stats MyStats;
+	FUnitProperty MyProperty;
+	int CurrentDistanceToAction;
+	
 	TArray<FIntPoint> WalkPath;
 	TArray<FIntPoint> WalkableTiles;
 	int WalkPathIndex;
@@ -57,6 +63,10 @@ protected:
 	
 	FRotator FinishRotateAngles;
 	FRotator StartRotateAngles;
+	float StartHeight;
+	float TargetHeight;
+	FVector StartPosition;
+	FVector TargetPosition;
 	
 	UPROPERTY()
 	TObjectPtr<AGrid> MyGrid;
@@ -64,7 +74,6 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AMy_Pawn> My_Pawn;
 
-	int aaaa = 0;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -78,6 +87,9 @@ protected:
 
 	UFUNCTION()
 	void HandleRotationAlpha(float Value);
+
+	UFUNCTION()
+	void HandleJumpAlpha(float Value);
 	// UFUNCTION()
 	// void FinishRotationAlpha();
 public:
@@ -102,6 +114,12 @@ public:
 	void SetWalkPath(TArray<FIntPoint>);
 	void SetWalkableTile(TArray<FIntPoint>);
 	bool IsInWalkableTile(const FIntPoint& point)const{return WalkableTiles.Find(point) != INDEX_NONE;}
+	const FUnitProperty& GetProperty()const{return MyProperty;}
 
+	//行动优先级相关
+	int DistanceToAction()const{return MyProperty.DistanceToAction / CurrentDistanceToAction;}
+	int GetCurrentDistanceToAction()const{return CurrentDistanceToAction;}
+	void ResetCurrentDistanceToAction(){CurrentDistanceToAction = 0;}
+	void AddCurrentDistanceToAction(){CurrentDistanceToAction += MyProperty.Agility;}
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

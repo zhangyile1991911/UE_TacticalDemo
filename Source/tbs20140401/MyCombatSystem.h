@@ -25,10 +25,12 @@ protected:
 	TObjectPtr<AGrid> MyGrid;
 
 	TMap<FIntPoint,TObjectPtr<AMyUnit>> UnitsInCombat;
+
+	TArray<TObjectPtr<AMyUnit>> UnitsActionPriority;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	void SortActionPriority();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

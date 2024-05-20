@@ -15,3 +15,26 @@ struct FUnitData_Stats
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	bool CanMoveDiagonally;
 };
+
+
+USTRUCT(BlueprintType)
+struct FUnitProperty
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int Attack;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int Magic;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int Agility;//行动速度
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int DistanceToAction;//行程
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int SkillPoint;//技能点 使用技能时候消耗
+	
+};

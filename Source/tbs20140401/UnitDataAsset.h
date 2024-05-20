@@ -15,7 +15,6 @@ struct FUnitDataAsset:public FTableRowBase
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSoftClassPtr<UAnimInstance> AnimBP;
 	
-
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSoftObjectPtr<UTexture2D> Icon;
 };

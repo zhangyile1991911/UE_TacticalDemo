@@ -25,6 +25,23 @@ void AMyCombatSystem::BeginPlay()
 	MyGrid = Cast<AGrid>(actor);
 }
 
+void AMyCombatSystem::SortActionPriority()
+{
+	if(UnitsActionPriority.IsEmpty())return;
+	if(UnitsActionPriority.Num() <= 1)return;
+
+	UnitsActionPriority.Sort([](const TObjectPtr<AMyUnit>& L,const TObjectPtr<AMyUnit>& R)
+	{//昇順　降順
+		int a = L->DistanceToAction();
+		int b = R->DistanceToAction();
+		if(a == b)
+		{
+			return L->GetCurrentDistanceToAction() > R->GetCurrentDistanceToAction();
+		}
+		return a > b;
+	});
+}
+
 // Called every frame
 void AMyCombatSystem::Tick(float DeltaTime)
 {
@@ -39,7 +56,10 @@ void AMyCombatSystem::AddUnitInCombat(const FIntPoint& Index, TObjectPtr<AMy_Paw
 	
 	auto pData = MyGrid->GetTileDataByIndex(Index);
 	Unit->SetActorLocation(pData->Transform.GetLocation());
+
 	UnitsInCombat.Add(Index,Unit);
+	UnitsActionPriority.Add(Unit);
+	
 	MyGrid->AddTileDataUnitByIndex(Index,Unit);
 
 	Unit->RefreshUnit(myPawn,MyGrid,Index);
@@ -49,8 +69,10 @@ void AMyCombatSystem::RemoveUnitInCombat(const FIntPoint& Index)
 {
 	if(UnitsInCombat.Contains(Index))
 	{
-		UnitsInCombat.Remove(Index);	
+		UnitsActionPriority.Remove(UnitsInCombat[Index]);
+		UnitsInCombat.Remove(Index);
 	}
+	
 	MyGrid->RemoveTileDataUnitByIndex(Index);
 }
 

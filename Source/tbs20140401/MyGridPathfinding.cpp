@@ -395,7 +395,7 @@ void AMyGridPathfinding::UnitFindPath(const FIntPoint& Start,const FIntPoint& Ta
 	AddPathFindingData(nullptr,StartPoint);
 	DiscoveredTileIndexes.Add(StartPoint);
 	
-	Async(EAsyncExecution::TaskGraph,[this,WalkableTileTypes,completed]()-> void
+	Async(EAsyncExecution::TaskGraphMainThread,[this,WalkableTileTypes,completed]()-> void
 	{
 		UE_LOG(LogTemp,Log,TEXT("Start Async EAsyncExecution::TaskGraph"))
 		FMyPathFindingData currentTile;

@@ -46,7 +46,11 @@ AMyUnit::AMyUnit()
 	{
 		RotationCurve = RoCurve.Object;
 	}
-	
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> JuCurve(TEXT("'/Game/Art/Units/JumpAlpha.JumpAlpha'"));
+	if (JuCurve.Succeeded())
+	{
+		JumpCurve = JuCurve.Object;
+	}
 }
 
 void AMyUnit::OnConstruction(const FTransform& Transform)
@@ -83,6 +87,14 @@ void AMyUnit::BeginPlay()
 		// FOnTimelineEvent finish;
 		// finish.BindDynamic(this,&AMyUnit::FinishRotationAlpha);
 		// UnitMovement.SetTimelineFinishedFunc(finish);
+	}
+	if(JumpCurve)
+	{
+		FOnTimelineFloat tmp;
+		tmp.BindDynamic(this,&AMyUnit::HandleJumpAlpha);
+		UnitMovement.AddInterpFloat(JumpCurve,tmp);
+		UnitMovement.SetLooping(false);
+		UnitMovement.SetTimelineLengthMode(TL_LastKeyFrame);
 	}
 	// FTimerHandle handle;
 	// GetWorld()->GetTimerManager().SetTimer(handle,this,&AMyUnit::testloop,3.0f,true);
@@ -267,6 +279,9 @@ void AMyUnit::FinishLocationAlpha()
 	
 	GridIndex = WalkPath[WalkPathIndex];
 	StartRotateAngles = FinishRotateAngles;
+	auto pData = MyGrid->GetTileDataByIndex(GridIndex);
+	StartHeight = pData->Transform.GetLocation().Z;
+	
 	// if(My_Pawn)
 	// {
 	// 	UE_LOG(LogTemp,Log,TEXT("unit on x = %d y = %d"),GridIndex.X,GridIndex.Y)
@@ -299,10 +314,12 @@ void AMyUnit::FinishLocationAlpha()
 	
 	
 	FIntPoint& next = WalkPath[WalkPathIndex];
-	auto pData = MyGrid->GetTileDataByIndex(next);
+	pData = MyGrid->GetTileDataByIndex(next);
 	float AngleDegrees = CalculateRotationAngleToTarget(GetActorLocation(),pData->Transform.GetLocation()); 
 	FinishRotateAngles.Yaw = AngleDegrees - 90;
-	
+
+	TargetHeight = pData->Transform.GetLocation().Z;
+	UE_LOG(LogTemp,Log,TEXT(" StartHeight = %f TargetHeight = %f "),StartHeight,TargetHeight);
 	UnitMovement.PlayFromStart();
 }
 
@@ -310,6 +327,13 @@ void AMyUnit::HandleRotationAlpha(float Value)
 {
 	auto tmp = FMath::Lerp(StartRotateAngles,FinishRotateAngles,Value);
 	SetActorRotation(tmp);
+}
+
+void AMyUnit::HandleJumpAlpha(float Value)
+{
+	FVector vec = GetTransform().GetLocation();
+	vec.Z = FMath::Lerp(StartHeight,TargetHeight,Value);
+	SetActorLocation(vec);
 }
 
 // void AMyUnit::FinishRotationAlpha()

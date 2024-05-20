@@ -27,6 +27,9 @@ class TBS20140401_API UMyDebugMenu : public UUserWidget
 
 	UFUNCTION()
 	void tab4();
+
+	UFUNCTION()
+	void tab5();
 protected:
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UButton> Button_Tab1;
@@ -39,6 +42,9 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UButton> Button_Tab4;
+
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UButton> Button_Tab5;
 
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UWidgetSwitcher> TabsContent;
