@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Command.h"
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "My_PC.generated.h"
@@ -10,6 +11,8 @@
  * 
  */
 
+class AMy_Pawn;
+class AMyUnit;
 
 class UInputMappingContext;
 
@@ -24,7 +27,26 @@ protected:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
+	int CommandIndex;
+	TArray<FCommand> Commands;
+	
+	// UPROPERTY()
+	// TObjectPtr<AMyUnit> CurrentControlUnit;
+	//
+	// UPROPERTY()
+	// TObjectPtr<AMy_Pawn> MyPawnInstance;
+	
 protected:
+	void PushCommand(FCommand cmd);
+	FCommand PopCommand();
+	void ClearCommand();
+	
+	// void SetCurrentControlUnit(TObjectPtr<AMyUnit> Unit);
+public:
+	void StartUnitTurn(TObjectPtr<AMyUnit> Unit);
+	void FinishUnitTurn();
+	TObjectPtr<AMyUnit> GetCurrentControlUnit()const;
+	// TObjectPtr<AMy_Pawn> GetMyPawn()const{return MyPawnInstance;}
 	
 };
 

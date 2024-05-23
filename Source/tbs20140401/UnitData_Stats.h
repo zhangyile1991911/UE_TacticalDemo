@@ -23,6 +23,9 @@ struct FUnitProperty
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int WalkRange;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int Attack;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)

@@ -3,10 +3,13 @@
 
 #include "MyTab_Game.h"
 
+#include "Grid.h"
 #include "Components/Button.h"
 #include "GameFramework/HUD.h"
 #include "MyHUD.h"
 #include "My_Pawn.h"
+#include "MyCombatSystem.h"
+#include "My_PC.h"
 
 
 void UMyTab_Game::NativeConstruct()
@@ -44,5 +47,15 @@ void UMyTab_Game::OnStartGameClicked()
 {
 	MyHUDInstance->ShowGameUI(true);
 	MyPawnInstance->SetSelectedActions(nullptr,nullptr);
+	MyPawnInstance->GetMyCombatSystem()->ResetAllUnit();
+	MyPawnInstance->GetMyGrid()->RemoveStateAllTile(ETileState::Selected);
+	MyPawnInstance->StartGame();
 	
+	// TObjectPtr<AMyUnit> firstUnit = MyPawnInstance->GetMyCombatSystem()->SortActionPriority();
+	// auto pc = GetWorld()->GetFirstPlayerController();
+	// AMy_PC* myPC = Cast<AMy_PC>(pc);
+	// if(myPC)
+	// {
+	// 	myPC->StartUnitTurn(firstUnit);
+	// }
 }

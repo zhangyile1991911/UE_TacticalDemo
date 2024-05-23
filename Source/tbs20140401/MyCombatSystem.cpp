@@ -25,11 +25,25 @@ void AMyCombatSystem::BeginPlay()
 	MyGrid = Cast<AGrid>(actor);
 }
 
-void AMyCombatSystem::SortActionPriority()
+TObjectPtr<AMyUnit>  AMyCombatSystem::SortActionPriority()
 {
-	if(UnitsActionPriority.IsEmpty())return;
-	if(UnitsActionPriority.Num() <= 1)return;
+	if(UnitsActionPriority.IsEmpty())return nullptr;
+	if(UnitsActionPriority.Num() <= 1)return UnitsActionPriority[0];
 
+	bool WhoCanMove = false;
+	while(!WhoCanMove)
+	{
+		for(auto Unit : UnitsActionPriority)
+		{
+			Unit->AddCurrentDistanceToAction();
+			if(Unit->DistanceToAction() >= 1)
+			{
+				WhoCanMove = true;
+				break;
+			}
+		}
+	}
+	
 	UnitsActionPriority.Sort([](const TObjectPtr<AMyUnit>& L,const TObjectPtr<AMyUnit>& R)
 	{//昇順　降順
 		int a = L->DistanceToAction();
@@ -40,6 +54,10 @@ void AMyCombatSystem::SortActionPriority()
 		}
 		return a > b;
 	});
+
+	ReSortEvent.Broadcast(UnitsActionPriority);
+	
+	return UnitsActionPriority[0];
 }
 
 // Called every frame
@@ -89,4 +107,21 @@ void AMyCombatSystem::SetUnitIndexOnGrid(const FIntPoint& Index, TObjectPtr<AMyU
 	Unit->SetActorLocation(pData->Transform.GetLocation());
 	
 }
+
+void AMyCombatSystem::NextAllUnit()
+{
+	for(auto Unit : UnitsActionPriority)
+	{
+		Unit->AddCurrentDistanceToAction();
+	}
+}
+
+void AMyCombatSystem::ResetAllUnit()
+{
+	for(auto Unit : UnitsActionPriority)
+	{
+		Unit->ResetCurrentDistanceToAction();
+	}
+}
+
 

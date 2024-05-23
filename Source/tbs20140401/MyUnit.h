@@ -9,6 +9,7 @@
 #include "MyUnit.generated.h"
 
 
+class AShadowUnit;
 class AMy_Pawn;
 class AGrid;
 
@@ -24,6 +25,13 @@ protected:
 	UPROPERTY()
 	TObjectPtr<USkeletalMeshComponent> MySkeletalMeshComponent;
 
+	UPROPERTY()
+	TObjectPtr<UChildActorComponent> MyChildActor;
+
+	UPROPERTY()
+	TObjectPtr<AShadowUnit> MyShadowUnit;
+	// UPROPERTY()
+	// TObjectPtr<USkeletalMeshComponent> ShadowSkeletalMeshComponent;
 	// UPROPERTY()
 	// TObjectPtr<UClass> AnimBPClass;
 	// UPROPERTY()
@@ -47,6 +55,7 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UCurveFloat> JumpCurve;
 
+	FUnitData MyData;
 	//属性相关
 	FUnitData_Stats MyStats;
 	FUnitProperty MyProperty;
@@ -109,17 +118,24 @@ public:
 
 	bool UnitCanWalkOnTile(ETileType TileType);
 	TArray<ETileType> UnitCanWalkTileType(){return MyStats.ValidTileTypes;}
+	bool IsInWalkableRange(const FIntPoint& index);
 	bool CanDiagonally()const{return MyStats.CanMoveDiagonally;}
 
 	void SetWalkPath(TArray<FIntPoint>);
 	void SetWalkableTile(TArray<FIntPoint>);
+	const TArray<FIntPoint>& GetWalkableTiles()const{return WalkableTiles;}
 	bool IsInWalkableTile(const FIntPoint& point)const{return WalkableTiles.Find(point) != INDEX_NONE;}
 	const FUnitProperty& GetProperty()const{return MyProperty;}
 
 	//行动优先级相关
-	int DistanceToAction()const{return MyProperty.DistanceToAction / CurrentDistanceToAction;}
+	int DistanceToAction()const{return CurrentDistanceToAction/MyProperty.DistanceToAction;}
 	int GetCurrentDistanceToAction()const{return CurrentDistanceToAction;}
 	void ResetCurrentDistanceToAction(){CurrentDistanceToAction = 0;}
 	void AddCurrentDistanceToAction(){CurrentDistanceToAction += MyProperty.Agility;}
+	EUnitType GetUnitType()const{return UnitType;}
+
+	void MoveShadowOnTile(const FVector& location);
+	void ShowShadowUnit();
+	void HideShadowUnit();
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

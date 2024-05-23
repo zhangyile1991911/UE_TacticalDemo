@@ -11,6 +11,8 @@
 
 #include "My_Pawn.generated.h"
 
+class UUPawnProcess_Normal;
+class UPawnProcess;
 class AMyGridPathfinding;
 class AMyUnit;
 class AMyCombatSystem;
@@ -51,6 +53,12 @@ protected:
 	TObjectPtr<UInputAction> MouseLeftClickAction;
 	UPROPERTY()
 	TObjectPtr<UInputAction> MouseRightClickAction;
+	UPROPERTY()
+	TObjectPtr<UInputAction> UnitMoveAction;
+	UPROPERTY()
+	TObjectPtr<UInputAction> ConfirmAction;
+	UPROPERTY()
+	TObjectPtr<UInputAction> CancelAction;
 
 	float m_curArmLength;
 	FVector m_locationDesired;
@@ -73,6 +81,9 @@ protected:
 	TObjectPtr<AMyUnit> HoveredUnit;
 
 	TObjectPtr<AMyUnit> SelectedUnit;
+
+	TObjectPtr<UUPawnProcess_Normal> NormalProcess;
+	TObjectPtr<UPawnProcess> CurrentProcess;
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	float Location_Speed = 20.0f;
@@ -99,6 +110,8 @@ public:
 	void SetCurrentTileType(ETileType ttype){CurSetTileType = ttype;}
 
 	EUnitType CurrentSelectedUnitType;
+
+	bool IsStartGame = false;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -107,7 +120,9 @@ protected:
 	void CamMove(const FInputActionValue& value);
 	void MouseLeftClick(const FInputActionValue& value);
 	void MouseRightClick(const FInputActionValue& value);
-	
+	void UnitMove(const FInputActionValue& value);
+	void ConfirmClick(const FInputActionValue& value);
+	void CancelClick(const FInputActionValue& value);
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -139,5 +154,10 @@ public:
 	TObjectPtr<AMyUnit> GetUnitUnderCursor();
 
 	TObjectPtr<AMyUnit> GetSelectedUnit()const{return SelectedUnit;}
+
+	void LookAtGrid(const FIntPoint&);
+	void LookAtUnit(TObjectPtr<AMyUnit>);
+	void StartGame();
+	
 	// FTileTypeChanged OnTileTYpeChanged;
 };

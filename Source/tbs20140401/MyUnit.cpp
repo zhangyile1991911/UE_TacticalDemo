@@ -7,8 +7,10 @@
 #include "IMyUnitAnimation.h"
 #include "My_Pawn.h"
 #include "My_Utilities.h"
+#include "ShadowUnit.h"
 #include "Curves/CurveFloat.h"
 #include "Components/TimelineComponent.h"
+#include "ShadowUnit.h"
 
 // Sets default values
 AMyUnit::AMyUnit()
@@ -20,9 +22,13 @@ AMyUnit::AMyUnit()
 
 	MySkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("StaticMeshComponent"));
 	MySkeletalMeshComponent->SetupAttachment(this->RootComponent);
-
+	
 	CollisionEnabledHasQuery(ECollisionEnabled::QueryOnly);
 	MySkeletalMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel3,ECR_Block);
+
+	MyChildActor = CreateDefaultSubobject<UChildActorComponent>(TEXT("Shadow"));
+	MyChildActor->SetChildActorClass(AShadowUnit::StaticClass());
+	
 	//加载资源
 	// static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("/Game/Art/Units/Warrior/ABP_Warrior.ABP_Warrior_C"));
 	// if (AnimBP.Succeeded())
@@ -57,15 +63,21 @@ void AMyUnit::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 	
-	RefreshUnit(nullptr,nullptr,FIntPoint(0,0));
+	// RefreshUnit(nullptr,nullptr,FIntPoint(0,0));
 	
+	MyChildActor->CreateChildActor([this](AActor* Actor)
+	{
+		MyShadowUnit = Cast<AShadowUnit>(Actor);	
+		MyShadowUnit->RefreshUnit(this);
+		MyShadowUnit->SetHidden(true);
+	});
 }
 
 // Called when the game starts or when spawned
 void AMyUnit::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	if(LocationCurve)
 	{
 		FOnTimelineFloat tmp;
@@ -139,12 +151,13 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	if(pData->Assets.SkeletalMesh.IsValid())
 	{
 		MySkeletalMeshComponent->SetSkeletalMesh(pData->Assets.SkeletalMesh.Get());
-		
+		// ShadowSkeletalMeshComponent->SetSkeletalMesh(pData->Assets.SkeletalMesh.Get());
 	}
 	else
 	{
 		auto skeletalMesh = pData->Assets.SkeletalMesh.LoadSynchronous();
 		MySkeletalMeshComponent->SetSkeletalMesh(skeletalMesh);
+		// ShadowSkeletalMeshComponent->SetSkeletalMesh(skeletalMesh);
 	}
 		
 	if(pData->Assets.AnimBP.IsValid())
@@ -158,9 +171,12 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	}
 
 	MyStats = pData->Stats;
+	MyProperty = pData->Property;
 	
 	SetActorRotation(FRotator(0,360-90,0));
 
+	if(MyShadowUnit)MyShadowUnit->RefreshUnit(this);
+	
 	UpdateHoveredAndSelected();
 }
 
@@ -183,6 +199,13 @@ bool AMyUnit::UnitCanWalkOnTile(ETileType TileType)
 		if(one == TileType)return true;
 	}
 	return false;
+}
+
+bool AMyUnit::IsInWalkableRange(const FIntPoint& index)
+{
+	if(WalkableTiles.IsEmpty())return false;
+	
+	return WalkableTiles.Contains(index);
 }
 
 float CalculateRotationAngleToTarget(const FVector& CurrentLocation, const FVector& TargetLocation)
@@ -246,6 +269,28 @@ void AMyUnit::HandleLocationAlpha(float Value)
 	// UE_LOG(LogTemp,Log,TEXT(" cur = %s next = %s"),CurData->Transform.GetLocation().ToString(),NextData->Transform.GetLocation().ToString());
 	FVector tmp = FMath::Lerp(CurData->Transform.GetLocation(),NextData->Transform.GetLocation(),Value);
 	SetActorLocation(tmp);
+}
+
+void AMyUnit::ShowShadowUnit()
+{
+	if(MyShadowUnit)
+		MyShadowUnit->SetActorHiddenInGame(false);
+}
+
+void AMyUnit::HideShadowUnit()
+{
+	if(MyShadowUnit)
+		MyShadowUnit->SetActorHiddenInGame(true);
+}
+
+void AMyUnit::MoveShadowOnTile(const FVector& location)
+{
+	if(MyShadowUnit != nullptr)
+	{
+		ShowShadowUnit();
+		MyShadowUnit->SetActorLocation(location);
+	}
+		
 }
 
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection)

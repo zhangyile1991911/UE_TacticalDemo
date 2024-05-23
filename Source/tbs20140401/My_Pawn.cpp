@@ -13,6 +13,8 @@
 #include "MyCombatSystem.h"
 #include "MyGridPathfinding.h"
 #include "MyUnit.h"
+#include "PawnProcess.h"
+#include "UPawnProcess_Normal.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -65,6 +67,24 @@ AMy_Pawn::AMy_Pawn()
 	{
 		MouseRightClickAction = InputActionRightAsset.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputUnitMoveAsset(TEXT("InputAction'/Game/Input/Actions/UnitMove'"));
+    if (InputUnitMoveAsset.Succeeded())
+    {
+    	UnitMoveAction = InputUnitMoveAsset.Object;
+    }
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> ConfirmAsset(TEXT("InputAction'/Game/Input/Actions/ConfirmAct'"));
+	if (ConfirmAsset.Succeeded())
+	{
+		ConfirmAction = ConfirmAsset.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> CancelAsset(TEXT("InputAction'/Game/Input/Actions/CancelAct'"));
+	if (CancelAsset.Succeeded())
+	{
+		CancelAction = CancelAsset.Object;
+	}
 	
 }
 
@@ -90,6 +110,8 @@ void AMy_Pawn::BeginPlay()
 	actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyGridPathfinding::StaticClass());
 	MyGridPathfinding = Cast<AMyGridPathfinding>(actor);
 	// OnTileTYpeChanged.AddDynamic(this,&AMy_Pawn::SetCurrentTileType);
+
+	NormalProcess = NewObject<UUPawnProcess_Normal>(this);
 }
 
 
@@ -101,7 +123,7 @@ void AMy_Pawn::Tick(float DeltaTime)
 	SetActorLocation(FMath::VInterpTo(GetActorLocation(),m_locationDesired,DeltaTime,Location_Interp));
 	SetActorRotation(FMath::RInterpTo(GetActorRotation(),m_rotationDesired,DeltaTime,Rotation_Interp));
 
-	UpdateTileUnderCursor();
+	if(!IsStartGame)UpdateTileUnderCursor();
 }
 
 // Called to bind functionality to input
@@ -119,6 +141,10 @@ void AMy_Pawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(CamMoveAction,ETriggerEvent::Triggered,this,&AMy_Pawn::CamMove);
 		EnhancedInputComponent->BindAction(MouseLeftClickAction,ETriggerEvent::Triggered,this,&AMy_Pawn::MouseLeftClick);
 		EnhancedInputComponent->BindAction(MouseRightClickAction,ETriggerEvent::Triggered,this,&AMy_Pawn::MouseRightClick);
+		EnhancedInputComponent->BindAction(UnitMoveAction,ETriggerEvent::Triggered,this,&AMy_Pawn::UnitMove);
+		EnhancedInputComponent->BindAction(ConfirmAction,ETriggerEvent::Triggered,this,&AMy_Pawn::ConfirmClick);
+		EnhancedInputComponent->BindAction(CancelAction,ETriggerEvent::Triggered,this,&AMy_Pawn::CancelClick);
+
 		
 	}
 }
@@ -272,6 +298,40 @@ void AMy_Pawn::MouseRightClick(const FInputActionValue& value)
 	}
 }
 
+void AMy_Pawn::UnitMove(const FInputActionValue& value)
+{
+	if(!IsStartGame)return;
+	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::UnitMove"))
+	FVector2D tmp = value.Get<FInputActionValue::Axis2D>();
+	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::UnitMove %f %f "),tmp.X,tmp.Y)
+	
+	FIntPoint next;
+	next.X = SelectedTile.X + tmp.Y;
+	next.Y = SelectedTile.Y + tmp.X;
+	
+	if(MyGrid->IsValidGridIndex(next))
+	{
+		MyGrid->RemoveStateFromTile(SelectedTile,ETileState::Selected);
+		MyGrid->AddStateToTile(next,ETileState::Selected);
+		SelectedTile = next;
+		
+		CurrentProcess->HandleDirectionInput(SelectedTile);
+	}
+	
+}
+
+void AMy_Pawn::ConfirmClick(const FInputActionValue& value)
+{
+	if(!IsStartGame)return;
+	CurrentProcess->HandleConfirmInput();
+}
+
+void AMy_Pawn::CancelClick(const FInputActionValue& value)
+{
+	if(!IsStartGame)return;
+	CurrentProcess->HandleCancelInput();
+}
+
 bool AMy_Pawn::CanHoverEmptySpace()
 {
 	UClass* add = AAction_AddTile::StaticClass();
@@ -311,5 +371,29 @@ TObjectPtr<AMyUnit> AMy_Pawn::GetUnitUnderCursor()
 	FIntPoint index = MyGrid->GetTileIndexUnderCursor(playerIndex,true,CanHoverEmptySpace());
 	const FTileData* pData = MyGrid->GetTileDataByIndex(index);
 	return pData ? pData->UnitOnTile : nullptr;
+}
+
+void AMy_Pawn::LookAtGrid(const FIntPoint& index)
+{
+	auto pData = MyGrid->GetTileDataByIndex(index);
+	if(pData == nullptr)return;
+
+	m_springArm->SetWorldLocation(pData->Transform.GetLocation());
+}
+
+void AMy_Pawn::LookAtUnit(TObjectPtr<AMyUnit> Unit)
+{
+	LookAtGrid(Unit->GetGridIndex());
+}
+
+void AMy_Pawn::StartGame()
+{
+	IsStartGame = true;
+	
+	MyGrid->RemoveStateFromTile(HoveredTile,ETileState::Hovered);
+
+	CurrentProcess = NormalProcess;
+	TObjectPtr<AMyUnit> FirstUnit = MyCombatSystem->SortActionPriority();
+	CurrentProcess->EnterProcess(this,FirstUnit);
 }
 

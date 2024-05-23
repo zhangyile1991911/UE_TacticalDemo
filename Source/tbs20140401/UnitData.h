@@ -28,4 +28,7 @@ struct FUnitData:public FTableRowBase
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FUnitData_Stats Stats;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FUnitProperty Property;
 };
