@@ -25,6 +25,9 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AGrid> MyGrid;
 
+	UPROPERTY()
+	TObjectPtr<AMyUnit> FirstUnit;
+	
 	TMap<FIntPoint,TObjectPtr<AMyUnit>> UnitsInCombat;
 
 	TArray<TObjectPtr<AMyUnit>> UnitsActionPriority;
@@ -40,6 +43,6 @@ public:
 	void NextAllUnit();
 	void ResetAllUnit();
 	TObjectPtr<AMyUnit> SortActionPriority();
-
+	TObjectPtr<AMyUnit> GetFirstUnit()const{return FirstUnit;}
 	ReSortEvent ReSortEvent;
 };

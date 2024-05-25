@@ -27,12 +27,12 @@ void AAction_ShowTileNeighbors::ExecuteAction(const FIntPoint& index)
 		MyPlayerPawn->RemoveTileStateByIndex(one,ETileState::IsNeighbor);
 	}
 	
-	MyPlayerPawn->UpdateTIleByIndex(index,ETileState::IsNeighbor);
+	MyPlayerPawn->UpdateTileStatusByIndex(index,ETileState::IsNeighbor);
 	selectedIndex = index;
 	CurNeighbors = MyPathFinding->GetValidTileNeighbors(index);
 	for(const FIntPoint& one : CurNeighbors)
 	{
-		MyPlayerPawn->UpdateTIleByIndex(one,ETileState::IsNeighbor);
+		MyPlayerPawn->UpdateTileStatusByIndex(one,ETileState::IsNeighbor);
 	}
 }
 

@@ -11,6 +11,9 @@
 #include "Curves/CurveFloat.h"
 #include "Components/TimelineComponent.h"
 #include "ShadowUnit.h"
+#include "UnitAbility.h"
+#include "UnitAbility_Idle.h"
+#include "UnitAbility_NormalAttack.h"
 
 // Sets default values
 AMyUnit::AMyUnit()
@@ -141,43 +144,74 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	UnitType = My_Pawn == nullptr ? UnitType : My_Pawn->GetCurrentSelectedUnitType();
 	MyGrid = grid;
 	GridIndex = index;
-	auto pData = GetUnitData(UnitType);
-	if(pData == nullptr)
+	const FUnitData* UnitData = GetUnitData(UnitType);
+	if(UnitData == nullptr)
 	{
 		UE_LOG(LogTemp,Error,TEXT("%d data is null"),UnitType);
 		return;
 	}
 
-	if(pData->Assets.SkeletalMesh.IsValid())
+	if(UnitData->Assets.SkeletalMesh.IsValid())
 	{
-		MySkeletalMeshComponent->SetSkeletalMesh(pData->Assets.SkeletalMesh.Get());
+		MySkeletalMeshComponent->SetSkeletalMesh(UnitData->Assets.SkeletalMesh.Get());
 		// ShadowSkeletalMeshComponent->SetSkeletalMesh(pData->Assets.SkeletalMesh.Get());
 	}
 	else
 	{
-		auto skeletalMesh = pData->Assets.SkeletalMesh.LoadSynchronous();
+		auto skeletalMesh = UnitData->Assets.SkeletalMesh.LoadSynchronous();
 		MySkeletalMeshComponent->SetSkeletalMesh(skeletalMesh);
 		// ShadowSkeletalMeshComponent->SetSkeletalMesh(skeletalMesh);
 	}
 		
-	if(pData->Assets.AnimBP.IsValid())
+	if(UnitData->Assets.AnimBP.IsValid())
 	{
-		MySkeletalMeshComponent->SetAnimInstanceClass(pData->Assets.AnimBP.Get());
+		MySkeletalMeshComponent->SetAnimInstanceClass(UnitData->Assets.AnimBP.Get());
 	}
 	else
 	{
-		auto bp = pData->Assets.AnimBP.LoadSynchronous();
+		auto bp = UnitData->Assets.AnimBP.LoadSynchronous();
 		MySkeletalMeshComponent->SetAnimInstanceClass(bp);
 	}
 
-	MyStats = pData->Stats;
-	MyProperty = pData->Property;
+	MyStats = UnitData->Stats;
+	MyProperty = UnitData->Property;
 	
 	SetActorRotation(FRotator(0,360-90,0));
 
 	if(MyShadowUnit)MyShadowUnit->RefreshUnit(this);
 	
 	UpdateHoveredAndSelected();
+
+	//スキルの初期化
+	for(int i = 0;i < UnitData->Ability.Num();i++)
+	{
+		switch (UnitData->Ability[i].SkillId)
+		{
+		case 10001:
+			{
+				auto IdleAbility = NewObject<UUnitAbility_Idle>(this);
+				IdleAbility->SetSkillData(UnitData->Ability[i],this);
+				OwnAbilityList.Add(IdleAbility);	
+			}
+			break;
+		case 10002:
+		case 20001:
+		case 30001:
+			{
+				auto NormalAttackAbility = NewObject<UUnitAbility_NormalAttack>(this);
+				NormalAttackAbility->SetSkillData(UnitData->Ability[i],this);
+				OwnAbilityList.Add(NormalAttackAbility);	
+			}
+			break;
+		default:
+			{
+				UE_LOG(LogTemp,Log,TEXT("error skillid %d"),UnitData->Ability[i].SkillId)
+				auto OneAbility = NewObject<UUnitAbility>(this);
+				OwnAbilityList.Add(OneAbility);	
+			}
+			break;
+		}
+	}
 }
 
 void AMyUnit::SetHovered(bool h)
@@ -320,7 +354,7 @@ void AMyUnit::FinishLocationAlpha()
 {
 	UE_LOG(LogTemp,Log,TEXT("FinishLocationAlpha"))
 	MyGrid->AddTileDataUnitByIndex(GridIndex,nullptr);
-	My_Pawn->UpdateTIleByIndex(GridIndex,ETileState::Selected);
+	My_Pawn->UpdateTileStatusByIndex(GridIndex,ETileState::Selected);
 	
 	GridIndex = WalkPath[WalkPathIndex];
 	StartRotateAngles = FinishRotateAngles;
@@ -353,7 +387,7 @@ void AMyUnit::FinishLocationAlpha()
 		{
 			MyGrid->RemoveStateFromTile(one,ETileState::PathFinding);
 		}
-		My_Pawn->UpdateTIleByIndex(GridIndex,ETileState::Selected);
+		My_Pawn->UpdateTileStatusByIndex(GridIndex,ETileState::Selected);
 		return;
 	}
 	

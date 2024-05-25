@@ -397,7 +397,7 @@ void AMyGridPathfinding::UnitFindPath(const FIntPoint& Start,const FIntPoint& Ta
 	
 	Async(EAsyncExecution::TaskGraphMainThread,[this,WalkableTileTypes,completed]()-> void
 	{
-		UE_LOG(LogTemp,Log,TEXT("Start Async EAsyncExecution::TaskGraph"))
+		// UE_LOG(LogTemp,Log,TEXT("Start Async EAsyncExecution::TaskGraph"))
 		FMyPathFindingData currentTile;
 		bool isFound;
 		for(;;)
@@ -424,7 +424,7 @@ void AMyGridPathfinding::UnitFindPath(const FIntPoint& Start,const FIntPoint& Ta
 			path.Add(TargetPoint);
 		}
 		completed.Execute(path);
-		UE_LOG(LogTemp,Log,TEXT("Finish Async EAsyncExecution::TaskGraph"))
+		// UE_LOG(LogTemp,Log,TEXT("Finish Async EAsyncExecution::TaskGraph"))
 	});
 }
 

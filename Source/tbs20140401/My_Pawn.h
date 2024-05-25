@@ -11,6 +11,10 @@
 
 #include "My_Pawn.generated.h"
 
+class UPawnProcess_Idle;
+class UPawnProcess_BeforeTurn;
+class AMyHUD;
+class UPawnProcess_CMD;
 class UUPawnProcess_Normal;
 class UPawnProcess;
 class AMyGridPathfinding;
@@ -65,13 +69,16 @@ protected:
 	FRotator m_rotationDesired;
 
 	UPROPERTY()
-	AGrid* MyGrid;
+	TObjectPtr<AGrid> MyGrid;
 
 	UPROPERTY()
-	AMyCombatSystem* MyCombatSystem;
+	TObjectPtr<AMyCombatSystem> MyCombatSystem;
 
 	UPROPERTY()
-	AMyGridPathfinding* MyGridPathfinding;
+	TObjectPtr<AMyGridPathfinding> MyGridPathfinding;
+
+	UPROPERTY()
+	TObjectPtr<AMyHUD> MyHUDInstance;
 	
 	FIntPoint HoveredTile = FIntPoint(-1,-1);
 	FIntPoint SelectedTile = FIntPoint(-1,-1);
@@ -82,7 +89,15 @@ protected:
 
 	TObjectPtr<AMyUnit> SelectedUnit;
 
+	UPROPERTY()
+	TObjectPtr<UPawnProcess_BeforeTurn> BeforeTurnProcess;
+	UPROPERTY()
+	TObjectPtr<UPawnProcess_CMD> CmdProcess;
+	UPROPERTY()
 	TObjectPtr<UUPawnProcess_Normal> NormalProcess;
+	UPROPERTY()
+	TObjectPtr<UPawnProcess_Idle> IdleProcess;
+	UPROPERTY()
 	TObjectPtr<UPawnProcess> CurrentProcess;
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
@@ -123,6 +138,8 @@ protected:
 	void UnitMove(const FInputActionValue& value);
 	void ConfirmClick(const FInputActionValue& value);
 	void CancelClick(const FInputActionValue& value);
+
+	void SwitchProcess(TObjectPtr<UPawnProcess> NextProcess);
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -131,7 +148,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 public:
 	void UpdateTileUnderCursor();
-	void UpdateTIleByIndex(const FIntPoint& index,ETileState state);
+	void UpdateTileStatusByIndex(const FIntPoint& index,ETileState state);
 	void RemoveTileStateByIndex(const FIntPoint& index,ETileState state);
 	const FIntPoint& GetHoveredTile() const {return HoveredTile;}
 	const FIntPoint& GetSelectedTile() const {return SelectedTile;}
@@ -147,10 +164,10 @@ public:
 	void SetCurrentSelectedUnitType(EUnitType UnitType){CurrentSelectedUnitType = UnitType;}
 	EUnitType GetCurrentSelectedUnitType()const{return CurrentSelectedUnitType;}
 	
-	AGrid* GetMyGrid()const{return MyGrid;}
-	AMyCombatSystem* GetMyCombatSystem()const{return MyCombatSystem;}
-	AMyGridPathfinding* GetMyGridPathFinding()const{return MyGridPathfinding;}
-	
+	TObjectPtr<AGrid> GetMyGrid()const{return MyGrid;}
+	TObjectPtr<AMyCombatSystem> GetMyCombatSystem()const{return MyCombatSystem;}
+	TObjectPtr<AMyGridPathfinding> GetMyGridPathFinding()const{return MyGridPathfinding;}
+	TObjectPtr<AMyHUD> GetMyHUD()const{return MyHUDInstance;}
 	TObjectPtr<AMyUnit> GetUnitUnderCursor();
 
 	TObjectPtr<AMyUnit> GetSelectedUnit()const{return SelectedUnit;}
@@ -158,6 +175,9 @@ public:
 	void LookAtGrid(const FIntPoint&);
 	void LookAtUnit(TObjectPtr<AMyUnit>);
 	void StartGame();
+	void SwitchToCmdInput();
+	void SwitchToNormal();
+	void SwitchToIdle();
 	
 	// FTileTypeChanged OnTileTYpeChanged;
 };

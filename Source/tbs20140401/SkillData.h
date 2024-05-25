@@ -4,19 +4,19 @@
 #include "SkillData.generated.h"
 
 USTRUCT(BlueprintType)
-struct FSkillData : public FTableRowBase
+struct FSkillData
 {
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	int SkillId;
+	int SkillId = 0;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	FText SkillName;
+	FText SkillName = FText::FromName(TEXT(""));
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	int SpendPoint;//消耗行动点
+	int SpendPoint = 0;//消耗行动点
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	FIntPoint Range;//范围
+	FIntPoint Range = FIntPoint(0,0);//范围
 };

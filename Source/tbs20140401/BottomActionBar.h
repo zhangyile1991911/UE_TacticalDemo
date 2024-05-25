@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "BottomActionBar.generated.h"
 
+class UUGameUI_UnitBriefInfo;
+class UCmdWidget;
 class AMyUnit;
 class UUnitPortrait;
 class UFirstRolePortrait;
@@ -17,6 +19,9 @@ class TBS20140401_API UBottomActionBar : public UUserWidget
 {
 	GENERATED_BODY()
 
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UCmdWidget> CmdList;
+	
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UFirstRolePortrait> FirstRolePortrait;
 
@@ -47,6 +52,8 @@ class TBS20140401_API UBottomActionBar : public UUserWidget
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UUnitPortrait> P9;
 
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfo;
 
 	TArray<TObjectPtr<UUnitPortrait>> Portraits;
 protected:
@@ -54,4 +61,7 @@ protected:
 	virtual void NativeDestruct() override;
 	
 	void OnActionBarChanged(const TArray<TObjectPtr<AMyUnit>>& array);
+public:
+	TObjectPtr<UCmdWidget> GetCmdPanel()const{return CmdList;}
+	TObjectPtr<UUGameUI_UnitBriefInfo> GetUnitBriefInfo()const{return UnitBriefInfo;}
 };

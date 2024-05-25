@@ -14,8 +14,12 @@
 #include "MyGridPathfinding.h"
 #include "MyUnit.h"
 #include "PawnProcess.h"
+#include "PawnProcess_CMD.h"
 #include "UPawnProcess_Normal.h"
 #include "Kismet/GameplayStatics.h"
+#include "MyHUD.h"
+#include "PawnProcess_BeforeTurn.h"
+#include "PawnProcess_Idle.h"
 
 
 // Sets default values
@@ -112,6 +116,24 @@ void AMy_Pawn::BeginPlay()
 	// OnTileTYpeChanged.AddDynamic(this,&AMy_Pawn::SetCurrentTileType);
 
 	NormalProcess = NewObject<UUPawnProcess_Normal>(this);
+	CmdProcess = NewObject<UPawnProcess_CMD>(this);
+	BeforeTurnProcess = NewObject<UPawnProcess_BeforeTurn>(this);
+	IdleProcess = NewObject<UPawnProcess_Idle>(this);
+	CurrentProcess = nullptr;
+
+	// 获取当前的玩家控制器
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{// 获取当前的 HUD 实例
+		AHUD* HUD = PlayerController->GetHUD();
+		if (HUD)
+		{
+			// 检查 HUD 是否是你的自定义 HUD 类
+			MyHUDInstance = Cast<AMyHUD>(HUD);
+			
+		}
+	}
+	
 }
 
 
@@ -124,6 +146,7 @@ void AMy_Pawn::Tick(float DeltaTime)
 	SetActorRotation(FMath::RInterpTo(GetActorRotation(),m_rotationDesired,DeltaTime,Rotation_Interp));
 
 	if(!IsStartGame)UpdateTileUnderCursor();
+	if(CurrentProcess)CurrentProcess->TickProcess();
 }
 
 // Called to bind functionality to input
@@ -141,9 +164,9 @@ void AMy_Pawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(CamMoveAction,ETriggerEvent::Triggered,this,&AMy_Pawn::CamMove);
 		EnhancedInputComponent->BindAction(MouseLeftClickAction,ETriggerEvent::Triggered,this,&AMy_Pawn::MouseLeftClick);
 		EnhancedInputComponent->BindAction(MouseRightClickAction,ETriggerEvent::Triggered,this,&AMy_Pawn::MouseRightClick);
-		EnhancedInputComponent->BindAction(UnitMoveAction,ETriggerEvent::Triggered,this,&AMy_Pawn::UnitMove);
-		EnhancedInputComponent->BindAction(ConfirmAction,ETriggerEvent::Triggered,this,&AMy_Pawn::ConfirmClick);
-		EnhancedInputComponent->BindAction(CancelAction,ETriggerEvent::Triggered,this,&AMy_Pawn::CancelClick);
+		EnhancedInputComponent->BindAction(UnitMoveAction,ETriggerEvent::Completed,this,&AMy_Pawn::UnitMove);
+		EnhancedInputComponent->BindAction(ConfirmAction,ETriggerEvent::Completed,this,&AMy_Pawn::ConfirmClick);
+		EnhancedInputComponent->BindAction(CancelAction,ETriggerEvent::Completed,this,&AMy_Pawn::CancelClick);
 
 		
 	}
@@ -176,12 +199,12 @@ void AMy_Pawn::UpdateTileUnderCursor()
 	
 }
 
-void AMy_Pawn::UpdateTIleByIndex(const FIntPoint& index, ETileState state)
+void AMy_Pawn::UpdateTileStatusByIndex(const FIntPoint& index, ETileState state)
 {
-	MyGrid->RemoveStateFromTile(SelectedTile,ETileState::Selected);
 	MyGrid->AddStateToTile(index,state);
 	if(state == ETileState::Selected)
 	{
+		if(index != SelectedTile)MyGrid->RemoveStateFromTile(SelectedTile,state);
 		SelectedTile = index;
 	}
 	auto pData = MyGrid->GetTileDataByIndex(index);
@@ -305,19 +328,7 @@ void AMy_Pawn::UnitMove(const FInputActionValue& value)
 	FVector2D tmp = value.Get<FInputActionValue::Axis2D>();
 	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::UnitMove %f %f "),tmp.X,tmp.Y)
 	
-	FIntPoint next;
-	next.X = SelectedTile.X + tmp.Y;
-	next.Y = SelectedTile.Y + tmp.X;
-	
-	if(MyGrid->IsValidGridIndex(next))
-	{
-		MyGrid->RemoveStateFromTile(SelectedTile,ETileState::Selected);
-		MyGrid->AddStateToTile(next,ETileState::Selected);
-		SelectedTile = next;
-		
-		CurrentProcess->HandleDirectionInput(SelectedTile);
-	}
-	
+	CurrentProcess->HandleDirectionInput(tmp);
 }
 
 void AMy_Pawn::ConfirmClick(const FInputActionValue& value)
@@ -330,6 +341,16 @@ void AMy_Pawn::CancelClick(const FInputActionValue& value)
 {
 	if(!IsStartGame)return;
 	CurrentProcess->HandleCancelInput();
+}
+
+void AMy_Pawn::SwitchProcess(TObjectPtr<UPawnProcess> NextProcess)
+{
+	if(CurrentProcess != nullptr)
+	{
+		CurrentProcess->ExitProcess();
+	}
+	CurrentProcess = NextProcess;
+	CurrentProcess->EnterProcess(this);
 }
 
 bool AMy_Pawn::CanHoverEmptySpace()
@@ -392,8 +413,22 @@ void AMy_Pawn::StartGame()
 	
 	MyGrid->RemoveStateFromTile(HoveredTile,ETileState::Hovered);
 
-	CurrentProcess = NormalProcess;
-	TObjectPtr<AMyUnit> FirstUnit = MyCombatSystem->SortActionPriority();
-	CurrentProcess->EnterProcess(this,FirstUnit);
+	SwitchProcess(BeforeTurnProcess);
+}
+
+void AMy_Pawn::SwitchToCmdInput()
+{
+	SwitchProcess(CmdProcess);
+}
+
+void AMy_Pawn::SwitchToNormal()
+{
+	SwitchProcess(NormalProcess);
+
+}
+
+void AMy_Pawn::SwitchToIdle()
+{
+	SwitchProcess(IdleProcess);
 }
 

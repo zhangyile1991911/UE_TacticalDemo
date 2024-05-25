@@ -13,7 +13,7 @@
 void AAction_SelectTile::ExecuteAction(const FIntPoint& index)
 {
 	// MyPlayerPawn->RemoveTileStateByIndex(selectedIndex,ETileState::Selected);
-	MyPlayerPawn->UpdateTIleByIndex(index,ETileState::Selected);
+	MyPlayerPawn->UpdateTileStatusByIndex(index,ETileState::Selected);
 	selectedIndex = index;
 
 	auto Unit = MyPlayerPawn->GetMyGrid()->GetUnitOnTile(index);

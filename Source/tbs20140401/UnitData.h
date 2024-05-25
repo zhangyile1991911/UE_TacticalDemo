@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "UnitDataAsset.h"
 #include "UnitData_Stats.h"
+#include "SkillData.h"
 #include "UnitData.generated.h"
 
 UENUM(BlueprintType)
@@ -31,4 +32,7 @@ struct FUnitData:public FTableRowBase
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FUnitProperty Property;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TArray<FSkillData> Ability;
 };

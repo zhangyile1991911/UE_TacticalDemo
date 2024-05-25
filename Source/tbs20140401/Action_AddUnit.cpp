@@ -18,5 +18,5 @@ void AAction_AddUnit::ExecuteAction(const FIntPoint& index)
 	if(hasUnit)return;
 
 	MyPlayerPawn->GetMyCombatSystem()->AddUnitInCombat(index,MyPlayerPawn);
-	MyPlayerPawn->UpdateTIleByIndex(index,ETileState::Selected);
+	MyPlayerPawn->UpdateTileStatusByIndex(index,ETileState::Selected);
 }

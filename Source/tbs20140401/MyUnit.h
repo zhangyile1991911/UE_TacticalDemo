@@ -9,6 +9,7 @@
 #include "MyUnit.generated.h"
 
 
+class UUnitAbility;
 class AShadowUnit;
 class AMy_Pawn;
 class AGrid;
@@ -64,6 +65,10 @@ protected:
 	TArray<FIntPoint> WalkPath;
 	TArray<FIntPoint> WalkableTiles;
 	int WalkPathIndex;
+
+	//技能相关
+	UPROPERTY()
+	TArray<TObjectPtr<UUnitAbility>> OwnAbilityList;
 
 	// UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	bool IsHovered = false;
@@ -137,5 +142,7 @@ public:
 	void MoveShadowOnTile(const FVector& location);
 	void ShowShadowUnit();
 	void HideShadowUnit();
+
+	const TArray<TObjectPtr<UUnitAbility>>& GetOwnAbilityList()const{return OwnAbilityList;}
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

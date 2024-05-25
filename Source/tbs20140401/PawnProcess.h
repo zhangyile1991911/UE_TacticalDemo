@@ -17,6 +17,9 @@ class TBS20140401_API UPawnProcess : public UObject
 protected:
 	GENERATED_BODY()
 
+public:
+	virtual void BeginDestroy() override;
+
 protected:
 	UPROPERTY()
 	TObjectPtr<AMyUnit> UnitInstance;
@@ -24,13 +27,12 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AMy_Pawn> PawnInstance;
 public:
-	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AMyUnit> Unit)
+	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	{
 		PawnInstance = Pawn;
-		UnitInstance = Unit;
 	};
 	virtual void TickProcess(){};
-	virtual void HandleDirectionInput(const FIntPoint& Index){};
+	virtual void HandleDirectionInput(const FVector2D& Input){};
 	virtual void HandleCancelInput(){}
 	virtual void HandleConfirmInput(){}
 	virtual void ExitProcess(){};

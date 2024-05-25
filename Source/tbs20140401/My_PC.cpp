@@ -31,7 +31,6 @@ void AMy_PC::BeginPlay()
 		// add the mapping context so we get controls
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
-
 	// APawn* MyPawn = GetPawn();
 	// MyPawnInstance = Cast<AMy_Pawn>(MyPawn);
 }

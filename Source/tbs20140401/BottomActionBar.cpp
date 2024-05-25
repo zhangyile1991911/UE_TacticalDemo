@@ -3,6 +3,7 @@
 
 #include "BottomActionBar.h"
 
+#include "CmdWidget.h"
 #include "FirstRolePortrait.h"
 #include "MyCombatSystem.h"
 #include "UnitPortrait.h"
@@ -28,6 +29,7 @@ void UBottomActionBar::NativeConstruct()
 	AMyCombatSystem* CombatSystem = Cast<AMyCombatSystem>(Actor);
 
 	CombatSystem->ReSortEvent.AddUObject(this,&UBottomActionBar::OnActionBarChanged);
+	CmdList->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UBottomActionBar::NativeDestruct()
@@ -52,11 +54,6 @@ void UBottomActionBar::OnActionBarChanged(const TArray<TObjectPtr<AMyUnit>>& arr
 	}
 	else if(array.Num() - 1 < Portraits.Num())
 	{
-		//array num = 3
-		//portrait = 9
-		//3 - 1 = 2
-		//9 - 2 = 7
-		//9 - 3
 		int PortraitIndex = 0;
 		
 		for(int i = 1;i < array.Num();i++,PortraitIndex++)

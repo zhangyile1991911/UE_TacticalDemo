@@ -7,6 +7,7 @@
 #include "PawnProcess.h"
 #include "UPawnProcess_Normal.generated.h"
 
+class UUGameUI_UnitBriefInfo;
 /**
  * 
  */
@@ -15,19 +16,27 @@ class TBS20140401_API UUPawnProcess_Normal : public UPawnProcess
 {
 	GENERATED_BODY()
 protected:
+	bool DoubleCheck;
 	//当前光标
 	FIntPoint CurrentCursor;
 	//记录寻路的路径
 	TArray<FIntPoint> PreviousPathFinding;
 	FPathFindingCompleted Completed;
-	void ShowWalkableTiles(TArray<FIntPoint> tiles);
+	
 	//记录临时选择目的地
 	FIntPoint TempTargetTile;
+
+	UPROPERTY()
+	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoInstance;
+protected:
 	void ClearPathFinding();
+	void ShowWalkableTiles(TArray<FIntPoint> tiles);
+	void ShowTargetUnitBriefInfo(TObjectPtr<AMyUnit> TargetUnit);
+	void HideTargetUnitBriefInfo();
 public:
-	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AMyUnit> Unit) override;
+	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn) override;
 	virtual void TickProcess() override;
-	virtual void HandleDirectionInput(const FIntPoint& Index)override;
+	virtual void HandleDirectionInput(const FVector2D& Input)override;
 	virtual void HandleCancelInput()override;
 	virtual void HandleConfirmInput() override;
 	virtual void ExitProcess()override;

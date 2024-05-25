@@ -57,7 +57,7 @@ TObjectPtr<AMyUnit>  AMyCombatSystem::SortActionPriority()
 
 	ReSortEvent.Broadcast(UnitsActionPriority);
 	
-	return UnitsActionPriority[0];
+	return FirstUnit = UnitsActionPriority[0];
 }
 
 // Called every frame
