@@ -175,6 +175,22 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 
 	MyStats = UnitData->Stats;
 	MyProperty = UnitData->Property;
+	//プロパティをコピー
+	MyRuntimeProperty.Move = MyProperty.Move;
+	MyRuntimeProperty.ActionPoint = MyProperty.ActionPoint;
+	MyRuntimeProperty.Power = MyProperty.Power;
+	MyRuntimeProperty.PhysicDefend = MyProperty.PhysicDefend;
+	MyRuntimeProperty.MagicPower = MyProperty.MagicPower;
+	MyRuntimeProperty.MagicDefend = MyProperty.MagicDefend;
+	MyRuntimeProperty.Lucky = MyProperty.Lucky;
+	MyRuntimeProperty.HitProb = MyProperty.HitProb;
+	MyRuntimeProperty.Speed = MyProperty.Speed;
+	MyRuntimeProperty.Dodge = MyProperty.Dodge;
+	MyRuntimeProperty.Jump = MyProperty.Jump;
+	MyRuntimeProperty.FireResistance = MyProperty.FireResistance;
+	MyRuntimeProperty.IceResistance = MyProperty.IceResistance;
+	MyRuntimeProperty.WindResistance = MyProperty.WindResistance;
+	MyRuntimeProperty.ThunderResistance = MyProperty.ThunderResistance;
 	
 	SetActorRotation(FRotator(0,360-90,0));
 
@@ -325,6 +341,11 @@ void AMyUnit::MoveShadowOnTile(const FVector& location)
 		MyShadowUnit->SetActorLocation(location);
 	}
 		
+}
+
+void AMyUnit::SetChosenAbility(int ChosenIndex)
+{
+	ChosenAbilityIndex = FMathf::Clamp(ChosenIndex,0,OwnAbilityList.Num()-1);
 }
 
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection)

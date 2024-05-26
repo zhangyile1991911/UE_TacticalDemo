@@ -540,3 +540,55 @@ TArray<FIntPoint> AMyGridPathfinding::UnitWalkablePath(const FIntPoint& Start,in
 	
 	return MoveTemp(ReachableTiles);
 }
+
+TArray<FIntPoint> AMyGridPathfinding::UnitAbilityRange(const FIntPoint& Start,const FIntPoint& Range,int AllowableDeviation)
+{
+	PathFindingData.Empty();
+	TArray<FIntPoint> ReachableTiles;
+	TSet<FIntPoint> DiscoverTiles;
+	FMyPathFindingData data = AddPathFindingData(nullptr,Start);
+	bool next = true;
+	int ReachableIndex = 0;
+	for(;next;ReachableIndex++)
+	{
+		FIntPoint center = ReachableTiles.IsEmpty() ? Start : ReachableTiles[ReachableIndex - 1];
+		if(DiscoverTiles.Contains(center))continue;
+		DiscoverTiles.Add(center);
+		data = PathFindingData[center];
+		TArray<FIntPoint> neighbor = GetNeighborIndexesForSquare(center);
+
+		auto Predicate = [&](const FIntPoint& Element) -> bool
+		{
+			auto pData = MyGrid->GetTileDataByIndex(Element);
+			if(pData == nullptr)return true;
+			if(!IsTileTypeWalkable(pData->TileType))return true;
+			//高度差
+			float z = pData->Transform.GetLocation().Z;
+			auto pCenterData = MyGrid->GetTileDataByIndex(center);
+			float center_z = pCenterData->Transform.GetLocation().Z;
+			bool isRemove = FMathf::Abs(z - center_z) > MyGrid->GetGridTileSize().Z*AllowableDeviation;
+			if(isRemove)return isRemove;
+
+			return true;
+		};
+		
+		neighbor.RemoveAll(Predicate);
+		
+		for(const FIntPoint one : neighbor)
+		{
+			auto c = AddPathFindingData(&data,one);
+			if(c.CostFromStart >= Range.X && c.CostFromStart <= Range.Y)
+			{
+				ReachableTiles.Add(one);
+			}
+			else
+			{
+				next = false;
+				break;
+			}
+		}
+		
+	}
+	
+	return MoveTemp(ReachableTiles);
+}

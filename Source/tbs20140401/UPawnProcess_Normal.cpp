@@ -10,19 +10,21 @@
 #include "My_Pawn.h"
 #include "MyHUD.h"
 #include "UGameUI_UnitBreifInfo.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/CanvasPanelSlot.h"
 
 
 void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
 	Super::EnterProcess(Pawn);
 
-	DoubleCheck = false;
+	// DoubleCheck = false;
 	
 	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
 	
 	TArray<FIntPoint> WalkableRange = PawnInstance->GetMyGridPathFinding()->UnitWalkablePath(
 			UnitInstance->GetGridIndex(),
-			UnitInstance->GetProperty().WalkRange,
+			UnitInstance->GetRuntimeProperty().Move,
 			UnitInstance->UnitCanWalkTileType());
 	UnitInstance->SetWalkableTile(WalkableRange);
 
@@ -86,17 +88,15 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 			UnitInstance->UnitCanWalkTileType(),
 			Completed);
 	}
+
+	TObjectPtr<AMyUnit> StandingUnit = PawnInstance->GetMyGrid()->GetUnitOnTile(CurrentCursor);
+	if(StandingUnit)
+	{//显示简略信息(簡略なメッセージを表示する)
+		ShowTargetUnitBriefInfo(StandingUnit);
+	}
 	else
-	{
-		TObjectPtr<AMyUnit> StandingUnit = PawnInstance->GetMyGrid()->GetUnitOnTile(CurrentCursor);
-		if(StandingUnit)
-		{//显示简略信息(簡略なメッセージを表示する)
-			ShowTargetUnitBriefInfo(StandingUnit);
-		}
-		else
-		{//隐藏简略信息(簡略なメッセージを非表示する)
-			HideTargetUnitBriefInfo();
-		}
+	{//隐藏简略信息(簡略なメッセージを非表示する)
+		HideTargetUnitBriefInfo();
 	}
 	
 }
@@ -115,17 +115,11 @@ void UUPawnProcess_Normal::HandleCancelInput()
 void UUPawnProcess_Normal::HandleConfirmInput()
 {
 	Super::HandleConfirmInput();
-
-	if(DoubleCheck)
-	{
-		PawnInstance->SwitchToCmdInput();
-		return;
-	}
 	
 	if(!UnitInstance->IsInWalkableRange(CurrentCursor))
 	{
 		if(PawnInstance->GetMyGrid()->TileGridHasUnit(CurrentCursor))
-		{//进入角色详情(キャラの詳細ページへ変遷)
+		{//进入指令界面(コマンドページへ変遷)
 			
 		}
 	}
@@ -139,7 +133,8 @@ void UUPawnProcess_Normal::HandleConfirmInput()
 			return;
 		}
 		UnitInstance->MoveShadowOnTile(TileData->Transform.GetLocation());
-		DoubleCheck = true;	
+
+		PawnInstance->SwitchToCmdInput();
 	}
 
 	
@@ -149,7 +144,6 @@ void UUPawnProcess_Normal::ExitProcess()
 {
 	Super::ExitProcess();
 	Completed.Unbind();
-	DoubleCheck = false;
 	ClearPathFinding();
 	PawnInstance->RemoveTileStateByIndex(CurrentCursor,ETileState::Selected);
 	// UnitInstance->HideShadowUnit();
@@ -180,11 +174,16 @@ void UUPawnProcess_Normal::ShowTargetUnitBriefInfo(TObjectPtr<AMyUnit> TargetUin
 	UnitBriefInfoInstance->RefreshUnitBriefInfo(UnitInstance,TargetUint);
 
 	FVector2D ScreenLocation;
-	bool Result = GetWorld()->GetFirstPlayerController()->ProjectWorldLocationToScreen(TargetUint->GetActorLocation(),ScreenLocation);
+	const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	const bool Result = PlayerController->ProjectWorldLocationToScreen(TargetUint->GetActorLocation(),ScreenLocation,true);
 	if(Result)
 	{
-		UnitBriefInfoInstance->SetRenderTranslation(ScreenLocation);
+		const float Scale = UWidgetLayoutLibrary::GetViewportScale(PlayerController);
+		ScreenLocation /= Scale;
+		UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(UnitBriefInfoInstance->Slot);
+		CanvasSlot->SetPosition(ScreenLocation);
 	}
+	UE_LOG(LogTemp,Log,TEXT("Target Location = %s Result = %hhd ScreenLocation = %s"),*TargetUint->GetActorLocation().ToString(),Result,*ScreenLocation.ToString())
 }
 
 void UUPawnProcess_Normal::HideTargetUnitBriefInfo()

@@ -6,6 +6,7 @@
 #include "UnitData.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Actor.h"
+#include "UnitRunTimeProperty.h"
 #include "MyUnit.generated.h"
 
 
@@ -60,15 +61,20 @@ protected:
 	//属性相关
 	FUnitData_Stats MyStats;
 	FUnitProperty MyProperty;
+	FUnitRunTimeProperty MyRuntimeProperty;
 	int CurrentDistanceToAction;
 	
 	TArray<FIntPoint> WalkPath;
 	TArray<FIntPoint> WalkableTiles;
 	int WalkPathIndex;
 
-	//技能相关
+	//技能相关 开始
 	UPROPERTY()
 	TArray<TObjectPtr<UUnitAbility>> OwnAbilityList;
+
+	int ChosenAbilityIndex = 0;
+	//技能相关 结束
+	
 
 	// UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	bool IsHovered = false;
@@ -131,6 +137,7 @@ public:
 	const TArray<FIntPoint>& GetWalkableTiles()const{return WalkableTiles;}
 	bool IsInWalkableTile(const FIntPoint& point)const{return WalkableTiles.Find(point) != INDEX_NONE;}
 	const FUnitProperty& GetProperty()const{return MyProperty;}
+	const FUnitRunTimeProperty& GetRuntimeProperty()const{return MyRuntimeProperty;}
 
 	//行动优先级相关
 	int DistanceToAction()const{return CurrentDistanceToAction/MyProperty.DistanceToAction;}
@@ -144,5 +151,8 @@ public:
 	void HideShadowUnit();
 
 	const TArray<TObjectPtr<UUnitAbility>>& GetOwnAbilityList()const{return OwnAbilityList;}
+
+	void SetChosenAbility(int ChosenIndex);
+	TObjectPtr<UUnitAbility> GetChosenAbility(){return OwnAbilityList[ChosenAbilityIndex];}
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

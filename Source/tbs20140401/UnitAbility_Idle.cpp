@@ -2,3 +2,8 @@
 
 
 #include "UnitAbility_Idle.h"
+
+bool UUnitAbility_Idle::CanExecute()
+{
+	return true;
+}

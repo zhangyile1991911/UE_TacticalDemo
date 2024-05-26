@@ -82,8 +82,9 @@ public:
 	void CanFly(bool fly);
 	void FindPath(const FIntPoint& start,const FIntPoint& target,FPathFindingCompleted completed);
 	
-	void UnitFindPath(const FIntPoint& Start,const FIntPoint& Target,TArray<ETileType> WalkableTileTypes,FPathFindingCompleted completed);
+	void UnitFindPath(const FIntPoint& Start,const FIntPoint& Target,TArray<ETileType> WalkableTileTypes,FPathFindingCompleted Completed);
 	TArray<FIntPoint> UnitWalkablePath(const FIntPoint& Start,int MaxWalkPoint,TArray<ETileType> WalkableTileTypes);
+	TArray<FIntPoint> UnitAbilityRange(const FIntPoint& Start,const FIntPoint& Range,int AllowableDeviation = 1);
 	void SetShowDebugOption(bool ShowCost,bool ShowStart,bool ShowTarget)
 	{
 		IsShowCost = ShowCost;

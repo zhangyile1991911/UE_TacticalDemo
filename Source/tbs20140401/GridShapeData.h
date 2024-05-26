@@ -33,6 +33,7 @@ enum class ETileState
 	IsNeighbor UMETA(DisplayName="IsNeighbor"),
 	PathFinding UMETA(DisplayName="PathFinding"),
 	Reachable UMETA(DisplayName="Reachable"),
+	AbilityRange UMETA(DisplayName="AbilityRange"),
 	Invalid UMETA(DisplayName="Invalid")
 };
 

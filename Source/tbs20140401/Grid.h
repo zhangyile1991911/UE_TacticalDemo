@@ -118,7 +118,8 @@ public:
 	TObjectPtr<AMyGridVisual> GetGridVisual(){return GridVisual;}
 
 	bool TileGridHasUnit(const FIntPoint& index);
-	
+
+	int CalcHighDisparity(FIntPoint a,FIntPoint b);
 };
 
 

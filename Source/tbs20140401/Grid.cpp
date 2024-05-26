@@ -668,3 +668,15 @@ bool AGrid::TileGridHasUnit(const FIntPoint& index)
 	return p.UnitOnTile != nullptr;
 }
 
+int AGrid::CalcHighDisparity(FIntPoint a, FIntPoint b)
+{
+	if(!GridTiles.Contains(a) || !GridTiles.Contains(b))
+		return 0;
+
+	FVector ALocation = GridTiles[a].Transform.GetLocation();
+	FVector BLocation = GridTiles[b].Transform.GetLocation();
+	float Disparity = ALocation.Z - BLocation.Z;
+
+	return FMathf::Floor(Disparity/CurGridTileSize.Z);
+}
+

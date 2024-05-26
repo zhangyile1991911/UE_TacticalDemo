@@ -16,7 +16,7 @@ class TBS20140401_API UUPawnProcess_Normal : public UPawnProcess
 {
 	GENERATED_BODY()
 protected:
-	bool DoubleCheck;
+	// bool DoubleCheck;
 	//当前光标
 	FIntPoint CurrentCursor;
 	//记录寻路的路径

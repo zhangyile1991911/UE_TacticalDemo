@@ -9,6 +9,7 @@
 #include "My_Pawn.h"
 #include "MyCombatSystem.h"
 #include "MyUnit.h"
+#include "UnitAbility.h"
 
 void UPawnProcess_CMD::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
@@ -51,6 +52,23 @@ void UPawnProcess_CMD::HandleCancelInput()
 void UPawnProcess_CMD::HandleConfirmInput()
 {
 	Super::HandleConfirmInput();
+
+	TObjectPtr<UUnitAbility> ChosenAbility = UnitInstance->GetOwnAbilityList()[CmdIndex];
+	//是否可以执行
+	if(!ChosenAbility->CanExecute())
+	{
+		return;
+	}
+	
+	if(ChosenAbility->GetSkillData().SkillId == 10001)
+	{
+		PawnInstance->SwitchToIdle();
+	}
+	else
+	{
+		PawnInstance->SwitchToChooseTarget();
+	}
+	
 }
 
 void UPawnProcess_CMD::ExitProcess()

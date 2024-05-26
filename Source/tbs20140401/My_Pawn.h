@@ -11,6 +11,7 @@
 
 #include "My_Pawn.generated.h"
 
+class UPawnProcess_ChooseTarget;
 class UPawnProcess_Idle;
 class UPawnProcess_BeforeTurn;
 class AMyHUD;
@@ -98,7 +99,11 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UPawnProcess_Idle> IdleProcess;
 	UPROPERTY()
+	TObjectPtr<UPawnProcess_ChooseTarget> ChooseTargetProcess;
+	UPROPERTY()
 	TObjectPtr<UPawnProcess> CurrentProcess;
+
+	
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	float Location_Speed = 20.0f;
@@ -178,6 +183,7 @@ public:
 	void SwitchToCmdInput();
 	void SwitchToNormal();
 	void SwitchToIdle();
+	void SwitchToChooseTarget();
 	
 	// FTileTypeChanged OnTileTYpeChanged;
 };

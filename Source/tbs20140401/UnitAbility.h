@@ -36,4 +36,5 @@ public:
 	}
 	const FText& GetAbilityName()const{return SkillData.SkillName;}
 	int GetCost()const{return SkillData.SpendPoint;}
+	virtual bool CanExecute(){return false;}
 };

@@ -2,3 +2,8 @@
 
 
 #include "UnitAbility_NormalAttack.h"
+
+bool UUnitAbility_NormalAttack::CanExecute()
+{
+	return Super::CanExecute();
+}

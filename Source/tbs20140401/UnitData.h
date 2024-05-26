@@ -35,4 +35,6 @@ struct FUnitData:public FTableRowBase
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TArray<FSkillData> Ability;
+
+	
 };

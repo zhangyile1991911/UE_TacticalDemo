@@ -3,6 +3,11 @@
 #include "CoreMinimal.h"
 #include "SkillData.generated.h"
 
+//todo 之后将技能改名为Ability
+enum class ESkillType
+{
+	
+};
 USTRUCT(BlueprintType)
 struct FSkillData
 {
@@ -19,4 +24,7 @@ struct FSkillData
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FIntPoint Range = FIntPoint(0,0);//范围
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int AllowableDeviation = 1;//允许高度差
 };

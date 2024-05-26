@@ -20,6 +20,7 @@
 #include "MyHUD.h"
 #include "PawnProcess_BeforeTurn.h"
 #include "PawnProcess_Idle.h"
+#include "PawnProcess_ChooseTarget.h"
 
 
 // Sets default values
@@ -164,7 +165,7 @@ void AMy_Pawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(CamMoveAction,ETriggerEvent::Triggered,this,&AMy_Pawn::CamMove);
 		EnhancedInputComponent->BindAction(MouseLeftClickAction,ETriggerEvent::Triggered,this,&AMy_Pawn::MouseLeftClick);
 		EnhancedInputComponent->BindAction(MouseRightClickAction,ETriggerEvent::Triggered,this,&AMy_Pawn::MouseRightClick);
-		EnhancedInputComponent->BindAction(UnitMoveAction,ETriggerEvent::Completed,this,&AMy_Pawn::UnitMove);
+		EnhancedInputComponent->BindAction(UnitMoveAction,ETriggerEvent::Triggered,this,&AMy_Pawn::UnitMove);
 		EnhancedInputComponent->BindAction(ConfirmAction,ETriggerEvent::Completed,this,&AMy_Pawn::ConfirmClick);
 		EnhancedInputComponent->BindAction(CancelAction,ETriggerEvent::Completed,this,&AMy_Pawn::CancelClick);
 
@@ -430,5 +431,11 @@ void AMy_Pawn::SwitchToNormal()
 void AMy_Pawn::SwitchToIdle()
 {
 	SwitchProcess(IdleProcess);
+}
+
+void AMy_Pawn::SwitchToChooseTarget()
+{
+	SwitchProcess(ChooseTargetProcess);
+
 }
 
