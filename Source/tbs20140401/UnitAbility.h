@@ -7,6 +7,12 @@
 #include "UObject/Object.h"
 #include "UnitAbility.generated.h"
 
+
+class UUnitAbility;
+DECLARE_EVENT_OneParam(UUnitAbility,EAbilityComplete,TObjectPtr<UUnitAbility>)
+DECLARE_DELEGATE_OneParam(FAbilityComplete,TObjectPtr<UUnitAbility>)
+
+struct FTileData;
 class AMyUnit;
 /**
  * 
@@ -25,6 +31,9 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AMyUnit> OwnerInstance;
 public:
+	EAbilityComplete CompletedEvent;
+	FAbilityComplete CompletedCallback;
+	
 	const FSkillData& GetSkillData()
 	{
 		return SkillData;
@@ -36,5 +45,12 @@ public:
 	}
 	const FText& GetAbilityName()const{return SkillData.SkillName;}
 	int GetCost()const{return SkillData.SpendPoint;}
+	
 	virtual bool CanExecute(){return false;}
+	virtual bool IsValidTarget(const FTileData& TileData){return false;}
+	virtual void Execute(){}
+	virtual TArray<FIntPoint> Range(const FIntPoint&){ return TArray<FIntPoint>();}
+
+	UFUNCTION(BlueprintCallable)
+	void OnAbilityCompleted();
 };

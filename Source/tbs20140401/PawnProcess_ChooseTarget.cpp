@@ -14,14 +14,12 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
 	Super::EnterProcess(Pawn);
 	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
-	
-	auto ChosenAbility = UnitInstance->GetChosenAbility();
-	
-	//显示攻击范围
-	AbilityRange = PawnInstance->GetMyGridPathFinding()->UnitAbilityRange(
-			UnitInstance->GetGridIndex(),
-			ChosenAbility->GetSkillData().Range);
+	UnitInstance->ShowShadowUnit();
+	ChosenAbility = UnitInstance->GetChosenAbility();
 
+	CurrentCursor = PawnInstance->GetSelectedTile();
+	//显示攻击范围
+	AbilityRange = ChosenAbility->Range(CurrentCursor);
 	for(const FIntPoint& one : AbilityRange)
 	{
 		PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::AbilityRange);
@@ -44,7 +42,8 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 
 	if(PawnInstance->GetMyGrid()->IsValidGridIndex(next))
 	{
-		PawnInstance->UpdateTileStatusByIndex(next,ETileState::Selected);
+		PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
+		PawnInstance->GetMyGrid()->AddStateToTile(next,ETileState::Selected);
 		CurrentCursor = next;
 		UE_LOG(LogTemp,Log,TEXT(" HandleDirectionInput CurrentCursor (%d,%d)"),CurrentCursor.X,CurrentCursor.Y);
 	}
@@ -60,7 +59,11 @@ void UPawnProcess_ChooseTarget::HandleCancelInput()
 void UPawnProcess_ChooseTarget::HandleConfirmInput()
 {
 	Super::HandleConfirmInput();
+	auto TileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
 	//todo 进入演出环节
+	if(!ChosenAbility->IsValidTarget(*TileData))return;
+
+	
 }
 
 void UPawnProcess_ChooseTarget::ExitProcess()
@@ -71,5 +74,6 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 	{
 		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::AbilityRange);
 	}
+	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
 	
 }

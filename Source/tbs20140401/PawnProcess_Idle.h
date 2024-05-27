@@ -6,6 +6,7 @@
 #include "PawnProcess.h"
 #include "PawnProcess_Idle.generated.h"
 
+class AMyUnit;
 /**
  * 
  */
@@ -13,7 +14,8 @@ UCLASS()
 class TBS20140401_API UPawnProcess_Idle : public UPawnProcess
 {
 	GENERATED_BODY()
-
+protected:
+	TObjectPtr<AMyUnit> UnitInstance;
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn) override; 
 	virtual void TickProcess()override;

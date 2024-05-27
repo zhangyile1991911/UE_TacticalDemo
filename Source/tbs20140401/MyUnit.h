@@ -10,6 +10,7 @@
 #include "MyUnit.generated.h"
 
 
+class AIdleDirection;
 class UUnitAbility;
 class AShadowUnit;
 class AMy_Pawn;
@@ -29,9 +30,13 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UChildActorComponent> MyChildActor;
-
 	UPROPERTY()
 	TObjectPtr<AShadowUnit> MyShadowUnit;
+
+	UPROPERTY()
+	TObjectPtr<UChildActorComponent> MyDirectionActor;
+	TObjectPtr<AIdleDirection> MyDirection;
+	
 	// UPROPERTY()
 	// TObjectPtr<USkeletalMeshComponent> ShadowSkeletalMeshComponent;
 	// UPROPERTY()
@@ -154,5 +159,15 @@ public:
 
 	void SetChosenAbility(int ChosenIndex);
 	TObjectPtr<UUnitAbility> GetChosenAbility(){return OwnAbilityList[ChosenAbilityIndex];}
+
+	TObjectPtr<AIdleDirection> GetMyDirection()const{return MyDirection;}
+
+	void TurnLeft();
+	void TurnRight();
+	void TurnForward();
+	void TurnBack();
+	void ShowDirectionArrow();
+	void HideDirectionArrow();
+	
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

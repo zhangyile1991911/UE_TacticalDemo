@@ -549,9 +549,12 @@ TArray<FIntPoint> AMyGridPathfinding::UnitAbilityRange(const FIntPoint& Start,co
 	FMyPathFindingData data = AddPathFindingData(nullptr,Start);
 	bool next = true;
 	int ReachableIndex = 0;
+	ReachableTiles.Add(Start);
 	for(;next;ReachableIndex++)
 	{
-		FIntPoint center = ReachableTiles.IsEmpty() ? Start : ReachableTiles[ReachableIndex - 1];
+		if(ReachableTiles.IsEmpty())break;
+		
+		FIntPoint center = ReachableTiles[ReachableIndex];
 		if(DiscoverTiles.Contains(center))continue;
 		DiscoverTiles.Add(center);
 		data = PathFindingData[center];

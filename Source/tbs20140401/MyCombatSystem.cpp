@@ -28,7 +28,13 @@ void AMyCombatSystem::BeginPlay()
 TObjectPtr<AMyUnit>  AMyCombatSystem::SortActionPriority()
 {
 	if(UnitsActionPriority.IsEmpty())return nullptr;
-	if(UnitsActionPriority.Num() <= 1)return UnitsActionPriority[0];
+	if(UnitsActionPriority.Num() <= 1)
+	{
+		FirstUnit = UnitsActionPriority[0];
+		ReSortEvent.Broadcast(UnitsActionPriority);
+		return FirstUnit;
+	}
+		
 
 	bool WhoCanMove = false;
 	while(!WhoCanMove)

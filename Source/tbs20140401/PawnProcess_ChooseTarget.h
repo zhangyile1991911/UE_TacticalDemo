@@ -6,6 +6,7 @@
 #include "PawnProcess.h"
 #include "PawnProcess_ChooseTarget.generated.h"
 
+class UUnitAbility;
 /**
  * 
  */
@@ -16,6 +17,7 @@ class TBS20140401_API UPawnProcess_ChooseTarget : public UPawnProcess
 protected:
 	FIntPoint CurrentCursor;
 	TArray<FIntPoint> AbilityRange;
+	TObjectPtr<UUnitAbility> ChosenAbility;
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn)override;
 	virtual void TickProcess()override;

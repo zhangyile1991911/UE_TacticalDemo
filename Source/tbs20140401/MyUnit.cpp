@@ -4,13 +4,13 @@
 #include "MyUnit.h"
 
 #include "Grid.h"
+#include "IdleDirection.h"
 #include "IMyUnitAnimation.h"
 #include "My_Pawn.h"
 #include "My_Utilities.h"
 #include "ShadowUnit.h"
 #include "Curves/CurveFloat.h"
 #include "Components/TimelineComponent.h"
-#include "ShadowUnit.h"
 #include "UnitAbility.h"
 #include "UnitAbility_Idle.h"
 #include "UnitAbility_NormalAttack.h"
@@ -31,6 +31,10 @@ AMyUnit::AMyUnit()
 
 	MyChildActor = CreateDefaultSubobject<UChildActorComponent>(TEXT("Shadow"));
 	MyChildActor->SetChildActorClass(AShadowUnit::StaticClass());
+	MyChildActor->SetupAttachment(this->RootComponent);
+
+	MyDirectionActor = CreateDefaultSubobject<UChildActorComponent>(TEXT("Direction"));
+	MyDirectionActor->SetupAttachment(this->RootComponent);
 	
 	//加载资源
 	// static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("/Game/Art/Units/Warrior/ABP_Warrior.ABP_Warrior_C"));
@@ -60,6 +64,12 @@ AMyUnit::AMyUnit()
 	{
 		JumpCurve = JuCurve.Object;
 	}
+
+	static ConstructorHelpers::FClassFinder<AActor> ActorBPClass(TEXT("/Game/Art/Units/CPP_IdleDirection"));
+	if (ActorBPClass.Class != nullptr)
+	{
+		MyDirectionActor->SetChildActorClass(ActorBPClass.Class);
+	}
 }
 
 void AMyUnit::OnConstruction(const FTransform& Transform)
@@ -73,6 +83,15 @@ void AMyUnit::OnConstruction(const FTransform& Transform)
 		MyShadowUnit = Cast<AShadowUnit>(Actor);	
 		MyShadowUnit->RefreshUnit(this);
 		MyShadowUnit->SetHidden(true);
+	});
+
+	MyDirectionActor->CreateChildActor([this](AActor* Actor)
+	{
+		MyDirection = Cast<AIdleDirection>(Actor);
+		MyDirectionActor->SetVisibility(false);
+		MyDirectionActor->SetRelativeLocation(FVector(0,0,100));
+		MyDirectionActor->SetRelativeRotation(FRotator(0,90,0));
+		// MyShadowUnit->SetHidden(true);
 	});
 }
 
@@ -347,6 +366,58 @@ void AMyUnit::SetChosenAbility(int ChosenIndex)
 {
 	ChosenAbilityIndex = FMathf::Clamp(ChosenIndex,0,OwnAbilityList.Num()-1);
 }
+
+void AMyUnit::TurnLeft()
+{
+	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,-90,0));
+	// SetActorRotation(FRotator(0,360-90-90,0));
+}
+
+void AMyUnit::TurnRight()
+{
+	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,90,0));
+	// SetActorRotation(FRotator(0,0,0));
+}
+
+void AMyUnit::TurnForward()
+{
+	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,0,0));
+	// SetActorRotation(FRotator(0,360-90,0));
+}
+
+void AMyUnit::TurnBack()
+{
+	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,180,0));
+	// SetActorRotation(FRotator(0,90,0));
+}
+
+void AMyUnit::ShowDirectionArrow()
+{
+	const auto& CurrentRotator = MySkeletalMeshComponent->GetRelativeRotation();
+	if(FMathf::Ceil(CurrentRotator.Yaw) == 0)
+	{
+		MyDirection->DoUpArrowAnimation();
+	}
+	else if(FMathf::Ceil(CurrentRotator.Yaw) == 180)
+	{
+		MyDirection->DoDownArrowAnimation();
+	}
+	else if(FMathf::Ceil(CurrentRotator.Yaw) == -90)
+	{
+		MyDirection->DoLeftArrowAnimation();
+	}
+	else if(FMathf::Ceil(CurrentRotator.Yaw) == 90)
+	{
+		MyDirection->DoRightArrowAnimation();
+	}
+	MyDirectionActor->SetVisibility(true);
+}
+
+void AMyUnit::HideDirectionArrow()
+{
+	MyDirectionActor->SetVisibility(false);
+}
+
 
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection)
 {

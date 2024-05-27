@@ -109,7 +109,7 @@ void UUPawnProcess_Normal::HandleCancelInput()
 	ClearPathFinding();
 	
 	PawnInstance->UpdateTileStatusByIndex(UnitInstance->GetGridIndex(),ETileState::Selected);
-	
+	PawnInstance->SwitchToIdle();
 }
 
 void UUPawnProcess_Normal::HandleConfirmInput()
@@ -145,6 +145,7 @@ void UUPawnProcess_Normal::ExitProcess()
 	Super::ExitProcess();
 	Completed.Unbind();
 	ClearPathFinding();
+	ClearWalkableTiles();
 	PawnInstance->RemoveTileStateByIndex(CurrentCursor,ETileState::Selected);
 	// UnitInstance->HideShadowUnit();
 }
@@ -166,6 +167,15 @@ void UUPawnProcess_Normal::ClearPathFinding()
 		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::PathFinding);
 	}
 	PreviousPathFinding.Empty();
+}
+
+void UUPawnProcess_Normal::ClearWalkableTiles()
+{
+	for(const FIntPoint& one : UnitInstance->GetWalkableTiles())
+	{
+		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::Reachable);
+	}
+	UnitInstance->SetWalkableTile(TArray<FIntPoint>());
 }
 
 void UUPawnProcess_Normal::ShowTargetUnitBriefInfo(TObjectPtr<AMyUnit> TargetUint)

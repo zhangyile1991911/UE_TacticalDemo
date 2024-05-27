@@ -59,7 +59,7 @@ void UPawnProcess_CMD::HandleConfirmInput()
 	{
 		return;
 	}
-	
+	UnitInstance->SetChosenAbility(CmdIndex);
 	if(ChosenAbility->GetSkillData().SkillId == 10001)
 	{
 		PawnInstance->SwitchToIdle();

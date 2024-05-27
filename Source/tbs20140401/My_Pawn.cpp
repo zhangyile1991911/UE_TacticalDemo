@@ -120,6 +120,7 @@ void AMy_Pawn::BeginPlay()
 	CmdProcess = NewObject<UPawnProcess_CMD>(this);
 	BeforeTurnProcess = NewObject<UPawnProcess_BeforeTurn>(this);
 	IdleProcess = NewObject<UPawnProcess_Idle>(this);
+	ChooseTargetProcess = NewObject<UPawnProcess_ChooseTarget>(this);
 	CurrentProcess = nullptr;
 
 	// 获取当前的玩家控制器
@@ -437,5 +438,10 @@ void AMy_Pawn::SwitchToChooseTarget()
 {
 	SwitchProcess(ChooseTargetProcess);
 
+}
+
+void AMy_Pawn::SwitchToBeforeTurn()
+{
+	SwitchProcess(BeforeTurnProcess);
 }
 

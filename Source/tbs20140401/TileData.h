@@ -5,10 +5,10 @@
 class AMyUnit;
 
 USTRUCT(BlueprintType)
-struct FTileData:public FTableRowBase
+struct FTileData
 {
 	GENERATED_BODY()
-
+	virtual ~FTileData() = default;
 	// FTileData(FTileData&& Other) noexcept :
 	// Index(MoveTemp(Other.Index)),
 	// TileType(MoveTemp(Other.TileType)),

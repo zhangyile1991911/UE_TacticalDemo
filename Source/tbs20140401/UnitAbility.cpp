@@ -8,3 +8,15 @@ void UUnitAbility::BeginDestroy()
 	UE_LOG(LogTemp,Log,TEXT("UUnitAbility::BeginDestroy()"))
 	UObject::BeginDestroy();
 }
+
+void UUnitAbility::OnAbilityCompleted()
+{
+	if(CompletedEvent.IsBound())
+	{
+		CompletedEvent.Broadcast(this);
+	}
+	if(CompletedCallback.IsBound())
+	{
+		CompletedCallback.Execute(this);
+	}
+}

@@ -15,5 +15,6 @@ class TBS20140401_API UUnitAbility_Idle : public UUnitAbility
 	GENERATED_BODY()
 public:
 	virtual bool CanExecute()override;
-	
+	virtual bool IsValidTarget(const FTileData& TileData) override;
+	virtual void Execute()override;
 };

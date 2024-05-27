@@ -184,6 +184,7 @@ public:
 	void SwitchToNormal();
 	void SwitchToIdle();
 	void SwitchToChooseTarget();
+	void SwitchToBeforeTurn();
 	
 	// FTileTypeChanged OnTileTYpeChanged;
 };

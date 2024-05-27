@@ -30,6 +30,7 @@ protected:
 	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoInstance;
 protected:
 	void ClearPathFinding();
+	void ClearWalkableTiles();
 	void ShowWalkableTiles(TArray<FIntPoint> tiles);
 	void ShowTargetUnitBriefInfo(TObjectPtr<AMyUnit> TargetUnit);
 	void HideTargetUnitBriefInfo();
