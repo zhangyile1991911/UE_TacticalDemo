@@ -168,6 +168,9 @@ public:
 
 	void SetCurrentSelectedUnitType(EUnitType UnitType){CurrentSelectedUnitType = UnitType;}
 	EUnitType GetCurrentSelectedUnitType()const{return CurrentSelectedUnitType;}
+
+	UFUNCTION(BlueprintCallable)
+	AGrid* GetMyGridForBP()const{return MyGrid;}
 	
 	TObjectPtr<AGrid> GetMyGrid()const{return MyGrid;}
 	TObjectPtr<AMyCombatSystem> GetMyCombatSystem()const{return MyCombatSystem;}

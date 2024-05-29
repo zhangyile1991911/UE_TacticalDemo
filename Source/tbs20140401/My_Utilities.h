@@ -25,7 +25,3 @@ bool IsIntEven(int i);
 FUnitData* GetUnitData(const EUnitType unitType);
 FGridShapeData* GetShapeData(EGridShape shapeName);
 bool IsTileTypeWalkable(ETileType);
-
-bool IsBackAttack(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender);
-bool IsWrapAttack(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,TObjectPtr<AMyUnit> Cooperator);
-int CalculateHitRate(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,TObjectPtr<AGrid> MyGrid,bool IsWrap);

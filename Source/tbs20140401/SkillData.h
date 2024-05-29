@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "SkillData.generated.h"
 
+class AUnitAbilityAnim;
+
 //todo 之后将技能改名为Ability
 enum class ESkillType
 {
@@ -27,4 +29,7 @@ struct FSkillData
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int AllowableDeviation = 1;//允许高度差
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TSubclassOf<AUnitAbilityAnim> SkillAnim;//技能演出
 };

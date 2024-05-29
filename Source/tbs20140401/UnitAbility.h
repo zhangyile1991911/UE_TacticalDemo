@@ -3,14 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BattleReport.h"
 #include "SkillData.h"
 #include "UObject/Object.h"
 #include "UnitAbility.generated.h"
 
 
-class UUnitAbility;
-DECLARE_EVENT_OneParam(UUnitAbility,EAbilityComplete,TObjectPtr<UUnitAbility>)
-DECLARE_DELEGATE_OneParam(FAbilityComplete,TObjectPtr<UUnitAbility>)
+class AMy_Pawn;
+class AGrid;
+
 
 struct FTileData;
 class AMyUnit;
@@ -22,35 +23,39 @@ class TBS20140401_API UUnitAbility : public UObject
 {
 	GENERATED_BODY()
 protected:
-	FSkillData SkillData;
-
-public:
 	virtual void BeginDestroy() override;
 
 protected:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	TObjectPtr<AMyUnit> OwnerInstance;
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	FSkillData SkillData;
+
+	// UPROPERTY()
+	// TObjectPtr<UChildActorComponent> Animation;
 public:
-	EAbilityComplete CompletedEvent;
-	FAbilityComplete CompletedCallback;
+	
 	
 	const FSkillData& GetSkillData()
 	{
 		return SkillData;
 	}
-	void SetSkillData(FSkillData Data,TObjectPtr<AMyUnit> Owner)
+	void SetSkillData(FSkillData Data,TObjectPtr<AMyUnit> OwnerInst)
 	{
 		SkillData = Data;
-		OwnerInstance = Owner;
+		OwnerInstance = OwnerInst;
 	}
 	const FText& GetAbilityName()const{return SkillData.SkillName;}
 	int GetCost()const{return SkillData.SpendPoint;}
 	
 	virtual bool CanExecute(){return false;}
 	virtual bool IsValidTarget(const FTileData& TileData){return false;}
-	virtual void Execute(){}
+	
+	virtual FBattleReport DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets,AGrid* MyGrid);
+	virtual FBattleReport DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid);
+	
 	virtual TArray<FIntPoint> Range(const FIntPoint&){ return TArray<FIntPoint>();}
 
-	UFUNCTION(BlueprintCallable)
-	void OnAbilityCompleted();
+	virtual TArray<TObjectPtr<AMyUnit>> TakeTargets(const FIntPoint& Point,AGrid* MyGrid);
+
 };

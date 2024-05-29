@@ -4,25 +4,25 @@
 
 #include "CoreMinimal.h"
 #include "PawnProcess.h"
-#include "PawnProcess_ChooseTarget.generated.h"
+#include "BattleReport.h"
+#include "PawnProcess_CalcAnim.generated.h"
 
-class AUnitAbilityAnim;
 class UUnitAbility;
+class AUnitAbilityAnim;
 /**
  * 
  */
 UCLASS()
-class TBS20140401_API UPawnProcess_ChooseTarget : public UPawnProcess
+class TBS20140401_API UPawnProcess_CalcAnim : public UPawnProcess
 {
 	GENERATED_BODY()
 protected:
-	FIntPoint CurrentCursor;
 	TArray<FIntPoint> AbilityRange;
 	TObjectPtr<UUnitAbility> ChosenAbility;
-	// TObjectPtr<AUnitAbilityAnim> ChosenAbilityAnim;
-protected:
-	// void AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Ability);
-	// void AbilityCompletedEvent(TObjectPtr<AUnitAbilityAnim> Ability);
+	TObjectPtr<AUnitAbilityAnim> ChosenAbilityAnim;
+	FBattleReport Report;
+	void AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Ability);
+	void AbilityCompletedEvent(TObjectPtr<AUnitAbilityAnim> Ability);
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn)override;
 	virtual void TickProcess()override;

@@ -10,13 +10,15 @@
 #include "MyUnit.generated.h"
 
 
+class IIMyUnitAnimation;
 class AIdleDirection;
 class UUnitAbility;
+class AUnitAbilityAnim;
 class AShadowUnit;
 class AMy_Pawn;
 class AGrid;
 
-UCLASS()
+UCLASS(Blueprintable)
 class TBS20140401_API AMyUnit : public AActor
 {
 	GENERATED_BODY()
@@ -25,8 +27,8 @@ public:
 	// Sets default values for this actor's properties
 	AMyUnit();
 protected:
-	UPROPERTY()
-	TObjectPtr<USkeletalMeshComponent> MySkeletalMeshComponent;
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	USkeletalMeshComponent* MySkeletalMeshComponent;
 
 	UPROPERTY()
 	TObjectPtr<UChildActorComponent> MyChildActor;
@@ -75,11 +77,20 @@ protected:
 
 	//技能相关 开始
 	UPROPERTY()
+	TArray<TObjectPtr<UChildActorComponent>> OwnAbilityActorComponents;
+	UPROPERTY()
+	TArray<TObjectPtr<AUnitAbilityAnim>> OwnAbilityAnimList;
+	UPROPERTY()
 	TArray<TObjectPtr<UUnitAbility>> OwnAbilityList;
-
+	
 	int ChosenAbilityIndex = 0;
 	//技能相关 结束
 	
+	UPROPERTY()
+	TObjectPtr<IIMyUnitAnimation> MyUnitAnimation;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	UAnimInstance* MyAnimInstance;
 
 	// UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	bool IsHovered = false;
@@ -104,6 +115,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	void UpdateHoveredAndSelected();
+	
+	UFUNCTION()
+	void OnAnimInstanceCompleted();
 	
 	UFUNCTION()
 	void HandleLocationAlpha(float Value);
@@ -142,6 +156,8 @@ public:
 	const TArray<FIntPoint>& GetWalkableTiles()const{return WalkableTiles;}
 	bool IsInWalkableTile(const FIntPoint& point)const{return WalkableTiles.Find(point) != INDEX_NONE;}
 	const FUnitProperty& GetProperty()const{return MyProperty;}
+	
+	UFUNCTION(BlueprintCallable)
 	const FUnitRunTimeProperty& GetRuntimeProperty()const{return MyRuntimeProperty;}
 
 	//行动优先级相关
@@ -156,12 +172,13 @@ public:
 	void HideShadowUnit();
 
 	const TArray<TObjectPtr<UUnitAbility>>& GetOwnAbilityList()const{return OwnAbilityList;}
-
 	void SetChosenAbility(int ChosenIndex);
 	TObjectPtr<UUnitAbility> GetChosenAbility(){return OwnAbilityList[ChosenAbilityIndex];}
+	TObjectPtr<AUnitAbilityAnim> GetChosenAbilityAnim(){return OwnAbilityAnimList[ChosenAbilityIndex];}
+	
 
 	TObjectPtr<AIdleDirection> GetMyDirection()const{return MyDirection;}
-
+	
 	void TurnLeft();
 	void TurnRight();
 	void TurnForward();

@@ -12,8 +12,10 @@
 #include "Curves/CurveFloat.h"
 #include "Components/TimelineComponent.h"
 #include "UnitAbility.h"
+#include "UnitAbility_NormalAtk.h"
 #include "UnitAbility_Idle.h"
-#include "UnitAbility_NormalAttack.h"
+#include "UnitAbilityAnim.h"
+
 
 // Sets default values
 AMyUnit::AMyUnit()
@@ -130,6 +132,8 @@ void AMyUnit::BeginPlay()
 		UnitMovement.SetLooping(false);
 		UnitMovement.SetTimelineLengthMode(TL_LastKeyFrame);
 	}
+
+	
 	// FTimerHandle handle;
 	// GetWorld()->GetTimerManager().SetTimer(handle,this,&AMyUnit::testloop,3.0f,true);
 }
@@ -157,6 +161,12 @@ void AMyUnit::UpdateHoveredAndSelected()
 // 	myinter->Execute_SetUnitAnimationState(inst,(EUnitAnimation)testAnimIndex);	
 // }
 
+void AMyUnit::OnAnimInstanceCompleted()
+{
+	MyAnimInstance = MySkeletalMeshComponent->GetAnimInstance();
+	MyUnitAnimation = Cast<IIMyUnitAnimation>(MyAnimInstance);
+}
+
 void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const FIntPoint& index)
 {
 	My_Pawn = Pawn;
@@ -181,7 +191,11 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 		MySkeletalMeshComponent->SetSkeletalMesh(skeletalMesh);
 		// ShadowSkeletalMeshComponent->SetSkeletalMesh(skeletalMesh);
 	}
-		
+	
+	FOnAnimInitialized Initialized;
+	Initialized.AddDynamic(this,&AMyUnit::OnAnimInstanceCompleted);
+	MySkeletalMeshComponent->OnAnimInitialized = Initialized;
+
 	if(UnitData->Assets.AnimBP.IsValid())
 	{
 		MySkeletalMeshComponent->SetAnimInstanceClass(UnitData->Assets.AnimBP.Get());
@@ -191,7 +205,7 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 		auto bp = UnitData->Assets.AnimBP.LoadSynchronous();
 		MySkeletalMeshComponent->SetAnimInstanceClass(bp);
 	}
-
+	
 	MyStats = UnitData->Stats;
 	MyProperty = UnitData->Property;
 	//プロパティをコピー
@@ -220,29 +234,54 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	//スキルの初期化
 	for(int i = 0;i < UnitData->Ability.Num();i++)
 	{
-		switch (UnitData->Ability[i].SkillId)
+		
+		auto AbilityData = UnitData->Ability[i]; 
+		switch (AbilityData.SkillId)
 		{
 		case 10001:
 			{
-				auto IdleAbility = NewObject<UUnitAbility_Idle>(this);
-				IdleAbility->SetSkillData(UnitData->Ability[i],this);
-				OwnAbilityList.Add(IdleAbility);	
+				auto Ability = NewObject<UUnitAbility_Idle>(this,TEXT("Idle"));
+				Ability->SetSkillData(AbilityData,this);
+				OwnAbilityList.Add(Ability);
+				
+				UChildActorComponent* AAbilityActor = NewObject<UChildActorComponent>(this,UChildActorComponent::StaticClass(),TEXT("IdleActorAnim"));
+				AAbilityActor->SetupAttachment(RootComponent);
+				AAbilityActor->SetChildActorClass(AbilityData.SkillAnim.Get());
+				AAbilityActor->RegisterComponent();
+				AAbilityActor->CreateChildActor([this](AActor* Actor)
+				{
+					AUnitAbilityAnim* Ability = Cast<AUnitAbilityAnim>(Actor);
+					OwnAbilityAnimList.Add(Ability);
+				});
+				
+				OwnAbilityActorComponents.Add(AAbilityActor);
 			}
 			break;
 		case 10002:
 		case 20001:
 		case 30001:
 			{
-				auto NormalAttackAbility = NewObject<UUnitAbility_NormalAttack>(this);
-				NormalAttackAbility->SetSkillData(UnitData->Ability[i],this);
-				OwnAbilityList.Add(NormalAttackAbility);	
+				auto Ability = NewObject<UUnitAbility_NormalAtk>(this,TEXT("NormalAttack"));
+				Ability->SetSkillData(AbilityData,this);
+				OwnAbilityList.Add(Ability);
+				
+				UChildActorComponent* AbilityActor = NewObject<UChildActorComponent>(this,UChildActorComponent::StaticClass(),TEXT("NormalAttackActorAnim"));
+				AbilityActor->SetupAttachment(RootComponent);
+				AbilityActor->SetChildActorClass(AbilityData.SkillAnim.Get());
+				AbilityActor->RegisterComponent();
+				AbilityActor->CreateChildActor([this](AActor* Actor)
+				{
+					AUnitAbilityAnim* Ability = Cast<AUnitAbilityAnim>(Actor);
+					OwnAbilityAnimList.Add(Ability);
+				});
+				OwnAbilityActorComponents.Add(AbilityActor);
 			}
 			break;
 		default:
 			{
 				UE_LOG(LogTemp,Log,TEXT("error skillid %d"),UnitData->Ability[i].SkillId)
-				auto OneAbility = NewObject<UUnitAbility>(this);
-				OwnAbilityList.Add(OneAbility);	
+				// auto OneAbility = NewObject<UUnitAbility>(this);
+				// OwnAbilityList.Add(OneAbility);	
 			}
 			break;
 		}
@@ -467,13 +506,11 @@ void AMyUnit::FinishLocationAlpha()
 	if(WalkPath.IsEmpty())return;
 	if(WalkPath.Num() <= WalkPathIndex)
 	{
-		auto inst = MySkeletalMeshComponent->GetAnimInstance();
-		auto myinter = Cast<IIMyUnitAnimation>(inst);
-		if(inst == nullptr&& myinter == nullptr)
+		if(MyUnitAnimation == nullptr)
 		{
 			return;
 		}
-		myinter->Execute_SetUnitAnimationState(inst,EUnitAnimation::Idle);
+		MyUnitAnimation->Execute_SetUnitAnimationState(MyAnimInstance,EUnitAnimation::Idle);
 
 		for(const FIntPoint& one : WalkPath)
 		{

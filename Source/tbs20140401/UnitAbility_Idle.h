@@ -6,15 +6,20 @@
 #include "UnitAbility.h"
 #include "UnitAbility_Idle.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class TBS20140401_API UUnitAbility_Idle : public UUnitAbility
 {
 	GENERATED_BODY()
+
 public:
-	virtual bool CanExecute()override;
-	virtual bool IsValidTarget(const FTileData& TileData) override;
-	virtual void Execute()override;
+	// Sets default values for this actor's properties
+	UUnitAbility_Idle();
+
+protected:
+	// Called when the game starts or when spawned
+	// virtual void BeginPlay() override;
+	virtual void BeginDestroy() override;
+public:
+	// Called every frame
+	// virtual void Tick(float DeltaTime) override;
 };
