@@ -53,6 +53,6 @@ void AAction_FindPath::WaitPathFinding(TArray<FIntPoint> path)
     }
 	if(MyPlayerPawn->GetMyGrid()->TileGridHasUnit(Start))
 	{
-		MyPlayerPawn->GetSelectedUnit()->SetWalkPath(MoveTemp(path));
+		MyPlayerPawn->GetSelectedUnit()->SetWalkPath(MoveTemp(path),nullptr);
 	}
 }

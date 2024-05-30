@@ -164,7 +164,7 @@ void AMyUnit::UpdateHoveredAndSelected()
 void AMyUnit::OnAnimInstanceCompleted()
 {
 	MyAnimInstance = MySkeletalMeshComponent->GetAnimInstance();
-	MyUnitAnimation = Cast<IIMyUnitAnimation>(MyAnimInstance);
+	
 }
 
 void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const FIntPoint& index)
@@ -196,15 +196,20 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	Initialized.AddDynamic(this,&AMyUnit::OnAnimInstanceCompleted);
 	MySkeletalMeshComponent->OnAnimInitialized = Initialized;
 
+	UClass* bp;
 	if(UnitData->Assets.AnimBP.IsValid())
 	{
-		MySkeletalMeshComponent->SetAnimInstanceClass(UnitData->Assets.AnimBP.Get());
+		bp = UnitData->Assets.AnimBP.Get();
 	}
 	else
 	{
-		auto bp = UnitData->Assets.AnimBP.LoadSynchronous();
-		MySkeletalMeshComponent->SetAnimInstanceClass(bp);
+		bp = UnitData->Assets.AnimBP.LoadSynchronous();
 	}
+	for(auto one : bp->Interfaces)
+	{
+		UE_LOG(LogTemp,Log,TEXT("bp->Interfaces %s"),*one.Class.GetName());
+	}
+	MySkeletalMeshComponent->SetAnimInstanceClass(bp);
 	
 	MyStats = UnitData->Stats;
 	MyProperty = UnitData->Property;
@@ -334,7 +339,7 @@ float CalculateRotationAngleToTarget(const FVector& CurrentLocation, const FVect
 	return AngleDegrees;
 }
 
-void AMyUnit::SetWalkPath(TArray<FIntPoint> path)
+void AMyUnit::SetWalkPath(TArray<FIntPoint> path,FPathCompleted completed)
 {
 	WalkPath = path;
 	WalkPathIndex = 1;
@@ -348,6 +353,9 @@ void AMyUnit::SetWalkPath(TArray<FIntPoint> path)
 	//
 	// UE_LOG(LogTemp,Log,TEXT("SetWalkPath StartRotateAngles = %f AngleDegrees = %f "),StartRotateAngles.Yaw,AngleDegrees)
 	FinishRotateAngles.Yaw = AngleDegrees - 90;
+	PathCompleted = completed;
+	
+	IIMyUnitAnimation::Execute_SetUnitAnimationState(MyAnimInstance,EUnitAnimation::Walk);
 	UnitMovement.PlayFromStart();
 }
 
@@ -457,6 +465,19 @@ void AMyUnit::HideDirectionArrow()
 	MyDirectionActor->SetVisibility(false);
 }
 
+void AMyUnit::BeforeStartTurn()
+{
+	AtkNum = 1;
+	WalkNum = 1;
+	AbilityTargetPosition = FIntPoint(-999,-999);
+	TempLocation = FIntPoint(-999,-999);
+}
+
+void AMyUnit::FinishTurn()
+{
+	CurrentDistanceToAction = 0;
+}
+
 
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection)
 {
@@ -485,7 +506,7 @@ void AMyUnit::FinishLocationAlpha()
 {
 	UE_LOG(LogTemp,Log,TEXT("FinishLocationAlpha"))
 	MyGrid->AddTileDataUnitByIndex(GridIndex,nullptr);
-	My_Pawn->UpdateTileStatusByIndex(GridIndex,ETileState::Selected);
+	// My_Pawn->UpdateTileStatusByIndex(GridIndex,ETileState::Selected);
 	
 	GridIndex = WalkPath[WalkPathIndex];
 	StartRotateAngles = FinishRotateAngles;
@@ -506,17 +527,18 @@ void AMyUnit::FinishLocationAlpha()
 	if(WalkPath.IsEmpty())return;
 	if(WalkPath.Num() <= WalkPathIndex)
 	{
-		if(MyUnitAnimation == nullptr)
-		{
-			return;
-		}
-		MyUnitAnimation->Execute_SetUnitAnimationState(MyAnimInstance,EUnitAnimation::Idle);
+		// if (MyAnimInstance->GetClass()->ImplementsInterface(UIMyUnitAnimation::StaticClass()))
+		// {
+		// 	UE_LOG(LogTemp,Log,TEXT("ImplementsInterface true"))
+			IIMyUnitAnimation::Execute_SetUnitAnimationState(MyAnimInstance,EUnitAnimation::Idle);
+		// }
 
 		for(const FIntPoint& one : WalkPath)
 		{
 			MyGrid->RemoveStateFromTile(one,ETileState::PathFinding);
 		}
-		My_Pawn->UpdateTileStatusByIndex(GridIndex,ETileState::Selected);
+		// My_Pawn->UpdateTileStatusByIndex(GridIndex,ETileState::Selected);
+		PathCompleted.Execute();
 		return;
 	}
 	

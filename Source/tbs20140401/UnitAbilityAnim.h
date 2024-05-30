@@ -7,6 +7,7 @@
 #include "UnitAbilityAnim.generated.h"
 
 class AUnitAbilityAnim;
+class AMy_Pawn;
 DECLARE_EVENT_OneParam(AUnitAbilityAnim,EAbilityComplete,TObjectPtr<AUnitAbilityAnim>)
 DECLARE_DELEGATE_OneParam(FAbilityComplete,TObjectPtr<AUnitAbilityAnim>)
 UCLASS(Abstract)

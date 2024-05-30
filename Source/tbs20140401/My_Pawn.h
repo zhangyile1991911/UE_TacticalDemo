@@ -11,6 +11,8 @@
 
 #include "My_Pawn.generated.h"
 
+class UPawnProcess_CalcAnim;
+class UPawnProcess_Move;
 class UPawnProcess_ChooseTarget;
 class UPawnProcess_Idle;
 class UPawnProcess_BeforeTurn;
@@ -91,6 +93,8 @@ protected:
 	TObjectPtr<AMyUnit> SelectedUnit;
 
 	UPROPERTY()
+	TObjectPtr<UPawnProcess_Move> MoveProcess;
+	UPROPERTY()
 	TObjectPtr<UPawnProcess_BeforeTurn> BeforeTurnProcess;
 	UPROPERTY()
 	TObjectPtr<UPawnProcess_CMD> CmdProcess;
@@ -100,6 +104,8 @@ protected:
 	TObjectPtr<UPawnProcess_Idle> IdleProcess;
 	UPROPERTY()
 	TObjectPtr<UPawnProcess_ChooseTarget> ChooseTargetProcess;
+	UPROPERTY()
+	TObjectPtr<UPawnProcess_CalcAnim> CalcAnimProcess;
 	UPROPERTY()
 	TObjectPtr<UPawnProcess> CurrentProcess;
 
@@ -188,6 +194,8 @@ public:
 	void SwitchToIdle();
 	void SwitchToChooseTarget();
 	void SwitchToBeforeTurn();
+	void SwitchToMove();
+	void SwitchToCalcAnim();
 	
 	// FTileTypeChanged OnTileTYpeChanged;
 };

@@ -10,6 +10,7 @@
 #include "MyUnit.generated.h"
 
 
+class UIMyUnitAnimation;
 class IIMyUnitAnimation;
 class AIdleDirection;
 class UUnitAbility;
@@ -17,6 +18,8 @@ class AUnitAbilityAnim;
 class AShadowUnit;
 class AMy_Pawn;
 class AGrid;
+class AMyUnit;
+DECLARE_DELEGATE(FPathCompleted)
 
 UCLASS(Blueprintable)
 class TBS20140401_API AMyUnit : public AActor
@@ -85,9 +88,8 @@ protected:
 	
 	int ChosenAbilityIndex = 0;
 	//技能相关 结束
-	
-	UPROPERTY()
-	TObjectPtr<IIMyUnitAnimation> MyUnitAnimation;
+	// UClass* bpAnim;
+	// IIMyUnitAnimation* MyUnitAnimation;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	UAnimInstance* MyAnimInstance;
@@ -103,6 +105,8 @@ protected:
 	float TargetHeight;
 	FVector StartPosition;
 	FVector TargetPosition;
+	FIntPoint TempLocation;
+	FIntPoint AbilityTargetPosition;
 	
 	UPROPERTY()
 	TObjectPtr<AGrid> MyGrid;
@@ -110,6 +114,10 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AMy_Pawn> My_Pawn;
 
+	int WalkNum;
+	int AtkNum;
+
+	FPathCompleted PathCompleted;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -151,7 +159,7 @@ public:
 	bool IsInWalkableRange(const FIntPoint& index);
 	bool CanDiagonally()const{return MyStats.CanMoveDiagonally;}
 
-	void SetWalkPath(TArray<FIntPoint>);
+	void SetWalkPath(TArray<FIntPoint>,FPathCompleted);
 	void SetWalkableTile(TArray<FIntPoint>);
 	const TArray<FIntPoint>& GetWalkableTiles()const{return WalkableTiles;}
 	bool IsInWalkableTile(const FIntPoint& point)const{return WalkableTiles.Find(point) != INDEX_NONE;}
@@ -171,6 +179,14 @@ public:
 	void ShowShadowUnit();
 	void HideShadowUnit();
 
+	void SetTempDestination(FIntPoint location){TempLocation = location;}
+	FIntPoint GetTempDestination()const{return TempLocation;}
+	bool NeedToMove()const{return TempLocation != GridIndex;}
+
+	void SetAbilityTargetPosition(FIntPoint location){AbilityTargetPosition = location;}
+	FIntPoint GetAbilityTargetPosition()const{return AbilityTargetPosition;}
+	
+
 	const TArray<TObjectPtr<UUnitAbility>>& GetOwnAbilityList()const{return OwnAbilityList;}
 	void SetChosenAbility(int ChosenIndex);
 	TObjectPtr<UUnitAbility> GetChosenAbility(){return OwnAbilityList[ChosenAbilityIndex];}
@@ -185,6 +201,12 @@ public:
 	void TurnBack();
 	void ShowDirectionArrow();
 	void HideDirectionArrow();
-	
+	bool CanWalk()const{return WalkNum > 0;}
+	void WalkDone(){WalkNum-=1;}
+	bool CanAttack()const{return AtkNum > 0;}
+	void AttackDone(){AtkNum-=1;}
+	//タン始まる前に　計算やプロパティリなどセットする
+	void BeforeStartTurn();
+	void FinishTurn();
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

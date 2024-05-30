@@ -49,12 +49,21 @@ void UPawnProcess_Idle::HandleDirectionInput(const FVector2D& Input)
 void UPawnProcess_Idle::HandleCancelInput()
 {
 	Super::HandleCancelInput();
-	PawnInstance->SwitchToNormal();
+	if(UnitInstance->CanWalk())
+	{
+		PawnInstance->SwitchToNormal();
+	}
+	else if(UnitInstance->CanAttack() && UnitInstance->CanWalk())
+	{
+		PawnInstance->SwitchToNormal();
+	}
+		
 }
 
 void UPawnProcess_Idle::HandleConfirmInput()
 {
 	Super::HandleConfirmInput();
+	UnitInstance->FinishTurn();
 	PawnInstance->SwitchToBeforeTurn();
 }
 

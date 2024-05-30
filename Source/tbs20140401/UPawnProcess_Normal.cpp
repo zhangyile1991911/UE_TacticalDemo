@@ -133,7 +133,7 @@ void UUPawnProcess_Normal::HandleConfirmInput()
 			return;
 		}
 		UnitInstance->MoveShadowOnTile(TileData->Transform.GetLocation());
-
+		UnitInstance->SetTempDestination(CurrentCursor);
 		PawnInstance->SwitchToCmdInput();
 	}
 

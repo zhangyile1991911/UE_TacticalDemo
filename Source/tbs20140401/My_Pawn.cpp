@@ -19,8 +19,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "MyHUD.h"
 #include "PawnProcess_BeforeTurn.h"
+#include "PawnProcess_CalcAnim.h"
 #include "PawnProcess_Idle.h"
 #include "PawnProcess_ChooseTarget.h"
+#include "PawnProcess_Move.h"
 
 
 // Sets default values
@@ -121,6 +123,9 @@ void AMy_Pawn::BeginPlay()
 	BeforeTurnProcess = NewObject<UPawnProcess_BeforeTurn>(this);
 	IdleProcess = NewObject<UPawnProcess_Idle>(this);
 	ChooseTargetProcess = NewObject<UPawnProcess_ChooseTarget>(this);
+	MoveProcess = NewObject<UPawnProcess_Move>(this);
+	CalcAnimProcess = NewObject<UPawnProcess_CalcAnim>(this);
+	
 	CurrentProcess = nullptr;
 
 	// 获取当前的玩家控制器
@@ -443,5 +448,15 @@ void AMy_Pawn::SwitchToChooseTarget()
 void AMy_Pawn::SwitchToBeforeTurn()
 {
 	SwitchProcess(BeforeTurnProcess);
+}
+
+void AMy_Pawn::SwitchToMove()
+{
+	SwitchProcess(MoveProcess);
+}
+
+void AMy_Pawn::SwitchToCalcAnim()
+{
+	SwitchProcess(CalcAnimProcess);
 }
 

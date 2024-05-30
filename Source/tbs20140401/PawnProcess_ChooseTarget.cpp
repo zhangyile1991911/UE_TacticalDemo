@@ -75,7 +75,16 @@ void UPawnProcess_ChooseTarget::HandleConfirmInput()
 
 	//控制流程
 	//todo 目标选择
-	TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbility->TakeTargets(CurrentCursor,PawnInstance->GetMyGrid());
+	// TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbility->TakeTargets(CurrentCursor,PawnInstance->GetMyGrid());
+	UnitInstance->SetAbilityTargetPosition(CurrentCursor);
+	if(UnitInstance->NeedToMove())
+	{
+		PawnInstance->SwitchToMove();	
+	}
+	else
+	{
+		PawnInstance->SwitchToCalcAnim();
+	}
 	
 	//计算战报
 	// FBattleReport Report = ChosenAbility->DoCalculation(TargetUnits,PawnInstance->GetMyGrid());
@@ -95,7 +104,7 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 	}
 	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
 	PawnInstance->UpdateTileStatusByIndex(CurrentCursor,ETileState::Selected);
-	
+	UnitInstance->HideShadowUnit();
 }
 
 

@@ -11,7 +11,8 @@
 
 void UPawnProcess_CalcAnim::AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Ability)
 {
-	
+	UnitInstance->AttackDone();
+	PawnInstance->SwitchToIdle();
 }
 
 void UPawnProcess_CalcAnim::AbilityCompletedEvent(TObjectPtr<AUnitAbilityAnim> Ability)
@@ -30,7 +31,7 @@ void UPawnProcess_CalcAnim::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	ChosenAbilityAnim->CompletedCallback.BindUObject(this,&UPawnProcess_CalcAnim::AbilityCompleted);
 	ChosenAbilityAnim->CompletedEvent.AddUObject(this,&UPawnProcess_CalcAnim::AbilityCompletedEvent);
 
-	FIntPoint CurrentCursor = PawnInstance->GetSelectedTile();
+	FIntPoint CurrentCursor = UnitInstance->GetAbilityTargetPosition();
 	//控制流程
 	//todo 目标选择
 	TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbility->TakeTargets(CurrentCursor,PawnInstance->GetMyGrid());
