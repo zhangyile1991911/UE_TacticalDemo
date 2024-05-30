@@ -23,6 +23,9 @@ struct FUnitProperty
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int HP;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int Agility;//行动条上的移动速度
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)

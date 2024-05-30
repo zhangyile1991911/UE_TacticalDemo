@@ -9,9 +9,61 @@
 #include "Grid.h"
 #include "MyGridPathfinding.h"
 #include "UnitAbility.h"
-#include "UnitAbilityAnim.h"
+#include "UGameUI_UnitBreifInfo.h"
+#include "MyHUD.h"
+#include "BottomActionBar.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/CanvasPanelSlot.h"
+#include "BattleFunc.h"
 
+void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
+{
+	const FTileData* TileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(Index);
+	TObjectPtr<AMyUnit> StandingUnit = TileData->UnitOnTile;
+	bool bShow = true;
+	if(StandingUnit == nullptr)
+	{
+		bShow = false;
+	}
+	else
+	{
+		bool IsValid = ChosenAbility->IsValidTarget(*TileData);
+		if(IsValid)
+		{
+			const bool bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,StandingUnit);
+			const bool bIsWrapAttack = UBattleFunc::HasWrapAttackUnit(UnitInstance,StandingUnit,PawnInstance->GetMyGrid());
+			const float HitPer = UBattleFunc::CalculateHitRate(UnitInstance,StandingUnit,PawnInstance->GetMyGrid(),bIsWrapAttack,bIsBackAttack);
+			//有效目标 确定 详情
+			UnitBriefInfoInstance->ShowTarget(UnitInstance,StandingUnit,HitPer,
+				FText::FromName(TEXT("确定")),FText::FromName(TEXT("详情")));	
+		}
+		else
+		{//无效 详情
+			UnitBriefInfoInstance->ShowTargetInfoAndTab(StandingUnit,0);
+		}
+	}
+	if(bShow)
+	{
+		FVector2D ScreenLocation;
+		const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 
+		const FVector WorldPosition = StandingUnit ? StandingUnit->GetActorLocation() : TileData->Transform.GetLocation();
+		const bool Result = PlayerController->ProjectWorldLocationToScreen(WorldPosition,ScreenLocation,true);
+		if(Result)
+		{
+			const float Scale = UWidgetLayoutLibrary::GetViewportScale(PlayerController);
+			ScreenLocation /= Scale;
+			UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(UnitBriefInfoInstance->Slot);
+			CanvasSlot->SetPosition(ScreenLocation);
+		}
+		UE_LOG(LogTemp,Log,TEXT("Target Location = %s Result = %hhd ScreenLocation = %s"),*WorldPosition.ToString(),Result,*ScreenLocation.ToString())
+		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Visible);	
+	}
+	else
+	{
+		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);	
+	}
+}
 
 void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
@@ -28,6 +80,9 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	{
 		PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::AbilityRange);
 	}
+
+	auto Tmp = PawnInstance->GetMyHUD()->GetGameUI();
+	UnitBriefInfoInstance = Tmp->GetUnitBriefInfo();
 	
 }
 
@@ -52,6 +107,8 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		UE_LOG(LogTemp,Log,TEXT(" HandleDirectionInput CurrentCursor (%d,%d)"),CurrentCursor.X,CurrentCursor.Y);
 	}
 	
+	ShowTargetUnitBriefInfo(CurrentCursor);
+	
 }
 
 void UPawnProcess_ChooseTarget::HandleCancelInput()
@@ -69,13 +126,7 @@ void UPawnProcess_ChooseTarget::HandleConfirmInput()
 
 	
 	if(!ChosenAbility->IsValidTarget(*TileData))return;
-
-	// ChosenAbilityAnim->CompletedCallback.BindUObject(this,&UPawnProcess_ChooseTarget::AbilityCompleted);
-	// ChosenAbilityAnim->CompletedEvent.AddUObject(this,&UPawnProcess_ChooseTarget::AbilityCompletedEvent);
-
-	//控制流程
-	//todo 目标选择
-	// TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbility->TakeTargets(CurrentCursor,PawnInstance->GetMyGrid());
+	
 	UnitInstance->SetAbilityTargetPosition(CurrentCursor);
 	if(UnitInstance->NeedToMove())
 	{
@@ -85,12 +136,6 @@ void UPawnProcess_ChooseTarget::HandleConfirmInput()
 	{
 		PawnInstance->SwitchToCalcAnim();
 	}
-	
-	//计算战报
-	// FBattleReport Report = ChosenAbility->DoCalculation(TargetUnits,PawnInstance->GetMyGrid());
-	//todo 进入演出环节
-	// ChosenAbilityAnim->DoAnimation(Report,PawnInstance);
-
 	
 }
 
@@ -106,19 +151,3 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 	PawnInstance->UpdateTileStatusByIndex(CurrentCursor,ETileState::Selected);
 	UnitInstance->HideShadowUnit();
 }
-
-
-// void UPawnProcess_ChooseTarget::AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Ability)
-// {
-// 	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_ChooseTarget::AbilityCompleted"))
-// 	//todo 是否有 夹击
-// 	// if(Report.Cooperator != nullptr)
-// 	// {
-// 	// 	
-// 	// }
-// }
-//
-// void UPawnProcess_ChooseTarget::AbilityCompletedEvent(TObjectPtr<AUnitAbilityAnim> Ability)
-// {
-// 	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_ChooseTarget::AbilityCompletedEvent"))
-// }

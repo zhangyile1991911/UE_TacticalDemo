@@ -8,6 +8,9 @@ struct FUnitRunTimeProperty
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int HP;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int ActionPoint;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)

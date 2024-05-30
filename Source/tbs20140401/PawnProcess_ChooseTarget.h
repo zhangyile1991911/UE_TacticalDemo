@@ -8,6 +8,7 @@
 
 class AUnitAbilityAnim;
 class UUnitAbility;
+class UUGameUI_UnitBriefInfo;
 /**
  * 
  */
@@ -20,9 +21,11 @@ protected:
 	TArray<FIntPoint> AbilityRange;
 	TObjectPtr<UUnitAbility> ChosenAbility;
 	// TObjectPtr<AUnitAbilityAnim> ChosenAbilityAnim;
+	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoInstance;
 protected:
 	// void AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Ability);
 	// void AbilityCompletedEvent(TObjectPtr<AUnitAbilityAnim> Ability);
+	void ShowTargetUnitBriefInfo(const FIntPoint& Index);
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn)override;
 	virtual void TickProcess()override;

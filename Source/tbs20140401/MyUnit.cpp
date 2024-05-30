@@ -214,6 +214,7 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	MyStats = UnitData->Stats;
 	MyProperty = UnitData->Property;
 	//プロパティをコピー
+	MyRuntimeProperty.HP = MyProperty.HP;
 	MyRuntimeProperty.Move = MyProperty.Move;
 	MyRuntimeProperty.ActionPoint = MyProperty.ActionPoint;
 	MyRuntimeProperty.Power = MyProperty.Power;

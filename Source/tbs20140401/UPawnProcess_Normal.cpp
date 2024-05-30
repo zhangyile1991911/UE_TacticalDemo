@@ -51,7 +51,7 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 
 	auto Tmp = PawnInstance->GetMyHUD()->GetGameUI();
 	UnitBriefInfoInstance = Tmp->GetUnitBriefInfo();
-	
+	ShowTargetUnitBriefInfo(CurrentCursor);
 	// PawnInstance->GetMyGrid()->AddStateToTile(CurrentCursor,ETileState::Selected);
 }
 
@@ -89,15 +89,8 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 			Completed);
 	}
 
-	TObjectPtr<AMyUnit> StandingUnit = PawnInstance->GetMyGrid()->GetUnitOnTile(CurrentCursor);
-	if(StandingUnit)
-	{//显示简略信息(簡略なメッセージを表示する)
-		ShowTargetUnitBriefInfo(StandingUnit);
-	}
-	else
-	{//隐藏简略信息(簡略なメッセージを非表示する)
-		HideTargetUnitBriefInfo();
-	}
+
+	ShowTargetUnitBriefInfo(CurrentCursor);
 	
 }
 
@@ -178,22 +171,59 @@ void UUPawnProcess_Normal::ClearWalkableTiles()
 	UnitInstance->SetWalkableTile(TArray<FIntPoint>());
 }
 
-void UUPawnProcess_Normal::ShowTargetUnitBriefInfo(TObjectPtr<AMyUnit> TargetUint)
+void UUPawnProcess_Normal::ShowTargetUnitBriefInfo(FIntPoint Index)
 {
-	UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Visible);
-	UnitBriefInfoInstance->RefreshUnitBriefInfo(UnitInstance,TargetUint);
-
-	FVector2D ScreenLocation;
-	const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	const bool Result = PlayerController->ProjectWorldLocationToScreen(TargetUint->GetActorLocation(),ScreenLocation,true);
-	if(Result)
+	bool bShow = true;
+	
+	const FTileData* TileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(Index);
+	TObjectPtr<AMyUnit> StandingUnit = TileData->UnitOnTile;
+	if(StandingUnit != nullptr)
 	{
-		const float Scale = UWidgetLayoutLibrary::GetViewportScale(PlayerController);
-		ScreenLocation /= Scale;
-		UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(UnitBriefInfoInstance->Slot);
-		CanvasSlot->SetPosition(ScreenLocation);
+		if(StandingUnit->GetGridIndex() == UnitInstance->GetGridIndex())
+		{//目标是自己 只显示详情
+			UnitBriefInfoInstance->ShowSelfCmd(UnitInstance);
+		}
+		else
+		{//友军 敌人
+			UnitBriefInfoInstance->ShowTargetInfoAndConfirmAndTab(StandingUnit,FText::FromName(TEXT("演习")),FText::FromName(TEXT("详情")));
+		}
 	}
-	UE_LOG(LogTemp,Log,TEXT("Target Location = %s Result = %hhd ScreenLocation = %s"),*TargetUint->GetActorLocation().ToString(),Result,*ScreenLocation.ToString())
+	else
+	{
+		bool IsContain = UnitInstance->GetWalkableTiles().Contains(Index);
+		if(IsContain)
+		{
+			UnitBriefInfoInstance->ShowConfirmCmd(FText::FromName(TEXT("移动")));
+		}
+		else
+		{
+			bShow = false;
+		}	
+	}
+
+	if(bShow)
+	{
+		FVector2D ScreenLocation;
+    	const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+
+		const FVector WorldPosition = StandingUnit ? StandingUnit->GetActorLocation() : TileData->Transform.GetLocation();
+    	const bool Result = PlayerController->ProjectWorldLocationToScreen(WorldPosition,ScreenLocation,true);
+    	if(Result)
+    	{
+    		const float Scale = UWidgetLayoutLibrary::GetViewportScale(PlayerController);
+    		ScreenLocation /= Scale;
+    		UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(UnitBriefInfoInstance->Slot);
+    		CanvasSlot->SetPosition(ScreenLocation);
+    	}
+    	UE_LOG(LogTemp,Log,TEXT("Target Location = %s Result = %hhd ScreenLocation = %s"),*WorldPosition.ToString(),Result,*ScreenLocation.ToString())
+		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Visible);	
+	}
+	else
+	{
+		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);	
+	}
+	
+	
 }
 
 void UUPawnProcess_Normal::HideTargetUnitBriefInfo()

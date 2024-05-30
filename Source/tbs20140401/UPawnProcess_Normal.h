@@ -25,14 +25,13 @@ protected:
 	
 	//记录临时选择目的地
 	FIntPoint TempTargetTile;
-
-	UPROPERTY()
+	
 	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoInstance;
 protected:
 	void ClearPathFinding();
 	void ClearWalkableTiles();
 	void ShowWalkableTiles(TArray<FIntPoint> tiles);
-	void ShowTargetUnitBriefInfo(TObjectPtr<AMyUnit> TargetUnit);
+	void ShowTargetUnitBriefInfo(FIntPoint Index);
 	void HideTargetUnitBriefInfo();
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn) override;

@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UGameUI_UnitBreifInfo.generated.h"
 
+class UOverlay;
 class AMyUnit;
 class UProgressBar;
 class UImage;
@@ -43,6 +44,9 @@ protected:
 	TObjectPtr<UTextBlock> HitPerText;
 
 	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UImage> HitIcon;
+
+	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> CurHPText;
 	
 	UPROPERTY(meta=(BindWidget))
@@ -60,13 +64,28 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> TabText;
 
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UOverlay> InfoNode;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UOverlay> ConfirmNode;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UOverlay> TabNode;
 	
 	TArray<TObjectPtr<UImage>> APList;
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
-
+	
+	void RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,float HitPercent);
 public:
-	void RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender);
+	void ShowMoveOnly();
+	void ShowDetailOnly();
+	void ShowSelfCmd(TObjectPtr<AMyUnit> Attacker);
+	void ShowConfirmCmd(const FText& ConfirmTxt);
+	void ShowTarget(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,float HitPercent,FText ConfirmTxt,FText DetailTxt);
+	void ShowTargetInfoAndTab(TObjectPtr<AMyUnit> Defender,float HitPercent);
+	void ShowTargetInfoAndConfirmAndTab(TObjectPtr<AMyUnit> Defender,FText ConfirmTxt,FText TabTxt);
 };
 
