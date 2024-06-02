@@ -46,6 +46,8 @@ protected:
 	TObjectPtr<UImage> AP3;
 
 	TArray<TObjectPtr<UImage>> APs;
+
+	FText FormatTemplate = FText::FromString(TEXT("HP {0}/{1}"));
 public:
 	void RefreshByUnit(TObjectPtr<AMyUnit> Unit);
 

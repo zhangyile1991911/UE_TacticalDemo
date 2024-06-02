@@ -13,6 +13,15 @@ void UPawnProcess_Idle::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	Super::EnterProcess(Pawn);
 	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
 	UnitInstance->ShowDirectionArrow();
+	RotateShadow = UnitInstance->NeedToMove(); 
+	if(RotateShadow)
+	{
+		UnitInstance->ShowShadowUnit();
+	}
+	else
+	{
+		UnitInstance->HideShadowUnit();
+	}
 }
 
 void UPawnProcess_Idle::TickProcess()
@@ -27,22 +36,53 @@ void UPawnProcess_Idle::HandleDirectionInput(const FVector2D& Input)
 	if (Input.Y > 0)
 	{
 		UnitInstance->GetMyDirection()->DoUpArrowAnimation();
-		UnitInstance->TurnForward();
+		if(RotateShadow)
+		{
+			UnitInstance->TurnShadowForward();
+		}
+		else
+		{
+			UnitInstance->TurnForward();	
+		}
+		
 	}
 	else if(Input.Y < 0)
 	{
 		UnitInstance->GetMyDirection()->DoDownArrowAnimation();
-		UnitInstance->TurnBack();
+		if(RotateShadow)
+		{
+			UnitInstance->TurnShadowBack();
+		}
+		else
+		{
+			UnitInstance->TurnBack();	
+		}
+		
 	}
 	else if(Input.X > 0)
 	{
 		UnitInstance->GetMyDirection()->DoRightArrowAnimation();
-		UnitInstance->TurnRight();
+		if(RotateShadow)
+		{
+			UnitInstance->TurnShadowRight();
+		}
+		else
+		{
+			UnitInstance->TurnRight();	
+		}
+		
 	}
 	else if(Input.X < 0)
 	{
 		UnitInstance->GetMyDirection()->DoLeftArrowAnimation();
-		UnitInstance->TurnLeft();
+		if(RotateShadow)
+		{
+			UnitInstance->TurnShadowLeft();
+		}
+		else
+		{
+			UnitInstance->TurnLeft();	
+		}
 	}
 }
 

@@ -43,8 +43,10 @@ TArray<FIntPoint> UUnitAbility_NormalAtk::Range(const FIntPoint& Int32Point)
 }
 
 bool UUnitAbility_NormalAtk::IsValidTarget(const FTileData& TileData)
-{//todo
-	return true;
+{
+	return TileData.UnitOnTile == nullptr ?
+		false :
+		TileData.UnitOnTile->GetRuntimeProperty().UnitSide != OwnerInstance->GetRuntimeProperty().UnitSide;
 }
 
 TArray<TObjectPtr<AMyUnit>> UUnitAbility_NormalAtk::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)

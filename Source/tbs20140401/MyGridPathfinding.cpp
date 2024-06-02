@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Containers/Array.h"
 #include "MyDebugTextAndColorsOnTiles.h"
+#include "MyUnit.h"
 
 // Sets default values
 AMyGridPathfinding::AMyGridPathfinding()
@@ -34,10 +35,10 @@ void AMyGridPathfinding::BeginPlay()
 void AMyGridPathfinding::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if(IsPathFinding)
-	{
-		FindPathInterval();	
-	}
+	// if(IsPathFinding)
+	// {
+	// 	FindPathInterval();	
+	// }
 	
 }
 
@@ -99,18 +100,18 @@ TArray<FIntPoint> AMyGridPathfinding::GetNeighborIndexesForHexagon(const FIntPoi
 
 TArray<FIntPoint> AMyGridPathfinding::GetValidTileNeighbors(const FIntPoint& index)
 {
-	TArray<FIntPoint> result;
-	switch (MyGrid->GetGridShapeType())
-	{
-	case EGridShape::Square:
-		result = GetNeighborIndexesForSquare(index);
-		break;
-	case EGridShape::Hexagon:
-		result = GetNeighborIndexesForHexagon(index);
-		break;
-	case EGridShape::Triangle:
-		result = GetNeighborIndexesForTriangle(index);
-	}
+	// TArray<FIntPoint> result;
+	// switch (MyGrid->GetGridShapeType())
+	// {
+	// case EGridShape::Square:
+	TArray<FIntPoint> result = GetNeighborIndexesForSquare(index);
+		// break;
+	// case EGridShape::Hexagon:
+	// 	result = GetNeighborIndexesForHexagon(index);
+	// 	break;
+	// case EGridShape::Triangle:
+	// 	result = GetNeighborIndexesForTriangle(index);
+	// }
 	CurSelectedPoint = index;
 	// auto pCenterData = MyGrid->GetTileDataByIndex(index);
 	// float cz = pCenterData->Transform.GetLocation().Z;
@@ -196,13 +197,13 @@ FMyPathFindingData AMyGridPathfinding::AddPathFindingData(const FMyPathFindingDa
 	case ETileType::FlyingUnitsOnly:
 		break;
 	case ETileType::Normal:
-		data.CostToEnterTile = 1;
+		data.CostToEnterTile = 10;
 		break;
 	case ETileType::DoubleCost:
-		data.CostToEnterTile = 2;
+		data.CostToEnterTile = 20;
 		break;
 	case ETileType::TripleCost:
-		data.CostToEnterTile = 3;
+		data.CostToEnterTile = 30;
 	}
 
 	if(ParentData == nullptr)
@@ -213,8 +214,14 @@ FMyPathFindingData AMyGridPathfinding::AddPathFindingData(const FMyPathFindingDa
 	}
 	else
 	{
-		data.CostFromStart = ParentData->CostFromStart + data.CostToEnterTile;//GetMinimumCostBetweenTwoTiles(Index,StartPoint,IncludeDiagonals);
-		data.MinimumCostToTarget = GetMinimumCostBetweenTwoTiles(Index,TargetPoint,IncludeDiagonals);
+		//是否是斜着走
+		int32 deltaX = Index.X - ParentData->Index.X;
+		int32 deltaY = Index.Y - ParentData->Index.Y;
+		// 判断是否为斜侧方向移动
+		const bool bIsDiagonal = FMath::Abs(deltaX) == 1 && FMath::Abs(deltaY) == 1;
+		data.CostFromStart = ParentData->CostFromStart + (bIsDiagonal ? data.CostToEnterTile+data.CostToEnterTile/2 : data.CostToEnterTile);//GetMinimumCostBetweenTwoTiles(Index,StartPoint,IncludeDiagonals);
+		// data.CostFromStart = ParentData->CostFromStart + data.CostToEnterTile;
+		data.MinimumCostToTarget = GetMinimumCostBetweenTwoTiles(Index,TargetPoint,IncludeDiagonals)*10;
 		data.PreviousIndex = ParentData->Index;	
 	}
 	
@@ -231,11 +238,10 @@ int AMyGridPathfinding::GetMinimumCostBetweenTwoTiles(const FIntPoint& index1,co
 	{
 		case EGridShape::Triangle:
 		case EGridShape::Square:
-			if(Diagonal)
-			{
-				return x > y ? x : y;
-			}
-		
+			// if(Diagonal)
+			// {
+			// 	return x > y ? x : y;
+			// }
 			return x + y;
 		case EGridShape::Hexagon:
 			return FMathf::Max((y - x)/2,0) + x;
@@ -245,9 +251,12 @@ int AMyGridPathfinding::GetMinimumCostBetweenTwoTiles(const FIntPoint& index1,co
 
 FMyPathFindingData AMyGridPathfinding::PullCheapestTileOutOfDiscoveredList()
 {
-	//找到 探索列表中最便宜的 探しリスト中で一番安いタイル引き出して
-	//从 探索链表中删除　探しリストから削除する
-	//加入 分析队列 分析リストに挿入
+	//探しリスト中で一番コストの安いタイル引き出して
+	//探しリストから削除する
+	//分析リストに挿入
+	//找到 探索列表中最便宜的 
+	//从 探索链表中删除　
+	//加入 分析队列 
 	auto iter = DiscoveredTileIndexes.begin();
 	FIntPoint cheapest = *iter;
 	++iter;
@@ -285,34 +294,34 @@ bool AMyGridPathfinding::DiscoverTile(const FMyPathFindingData& TilePathData)
 
 void AMyGridPathfinding::FindPathInterval()
 {
-	bool isFound = false;
-	FMyPathFindingData currentTile;
-	for(int i = 0;i < MaxCalculationPerFrame;i++)
-	{
-		currentTile = PullCheapestTileOutOfDiscoveredList();
-		isFound = DiscoverTile(currentTile);
-		if(isFound)break;
-	}
-	
-
-	if(!isFound && !DiscoveredTileIndexes.IsEmpty())
-	{
-		return;
-	}
-
-	TArray<FIntPoint> path;
-	if(isFound)
-	{
-		while(currentTile.Index != FIntPoint(-999,-999))
-		{
-			path.Add(currentTile.Index);
-			currentTile = PathFindingData.FindRef(currentTile.PreviousIndex);
-		}
-		Algo::Reverse(path);
-		path.Add(TargetPoint);
-	}
-	FindPathCb.Execute(path);
-	IsPathFinding = false;
+	// bool isFound = false;
+	// FMyPathFindingData currentTile;
+	// for(int i = 0;i < MaxCalculationPerFrame;i++)
+	// {
+	// 	currentTile = PullCheapestTileOutOfDiscoveredList();
+	// 	isFound = DiscoverTile(currentTile);
+	// 	if(isFound)break;
+	// }
+	//
+	//
+	// if(!isFound && !DiscoveredTileIndexes.IsEmpty())
+	// {
+	// 	return;
+	// }
+	//
+	// TArray<FIntPoint> path;
+	// if(isFound)
+	// {
+	// 	while(currentTile.Index != FIntPoint(-999,-999))
+	// 	{
+	// 		path.Add(currentTile.Index);
+	// 		currentTile = PathFindingData.FindRef(currentTile.PreviousIndex);
+	// 	}
+	// 	Algo::Reverse(path);
+	// 	path.Add(TargetPoint);
+	// }
+	// FindPathCb.Execute(path);
+	// IsPathFinding = false;
 	// GetWorld()->GetTimerManager().ClearTimer(FindPathHandle);
 }
 
@@ -376,14 +385,14 @@ void AMyGridPathfinding::FindPath(const FIntPoint& start, const FIntPoint& targe
 }
 
 
-void AMyGridPathfinding::UnitFindPath(const FIntPoint& Start,const FIntPoint& Target,TArray<ETileType> WalkableTileTypes,FPathFindingCompleted completed)
+void AMyGridPathfinding::UnitFindPath(const int UnitSide,const FIntPoint& Start,const FIntPoint& Target,TArray<ETileType> WalkableTileTypes,FPathFindingCompleted completed,bool bDiagonal)
 {
 	if(IsInputDataValid(Start,Target))return;
-	
-	for(const auto& pair:PathFindingData)
-	{
-		MyDebugTextAndColorsOnTiles->ClearDebugInfo(pair.Value);
-	}
+	IncludeDiagonals = bDiagonal;
+	// for(const auto& pair:PathFindingData)
+	// {
+	// 	MyDebugTextAndColorsOnTiles->ClearDebugInfo(pair.Value);
+	// }
 
 	DiscoveredTileIndexes.Empty();
 	AnalysedTileIndexes.Empty();
@@ -395,7 +404,7 @@ void AMyGridPathfinding::UnitFindPath(const FIntPoint& Start,const FIntPoint& Ta
 	AddPathFindingData(nullptr,StartPoint);
 	DiscoveredTileIndexes.Add(StartPoint);
 	
-	Async(EAsyncExecution::TaskGraphMainThread,[this,WalkableTileTypes,completed]()-> void
+	Async(EAsyncExecution::TaskGraphMainThread,[this,WalkableTileTypes,completed,UnitSide]()-> void
 	{
 		// UE_LOG(LogTemp,Log,TEXT("Start Async EAsyncExecution::TaskGraph"))
 		FMyPathFindingData currentTile;
@@ -403,7 +412,7 @@ void AMyGridPathfinding::UnitFindPath(const FIntPoint& Start,const FIntPoint& Ta
 		for(;;)
 		{
 			currentTile = PullCheapestTileOutOfDiscoveredList();
-			isFound = DiscoverTileByWalkableType(currentTile,WalkableTileTypes);
+			isFound = DiscoverTileByWalkableType(UnitSide,currentTile,WalkableTileTypes);
 			if(isFound)break;
 
 			if(!isFound && DiscoveredTileIndexes.IsEmpty())
@@ -429,7 +438,7 @@ void AMyGridPathfinding::UnitFindPath(const FIntPoint& Start,const FIntPoint& Ta
 }
 
 
-bool AMyGridPathfinding::DiscoverTileByWalkableType(const FMyPathFindingData& TilePathData,const TArray<ETileType>& WalkableType)
+bool AMyGridPathfinding::DiscoverTileByWalkableType(const int UnitSide,const FMyPathFindingData& TilePathData,const TArray<ETileType>& WalkableType)
 {
 	FIntPoint index = TilePathData.Index;
 	TArray<FIntPoint>  neighbors = GetNeighborIndexesForSquare(index);
@@ -438,14 +447,17 @@ bool AMyGridPathfinding::DiscoverTileByWalkableType(const FMyPathFindingData& Ti
 	{
 		auto pData = MyGrid->GetTileDataByIndex(Element);
 		if(pData == nullptr)return true;
+		//非同一阵营的人
+		if(pData->UnitOnTile != nullptr)return UnitSide != pData->UnitOnTile->GetRuntimeProperty().UnitSide;
+		//是否可以行走
 		if(!IsTileTypeWalkable(pData->TileType))return true;
 		float z = pData->Transform.GetLocation().Z;
-
+		//高低差
 		auto pCenterData = MyGrid->GetTileDataByIndex(index);
 		float center_z = pCenterData->Transform.GetLocation().Z;
 		bool isRemove = FMathf::Abs(z - center_z) > MyGrid->GetGridTileSize().Z;
 		if(isRemove)return isRemove;
-
+		//是否是单位可以行走的格子类型
 		bool Walkable = false;
 		for(const ETileType& t : WalkableType)
 		{
@@ -455,7 +467,65 @@ bool AMyGridPathfinding::DiscoverTileByWalkableType(const FMyPathFindingData& Ti
 				break;
 			}
 		}
-	
+		//是否是斜着走
+		int32 deltaX = pData->Index.X - index.X;
+		int32 deltaY = pData->Index.Y - index.Y;
+		// 判断是否为斜侧方向移动
+		const bool bIsDiagonal = FMath::Abs(deltaX) == 1 && FMath::Abs(deltaY) == 1;
+		if(bIsDiagonal)
+		{
+			if(deltaX > 0 && deltaY > 0)
+			{//右前方
+				//上方和右方 如果有敌人不能走
+				const FIntPoint Right(index.X,index.Y+1);
+				const FIntPoint Up(index.X+1,index.Y);
+				const auto RightUnit = MyGrid->GetUnitOnTile(Right);
+				const auto UpUnit = MyGrid->GetUnitOnTile(Up);
+				bool RightCanWalk = true;
+				bool UpCanWalk = true;
+				if(RightUnit != nullptr)
+					RightCanWalk = RightUnit->IsSameUnitSide(UnitSide);
+				if(UpUnit != nullptr)
+					UpCanWalk = UpUnit->IsSameUnitSide(UnitSide);
+				return !(RightCanWalk && UpCanWalk);
+			}
+			if(deltaX > 0 && deltaY < 0)
+			{//左前方
+				const FIntPoint Left(index.X,index.Y-1);
+				const FIntPoint Up(index.X+1,index.Y);
+				const auto LeftUnit = MyGrid->GetUnitOnTile(Left);
+				const auto UpUnit = MyGrid->GetUnitOnTile(Up);
+				bool LeftCanWalk = true;
+				bool UpCanWalk = true;
+				if(LeftUnit)LeftCanWalk = LeftUnit->IsSameUnitSide(UnitSide);
+				if(UpUnit)UpCanWalk = UpUnit->IsSameUnitSide(UnitSide);
+				return !(LeftCanWalk && UpCanWalk);
+			}
+			if(deltaX < 0 && deltaY < 0)
+			{//左后方
+				const FIntPoint Left(index.X,index.Y-1);
+				const FIntPoint Down(index.X - 1,index.Y);
+				const auto LeftUnit = MyGrid->GetUnitOnTile(Left);
+				const auto DownUnit = MyGrid->GetUnitOnTile(Down);
+				bool LeftCanWalk = true;
+				bool DownCanWalk = true;
+				if(LeftUnit)LeftCanWalk = LeftUnit->IsSameUnitSide(UnitSide);
+				if(DownUnit)DownCanWalk = DownUnit->IsSameUnitSide(UnitSide);
+				return !(LeftCanWalk && DownCanWalk);
+			}
+			if(deltaX < 0 && deltaY > 0)
+			{//右后方
+				const FIntPoint Right(index.X,index.Y+1);
+				const FIntPoint Down(index.X-1,index.Y);
+				const auto RightUnit = MyGrid->GetUnitOnTile(Right);
+				const auto DownUnit = MyGrid->GetUnitOnTile(Down);
+				bool RightCanWalk = true;
+				bool DownCanWalk = true;
+				if(RightUnit)RightCanWalk = RightUnit->IsSameUnitSide(UnitSide);
+				if(DownUnit)DownCanWalk = DownUnit->IsSameUnitSide(UnitSide);
+				return !(RightCanWalk && DownCanWalk);
+			}
+		}
 		return !Walkable;
 	};
 	
@@ -477,8 +547,9 @@ bool AMyGridPathfinding::DiscoverTileByWalkableType(const FMyPathFindingData& Ti
 
 TArray<FIntPoint> AMyGridPathfinding::UnitWalkablePath(const FIntPoint& Start,int MaxWalkPoint,TArray<ETileType> WalkableTileTypes)
 {
+	IncludeDiagonals = false;
 	PathFindingData.Empty();
-
+	
 	TArray<FIntPoint> ReachableTiles;
 	TSet<FIntPoint> DiscoverTiles;
 	FMyPathFindingData data = AddPathFindingData(nullptr,Start);

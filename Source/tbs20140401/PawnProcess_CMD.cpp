@@ -53,15 +53,23 @@ void UPawnProcess_CMD::HandleConfirmInput()
 {
 	Super::HandleConfirmInput();
 
-	TObjectPtr<UUnitAbility> ChosenAbility = UnitInstance->GetOwnAbilityList()[CmdIndex];
+	const TObjectPtr<UUnitAbility> ChosenAbility = UnitInstance->GetOwnAbilityList()[CmdIndex];
 	//是否可以执行
 	if(!ChosenAbility->CanExecute())
 	{
 		return;
 	}
 	UnitInstance->SetChosenAbility(CmdIndex);
+
+	if(ChosenAbility->IsIdle())
+	{
+		PawnInstance->SwitchToIdle();
+	}
+	else
+	{
+		PawnInstance->SwitchToChooseTarget();	
+	}
 	
-	PawnInstance->SwitchToChooseTarget();
 	
 	// if(ChosenAbility->GetSkillData().SkillId == 10001)
 	// {

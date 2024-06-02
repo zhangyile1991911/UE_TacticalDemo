@@ -25,7 +25,6 @@ UCLASS(Blueprintable)
 class TBS20140401_API AMyUnit : public AActor
 {
 	GENERATED_BODY()
-	
 public:	
 	// Sets default values for this actor's properties
 	AMyUnit();
@@ -55,8 +54,12 @@ protected:
 	// uint8 testAnimIndex;
 	
 	FIntPoint GridIndex;
+	FIntPoint MoveIndex;
+
+	FIntPoint DodgeIndex;
 
 	FTimeline UnitMovement;
+	FTimeline DodgeMovement;
 
 	UPROPERTY()
 	TObjectPtr<UCurveFloat> LocationCurve;
@@ -66,6 +69,9 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UCurveFloat> JumpCurve;
+
+	UPROPERTY()
+	TObjectPtr<UCurveFloat> DodgeCurve;
 
 	FUnitData MyData;
 	//属性相关
@@ -105,8 +111,8 @@ protected:
 	float TargetHeight;
 	FVector StartPosition;
 	FVector TargetPosition;
-	FIntPoint TempLocation;
-	FIntPoint AbilityTargetPosition;
+	FIntPoint TempDestinationGridIndex;
+	FIntPoint AbilityTargetGridIndex;
 	
 	UPROPERTY()
 	TObjectPtr<AGrid> MyGrid;
@@ -116,6 +122,7 @@ protected:
 
 	int WalkNum;
 	int AtkNum;
+	
 
 	FPathCompleted PathCompleted;
 protected:
@@ -131,6 +138,11 @@ protected:
 	void HandleLocationAlpha(float Value);
 	UFUNCTION()
 	void FinishLocationAlpha();
+
+	UFUNCTION()
+	void HandleDodgeAlpha(float Value);
+	UFUNCTION()
+	void FinishDodgeAlpha();
 
 	UFUNCTION()
 	void HandleRotationAlpha(float Value);
@@ -160,6 +172,8 @@ public:
 	bool CanDiagonally()const{return MyStats.CanMoveDiagonally;}
 
 	void SetWalkPath(TArray<FIntPoint>,FPathCompleted);
+	void SaveWalkPath(TArray<FIntPoint>);
+	void StartWalkPath(FPathCompleted);
 	void SetWalkableTile(TArray<FIntPoint>);
 	const TArray<FIntPoint>& GetWalkableTiles()const{return WalkableTiles;}
 	bool IsInWalkableTile(const FIntPoint& point)const{return WalkableTiles.Find(point) != INDEX_NONE;}
@@ -167,6 +181,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	const FUnitRunTimeProperty& GetRuntimeProperty()const{return MyRuntimeProperty;}
+	int GetUnitSide()const{return MyRuntimeProperty.UnitSide;}
+	bool IsSameUnitSide(int UnitSide)const{return MyRuntimeProperty.UnitSide == UnitSide;}
 
 	//行动优先级相关
 	int DistanceToAction()const{return CurrentDistanceToAction/MyProperty.DistanceToAction;}
@@ -179,12 +195,12 @@ public:
 	void ShowShadowUnit();
 	void HideShadowUnit();
 
-	void SetTempDestination(FIntPoint location){TempLocation = location;}
-	FIntPoint GetTempDestination()const{return TempLocation;}
-	bool NeedToMove()const{return TempLocation != GridIndex;}
+	void SetTempDestinationGridIndex(FIntPoint location){TempDestinationGridIndex = location;}
+	FIntPoint GetTempDestinationGridIndex()const{return TempDestinationGridIndex;}
+	bool NeedToMove()const{return TempDestinationGridIndex != GridIndex;}
 
-	void SetAbilityTargetPosition(FIntPoint location){AbilityTargetPosition = location;}
-	FIntPoint GetAbilityTargetPosition()const{return AbilityTargetPosition;}
+	void SetAbilityTargetGridIndex(FIntPoint location){AbilityTargetGridIndex = location;}
+	const FIntPoint& GetAbilityTargetGridIndex()const{return AbilityTargetGridIndex;}
 	
 
 	const TArray<TObjectPtr<UUnitAbility>>& GetOwnAbilityList()const{return OwnAbilityList;}
@@ -199,6 +215,12 @@ public:
 	void TurnRight();
 	void TurnForward();
 	void TurnBack();
+
+	void TurnShadowLeft();
+	void TurnShadowRight();
+	void TurnShadowForward();
+	void TurnShadowBack();
+	
 	void ShowDirectionArrow();
 	void HideDirectionArrow();
 	bool CanWalk()const{return WalkNum > 0;}
@@ -208,5 +230,9 @@ public:
 	//タン始まる前に　計算やプロパティリなどセットする
 	void BeforeStartTurn();
 	void FinishTurn();
+
+	void RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex);
+
+	void DoDodgeAnim(const FIntPoint& FromIndex);
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

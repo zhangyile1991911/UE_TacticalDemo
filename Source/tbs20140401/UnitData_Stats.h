@@ -75,4 +75,7 @@ struct FUnitProperty
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int ThunderResistance;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int UnitSide;
 };

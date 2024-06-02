@@ -62,8 +62,9 @@ protected:
 
 	bool ShouldRemovePoint(const FIntPoint& index);
 	bool DiscoverTile(const FMyPathFindingData&);
-	bool DiscoverTileByWalkableType(const FMyPathFindingData&,const TArray<ETileType>&);
+	bool DiscoverTileByWalkableType(const int UnitSide,const FMyPathFindingData&,const TArray<ETileType>&);
 	int GetMinimumCostBetweenTwoTiles(const FIntPoint& index1,const FIntPoint& index2,bool Diagonal);
+
 	
 	FMyPathFindingData PullCheapestTileOutOfDiscoveredList();
 	bool IsInputDataValid(const FIntPoint& start, const FIntPoint& target);
@@ -82,7 +83,7 @@ public:
 	void CanFly(bool fly);
 	void FindPath(const FIntPoint& start,const FIntPoint& target,FPathFindingCompleted completed);
 	
-	void UnitFindPath(const FIntPoint& Start,const FIntPoint& Target,TArray<ETileType> WalkableTileTypes,FPathFindingCompleted Completed);
+	void UnitFindPath(const int UnitSide,const FIntPoint& Start,const FIntPoint& Target,TArray<ETileType> WalkableTileTypes,FPathFindingCompleted Completed,bool bDiagonal=true);
 	TArray<FIntPoint> UnitWalkablePath(const FIntPoint& Start,int MaxWalkPoint,TArray<ETileType> WalkableTileTypes);
 	TArray<FIntPoint> UnitAbilityRange(const FIntPoint& Start,const FIntPoint& Range,int AllowableDeviation = 1);
 	void SetShowDebugOption(bool ShowCost,bool ShowStart,bool ShowTarget)

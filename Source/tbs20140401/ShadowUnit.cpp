@@ -28,7 +28,7 @@ void AShadowUnit::BeginPlay()
 	
 }
 
-void AShadowUnit::RefreshUnit(TObjectPtr<AMyUnit> Master)
+void AShadowUnit::RefreshUnit(TObjectPtr<AMyUnit> Master,UClass* AnimBP)
 {
 	MyMaster = Master;
 	EUnitType UnitType = MyMaster->GetUnitType();
@@ -48,10 +48,26 @@ void AShadowUnit::RefreshUnit(TObjectPtr<AMyUnit> Master)
 		auto skeletalMesh = pData->Assets.SkeletalMesh.LoadSynchronous();
 		SkeletalMeshComponent->SetSkeletalMesh(skeletalMesh);
 	}
-
-	SetActorRotation(FRotator(0,360-90,0));
+	SkeletalMeshComponent->SetAnimInstanceClass(AnimBP);
+	// SetActorRotation(FRotator(0,360-90,0));
 
 	SkeletalMeshComponent->SetVectorParameterValueOnMaterials(TEXT("ColorMultiply"),FVector(1.0f,1.0f,1.0f));
+}
+
+void AShadowUnit::TurnLeft()
+{
+}
+
+void AShadowUnit::TurnRight()
+{
+}
+
+void AShadowUnit::TurnForward()
+{
+}
+
+void AShadowUnit::TurnBack()
+{
 }
 
 // Called every frame

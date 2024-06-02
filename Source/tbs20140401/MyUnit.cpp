@@ -30,7 +30,8 @@ AMyUnit::AMyUnit()
 	
 	CollisionEnabledHasQuery(ECollisionEnabled::QueryOnly);
 	MySkeletalMeshComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel3,ECR_Block);
-
+	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,-90,0));
+	
 	MyChildActor = CreateDefaultSubobject<UChildActorComponent>(TEXT("Shadow"));
 	MyChildActor->SetChildActorClass(AShadowUnit::StaticClass());
 	MyChildActor->SetupAttachment(this->RootComponent);
@@ -38,18 +39,6 @@ AMyUnit::AMyUnit()
 	MyDirectionActor = CreateDefaultSubobject<UChildActorComponent>(TEXT("Direction"));
 	MyDirectionActor->SetupAttachment(this->RootComponent);
 	
-	//加载资源
-	// static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("/Game/Art/Units/Warrior/ABP_Warrior.ABP_Warrior_C"));
-	// if (AnimBP.Succeeded())
-	// {
-	// 	AnimBPClass = AnimBP.Class.Get();
-	// }
-	//
-	// static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkeletalMeshLoad(TEXT("/Script/Engine.SkeletalMesh'/Game/Art/Units/Warrior/SK_Warrior.SK_Warrior'"));
-	// if(SkeletalMeshLoad.Succeeded())
-	// {
-	// 	SkeletalMeshAsset = SkeletalMeshLoad.Object;
-	// }
 
 	static ConstructorHelpers::FObjectFinder<UCurveFloat> LoCurve(TEXT("'/Game/Art/Units/LocationAlpha.LocationAlpha'"));
 	if (LoCurve.Succeeded())
@@ -65,6 +54,11 @@ AMyUnit::AMyUnit()
 	if (JuCurve.Succeeded())
 	{
 		JumpCurve = JuCurve.Object;
+	}
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> DoDCurve(TEXT("'/Game/Art/Units/DodgeAlpha.DodgeAlpha'"));
+	if (DoDCurve.Succeeded())
+	{
+		DodgeCurve = DoDCurve.Object;
 	}
 
 	static ConstructorHelpers::FClassFinder<AActor> ActorBPClass(TEXT("/Game/Art/Units/CPP_IdleDirection"));
@@ -83,7 +77,7 @@ void AMyUnit::OnConstruction(const FTransform& Transform)
 	MyChildActor->CreateChildActor([this](AActor* Actor)
 	{
 		MyShadowUnit = Cast<AShadowUnit>(Actor);	
-		MyShadowUnit->RefreshUnit(this);
+		MyShadowUnit->RefreshUnit(this,nullptr);
 		MyShadowUnit->SetHidden(true);
 	});
 
@@ -91,8 +85,9 @@ void AMyUnit::OnConstruction(const FTransform& Transform)
 	{
 		MyDirection = Cast<AIdleDirection>(Actor);
 		MyDirectionActor->SetVisibility(false);
+		MyDirection->HideArrow();
 		MyDirectionActor->SetRelativeLocation(FVector(0,0,100));
-		MyDirectionActor->SetRelativeRotation(FRotator(0,90,0));
+		// MyDirectionActor->SetRelativeRotation(FRotator(0,0,0));
 		// MyShadowUnit->SetHidden(true);
 	});
 }
@@ -112,6 +107,17 @@ void AMyUnit::BeginPlay()
 		FOnTimelineEvent finish;
 		finish.BindDynamic(this,&AMyUnit::FinishLocationAlpha);
 		UnitMovement.SetTimelineFinishedFunc(finish);
+	}
+	if(DodgeCurve)
+	{
+		FOnTimelineFloat DodgeUpdate;
+		DodgeUpdate.BindDynamic(this,&AMyUnit::HandleDodgeAlpha);
+		DodgeMovement.AddInterpFloat(LocationCurve,DodgeUpdate);
+		DodgeMovement.SetLooping(false);
+		DodgeMovement.SetTimelineLengthMode(TL_LastKeyFrame);
+		FOnTimelineEvent DodgeFinish;
+		DodgeFinish.BindDynamic(this,&AMyUnit::FinishDodgeAlpha);
+		DodgeMovement.SetTimelineFinishedFunc(DodgeFinish);
 	}
 	if(RotationCurve)
 	{
@@ -172,7 +178,7 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	My_Pawn = Pawn;
 	UnitType = My_Pawn == nullptr ? UnitType : My_Pawn->GetCurrentSelectedUnitType();
 	MyGrid = grid;
-	GridIndex = index;
+	MoveIndex = GridIndex = index;
 	const FUnitData* UnitData = GetUnitData(UnitType);
 	if(UnitData == nullptr)
 	{
@@ -230,10 +236,11 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	MyRuntimeProperty.IceResistance = MyProperty.IceResistance;
 	MyRuntimeProperty.WindResistance = MyProperty.WindResistance;
 	MyRuntimeProperty.ThunderResistance = MyProperty.ThunderResistance;
+	MyRuntimeProperty.UnitSide = MyProperty.UnitSide;
 	
-	SetActorRotation(FRotator(0,360-90,0));
+	// SetActorRotation(FRotator(0,360-90,0));
 
-	if(MyShadowUnit)MyShadowUnit->RefreshUnit(this);
+	if(MyShadowUnit)MyShadowUnit->RefreshUnit(this,bp);
 	
 	UpdateHoveredAndSelected();
 
@@ -347,7 +354,7 @@ void AMyUnit::SetWalkPath(TArray<FIntPoint> path,FPathCompleted completed)
 	if(path.IsEmpty())return;
 	auto pData = MyGrid->GetTileDataByIndex(WalkPath[WalkPathIndex]);
 	
-	StartRotateAngles = GetActorForwardVector().Rotation();
+	StartRotateAngles = MySkeletalMeshComponent->GetRelativeRotation();
 	// float AngleDegrees = CalculateRotationAngle(GetActorForwardVector(),GetActorLocation(),pData->Transform.GetLocation());
 	float AngleDegrees = CalculateRotationAngleToTarget(GetActorLocation(),pData->Transform.GetLocation());
 	// UE_LOG(LogTemp,Log,TEXT("cur location %s next location %s"),*GetActorLocation().ToString(),*pData->Transform.GetLocation().ToString());
@@ -355,10 +362,36 @@ void AMyUnit::SetWalkPath(TArray<FIntPoint> path,FPathCompleted completed)
 	// UE_LOG(LogTemp,Log,TEXT("SetWalkPath StartRotateAngles = %f AngleDegrees = %f "),StartRotateAngles.Yaw,AngleDegrees)
 	FinishRotateAngles.Yaw = AngleDegrees - 90;
 	PathCompleted = completed;
-	
+
+	//下一个即将行走的格子是否有单位
+	if(pData->UnitOnTile != nullptr)
+	{
+		pData->UnitOnTile->DoDodgeAnim(GetGridIndex());
+	}
 	IIMyUnitAnimation::Execute_SetUnitAnimationState(MyAnimInstance,EUnitAnimation::Walk);
 	UnitMovement.PlayFromStart();
 }
+
+void AMyUnit::SaveWalkPath(TArray<FIntPoint> Path)
+{
+	WalkPath = Path;
+}
+
+void AMyUnit::StartWalkPath(FPathCompleted Completed)
+{
+	if(WalkPath.IsEmpty())return;
+	
+	PathCompleted = Completed;
+	WalkPathIndex = 1;
+	
+	auto pData = MyGrid->GetTileDataByIndex(WalkPath[WalkPathIndex]);
+	StartRotateAngles = GetActorForwardVector().Rotation();
+	float AngleDegrees = CalculateRotationAngleToTarget(GetActorLocation(),pData->Transform.GetLocation());
+	FinishRotateAngles.Yaw = AngleDegrees - 90;
+	IIMyUnitAnimation::Execute_SetUnitAnimationState(MyAnimInstance,EUnitAnimation::Walk);
+	UnitMovement.PlayFromStart();
+}
+
 
 void AMyUnit::SetWalkableTile(TArray<FIntPoint> walkableTile)
 {
@@ -382,11 +415,13 @@ void AMyUnit::HandleLocationAlpha(float Value)
 	const FTileData* NextData = MyGrid->GetTileDataByIndex(next);
 	if(NextData == nullptr)return;
 
-	const FTileData* CurData = MyGrid->GetTileDataByIndex(GridIndex);
+	const FTileData* CurData = MyGrid->GetTileDataByIndex(MoveIndex);
 	// UE_LOG(LogTemp,Log,TEXT(" cur = %s next = %s"),CurData->Transform.GetLocation().ToString(),NextData->Transform.GetLocation().ToString());
 	FVector tmp = FMath::Lerp(CurData->Transform.GetLocation(),NextData->Transform.GetLocation(),Value);
 	SetActorLocation(tmp);
 }
+
+
 
 void AMyUnit::ShowShadowUnit()
 {
@@ -417,26 +452,46 @@ void AMyUnit::SetChosenAbility(int ChosenIndex)
 
 void AMyUnit::TurnLeft()
 {
-	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,-90,0));
+	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,-180,0));
 	// SetActorRotation(FRotator(0,360-90-90,0));
 }
 
 void AMyUnit::TurnRight()
 {
-	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,90,0));
+	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,0,0));
 	// SetActorRotation(FRotator(0,0,0));
 }
 
 void AMyUnit::TurnForward()
 {
-	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,0,0));
+	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,-90,0));
 	// SetActorRotation(FRotator(0,360-90,0));
 }
 
 void AMyUnit::TurnBack()
 {
-	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,180,0));
+	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,90,0));
 	// SetActorRotation(FRotator(0,90,0));
+}
+
+void AMyUnit::TurnShadowLeft()
+{
+	MyShadowUnit->SetActorRotation(FRotator(0,0,0));
+}
+
+void AMyUnit::TurnShadowRight()
+{
+	MyShadowUnit->SetActorRotation(FRotator(0,-180,0));
+}
+
+void AMyUnit::TurnShadowForward()
+{
+	MyShadowUnit->SetActorRotation(FRotator(0,90,0));
+}
+
+void AMyUnit::TurnShadowBack()
+{
+	MyShadowUnit->SetActorRotation(FRotator(0,-90,0));
 }
 
 void AMyUnit::ShowDirectionArrow()
@@ -458,11 +513,16 @@ void AMyUnit::ShowDirectionArrow()
 	{
 		MyDirection->DoRightArrowAnimation();
 	}
+	FVector ShadowLocation = MyShadowUnit->GetActorLocation();
+	ShadowLocation.Z += 100;
+	MyDirection->SetActorLocation(ShadowLocation);
 	MyDirectionActor->SetVisibility(true);
+	MyDirection->ShowArrow();
 }
 
 void AMyUnit::HideDirectionArrow()
 {
+	MyDirection->HideArrow();
 	MyDirectionActor->SetVisibility(false);
 }
 
@@ -470,13 +530,94 @@ void AMyUnit::BeforeStartTurn()
 {
 	AtkNum = 1;
 	WalkNum = 1;
-	AbilityTargetPosition = FIntPoint(-999,-999);
-	TempLocation = FIntPoint(-999,-999);
+	AbilityTargetGridIndex = FIntPoint(-999,-999);
+	TempDestinationGridIndex = FIntPoint(-999,-999);
 }
 
 void AMyUnit::FinishTurn()
 {
 	CurrentDistanceToAction = 0;
+}
+
+void AMyUnit::RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex)
+{
+	//计算方向 需要旋转角度
+	int DeltaX = TargetIndex.X - StandIndex.X;
+	int DeltaY = TargetIndex.Y - StandIndex.Y;
+	if(DeltaX == 0)
+	{//左右问题
+		if(NeedToMove())
+		{
+			StandIndex.Y < TargetIndex.Y ? TurnShadowRight() : TurnShadowLeft();
+		}
+		else
+		{
+			StandIndex.Y < TargetIndex.Y ? TurnRight() : TurnLeft();	
+		}
+		
+	}
+	else if(DeltaY == 0)
+	{//上下问题
+		if(NeedToMove())
+		{
+			StandIndex.X < TargetIndex.X ? TurnShadowForward() : TurnShadowBack();	
+		}
+		else
+		{
+			StandIndex.X < TargetIndex.X ? TurnForward() : TurnBack();
+		}
+		
+	}
+	else
+	{
+		if(FMath::Abs(DeltaX) > FMath::Abs(DeltaY))
+		{//上下问题
+			if(NeedToMove())
+			{
+				StandIndex.X < TargetIndex.X ? TurnShadowForward() : TurnShadowBack();	
+			}
+			else
+			{
+				StandIndex.X < TargetIndex.X ? TurnForward() : TurnBack();
+			}
+			
+		}
+		else
+		{//左右问题
+			if(NeedToMove())
+			{
+				StandIndex.Y < TargetIndex.Y ? TurnShadowRight() : TurnShadowLeft();	
+			}
+			else
+			{
+				StandIndex.Y < TargetIndex.Y ? TurnRight() : TurnLeft();	
+			}
+		}
+	}
+}
+
+void AMyUnit::DoDodgeAnim(const FIntPoint& FromIndex)
+{
+	DodgeIndex = GridIndex;
+	int DeltaX = GridIndex.X - FromIndex.X;
+	int DeltaY = GridIndex.Y - FromIndex.Y;
+	bool IsUpDown = FMath::RandBool();
+	if(DeltaX == 0)
+	{
+		if(IsUpDown)DodgeIndex.Y += 1;
+		else DodgeIndex.Y -= 1;
+		
+	}
+	else if(DeltaY == 0)
+	{
+		if(IsUpDown)DodgeIndex.X += 1;
+		else DodgeIndex.X -= 1;
+	}
+	else if(DeltaX > 0)
+	{
+		if(IsUpDown)DodgeIndex.Y += 1;
+		else DodgeIndex.Y -= 1;
+	}
 }
 
 
@@ -506,21 +647,11 @@ float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVe
 void AMyUnit::FinishLocationAlpha()
 {
 	UE_LOG(LogTemp,Log,TEXT("FinishLocationAlpha"))
-	MyGrid->AddTileDataUnitByIndex(GridIndex,nullptr);
-	// My_Pawn->UpdateTileStatusByIndex(GridIndex,ETileState::Selected);
-	
-	GridIndex = WalkPath[WalkPathIndex];
+
+	MoveIndex = WalkPath[WalkPathIndex];
 	StartRotateAngles = FinishRotateAngles;
-	auto pData = MyGrid->GetTileDataByIndex(GridIndex);
+	auto pData = MyGrid->GetTileDataByIndex(MoveIndex);
 	StartHeight = pData->Transform.GetLocation().Z;
-	
-	// if(My_Pawn)
-	// {
-	// 	UE_LOG(LogTemp,Log,TEXT("unit on x = %d y = %d"),GridIndex.X,GridIndex.Y)
-	// 	My_Pawn->UpdateTIleByIndex(GridIndex,ETileState::Selected);
-	// }
-	//
-	MyGrid->AddTileDataUnitByIndex(GridIndex,this);
 	
 	StartRotateAngles = FinishRotateAngles;
 	WalkPathIndex++;
@@ -528,17 +659,16 @@ void AMyUnit::FinishLocationAlpha()
 	if(WalkPath.IsEmpty())return;
 	if(WalkPath.Num() <= WalkPathIndex)
 	{
-		// if (MyAnimInstance->GetClass()->ImplementsInterface(UIMyUnitAnimation::StaticClass()))
-		// {
-		// 	UE_LOG(LogTemp,Log,TEXT("ImplementsInterface true"))
-			IIMyUnitAnimation::Execute_SetUnitAnimationState(MyAnimInstance,EUnitAnimation::Idle);
-		// }
+		IIMyUnitAnimation::Execute_SetUnitAnimationState(MyAnimInstance,EUnitAnimation::Idle);
 
 		for(const FIntPoint& one : WalkPath)
 		{
 			MyGrid->RemoveStateFromTile(one,ETileState::PathFinding);
 		}
-		// My_Pawn->UpdateTileStatusByIndex(GridIndex,ETileState::Selected);
+		MyGrid->AddTileDataUnitByIndex(GridIndex,nullptr);
+		GridIndex = MoveIndex;
+		MyGrid->AddTileDataUnitByIndex(GridIndex,this);
+		MyShadowUnit->SetActorLocation(GetActorLocation());
 		PathCompleted.Execute();
 		return;
 	}
@@ -550,14 +680,31 @@ void AMyUnit::FinishLocationAlpha()
 	FinishRotateAngles.Yaw = AngleDegrees - 90;
 
 	TargetHeight = pData->Transform.GetLocation().Z;
-	UE_LOG(LogTemp,Log,TEXT(" StartHeight = %f TargetHeight = %f "),StartHeight,TargetHeight);
+	if(pData->UnitOnTile != nullptr)
+	{
+		pData->UnitOnTile->DoDodgeAnim(MoveIndex);
+	}
+	// UE_LOG(LogTemp,Log,TEXT(" StartHeight = %f TargetHeight = %f "),StartHeight,TargetHeight);
 	UnitMovement.PlayFromStart();
+}
+
+void AMyUnit::HandleDodgeAlpha(float Value)
+{
+	const FTileData* CurrentTile = MyGrid->GetTileDataByIndex(GridIndex);
+	const FTileData* DodgeTile = MyGrid->GetTileDataByIndex(DodgeIndex);
+	auto tmp = FMath::Lerp(CurrentTile->Transform.GetLocation(),DodgeTile->Transform.GetLocation(),Value);
+	SetActorLocation(tmp);
+}
+
+void AMyUnit::FinishDodgeAlpha()
+{
 }
 
 void AMyUnit::HandleRotationAlpha(float Value)
 {
 	auto tmp = FMath::Lerp(StartRotateAngles,FinishRotateAngles,Value);
-	SetActorRotation(tmp);
+	// SetActorRotation(tmp);
+	MySkeletalMeshComponent->SetRelativeRotation(tmp);
 }
 
 void AMyUnit::HandleJumpAlpha(float Value)

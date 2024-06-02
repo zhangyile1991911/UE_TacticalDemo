@@ -29,5 +29,9 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void RefreshUnit(TObjectPtr<AMyUnit> Master);
+	void RefreshUnit(TObjectPtr<AMyUnit> Master,UClass* AnimBP);
+	void TurnLeft();
+	void TurnRight();
+	void TurnForward();
+	void TurnBack();
 };

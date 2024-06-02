@@ -62,3 +62,15 @@ void AIdleDirection::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+
+void AIdleDirection::ShowArrow()
+{
+	bShow = true;
+	// RootComponent->SetVisibility(true);
+}
+
+void AIdleDirection::HideArrow()
+{
+	bShow = false;
+	// RootComponent->SetVisibility(false);
+}

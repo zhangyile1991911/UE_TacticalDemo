@@ -86,6 +86,7 @@ public:
 	FVector GetCursorLocationOnGrid(TObjectPtr<APlayerController> playerIndex,bool traceForGround,bool traceForEmptySpace);
 	FIntPoint GetTileIndexUnderCursor(TObjectPtr<APlayerController> playerIndex,bool traceForGround,bool traceForEmptySpace);
 	FIntPoint GetTileIndexFromWorldLocation(FVector location);
+	
 	void SetUseEnvironment(bool bis);
 	void SetOffsetFromGround(float offset);
 	

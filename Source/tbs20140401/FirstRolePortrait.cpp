@@ -6,6 +6,7 @@
 #include "MyUnit.h"
 #include "My_Utilities.h"
 #include "Components/Image.h"
+#include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 
 void UFirstRolePortrait::RefreshByUnit(TObjectPtr<AMyUnit> Unit)
@@ -41,7 +42,14 @@ void UFirstRolePortrait::RefreshByUnit(TObjectPtr<AMyUnit> Unit)
 	{
 		APs[i]->SetBrushTintColor(bright);
 	}
-	
+
+	int CurHP = Unit->GetRuntimeProperty().HP;
+	int ConfigHP = Unit->GetProperty().HP;
+	FText str = FText::Format(FormatTemplate,CurHP,ConfigHP);
+	HPText->SetText(str);
+
+	float per = static_cast<float>(CurHP)/static_cast<float>(ConfigHP);
+	HPBar->SetPercent(per);
 }
 
 void UFirstRolePortrait::NativeConstruct()

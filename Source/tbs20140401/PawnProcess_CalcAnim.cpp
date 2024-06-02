@@ -31,14 +31,15 @@ void UPawnProcess_CalcAnim::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	ChosenAbilityAnim->CompletedCallback.BindUObject(this,&UPawnProcess_CalcAnim::AbilityCompleted);
 	ChosenAbilityAnim->CompletedEvent.AddUObject(this,&UPawnProcess_CalcAnim::AbilityCompletedEvent);
 
-	FIntPoint CurrentCursor = UnitInstance->GetAbilityTargetPosition();
+	FIntPoint TargetLocation = UnitInstance->GetAbilityTargetGridIndex();
 	//控制流程
-	//todo 目标选择
-	TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbility->TakeTargets(CurrentCursor,PawnInstance->GetMyGrid());
+
+	//目标选择
+	TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbility->TakeTargets(TargetLocation,PawnInstance->GetMyGrid());
 	
 	//计算战报
 	Report = ChosenAbility->DoCalculation(TargetUnits,PawnInstance->GetMyGrid());
-	//todo 进入演出环节
+	//进入演出环节
 	ChosenAbilityAnim->DoAnimation(Report,PawnInstance);
 	
 }

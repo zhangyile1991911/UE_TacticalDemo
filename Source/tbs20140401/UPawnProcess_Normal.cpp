@@ -37,12 +37,15 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 
 	CurrentCursor = PawnInstance->GetSelectedTile();
 	UE_LOG(LogTemp,Log,TEXT(" EnterProcess CurrentCursor (%d,%d)"),CurrentCursor.X,CurrentCursor.Y);
+	//将临时目标设置为当前目标
+	UnitInstance->SetTempDestinationGridIndex(CurrentCursor);
 	PawnInstance->UpdateTileStatusByIndex(CurrentCursor,ETileState::Selected);
 	ClearPathFinding();
 
 	if(CurrentCursor != UnitInstance->GetGridIndex())
 	{
 		PawnInstance->GetMyGridPathFinding()->UnitFindPath(
+			UnitInstance->GetRuntimeProperty().UnitSide,
 			UnitInstance->GetGridIndex(),
 			CurrentCursor,
 			UnitInstance->UnitCanWalkTileType(),
@@ -83,6 +86,7 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 	if(UnitInstance->IsInWalkableRange(CurrentCursor))
 	{//今選んだ目的地は行けるなら　路線を計算する
 		PawnInstance->GetMyGridPathFinding()->UnitFindPath(
+			UnitInstance->GetRuntimeProperty().UnitSide,
 			UnitInstance->GetGridIndex(),
 			CurrentCursor,
 			UnitInstance->UnitCanWalkTileType(),
@@ -126,7 +130,7 @@ void UUPawnProcess_Normal::HandleConfirmInput()
 			return;
 		}
 		UnitInstance->MoveShadowOnTile(TileData->Transform.GetLocation());
-		UnitInstance->SetTempDestination(CurrentCursor);
+		UnitInstance->SetTempDestinationGridIndex(CurrentCursor);
 		PawnInstance->SwitchToCmdInput();
 	}
 
@@ -140,6 +144,7 @@ void UUPawnProcess_Normal::ExitProcess()
 	ClearPathFinding();
 	ClearWalkableTiles();
 	PawnInstance->RemoveTileStateByIndex(CurrentCursor,ETileState::Selected);
+	UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);
 	// UnitInstance->HideShadowUnit();
 }
 
@@ -150,6 +155,7 @@ void UUPawnProcess_Normal::ShowWalkableTiles(TArray<FIntPoint> tiles)
 	{
 		PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::PathFinding);
 	}
+	UnitInstance->SaveWalkPath(tiles);
 	PreviousPathFinding = MoveTemp(tiles);
 }
 

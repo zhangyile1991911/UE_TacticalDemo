@@ -32,7 +32,8 @@ void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 		{
 			const bool bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,StandingUnit);
 			const bool bIsWrapAttack = UBattleFunc::HasWrapAttackUnit(UnitInstance,StandingUnit,PawnInstance->GetMyGrid());
-			const float HitPer = UBattleFunc::CalculateHitRate(UnitInstance,StandingUnit,PawnInstance->GetMyGrid(),bIsWrapAttack,bIsBackAttack);
+			float HitPer = UBattleFunc::CalculateHitRate(UnitInstance,StandingUnit,PawnInstance->GetMyGrid(),bIsWrapAttack,bIsBackAttack);
+			HitPer = FMath::Clamp(HitPer,0,100);
 			//有效目标 确定 详情
 			UnitBriefInfoInstance->ShowTarget(UnitInstance,StandingUnit,HitPer,
 				FText::FromName(TEXT("确定")),FText::FromName(TEXT("详情")));	
@@ -105,9 +106,37 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		PawnInstance->GetMyGrid()->AddStateToTile(next,ETileState::Selected);
 		CurrentCursor = next;
 		UE_LOG(LogTemp,Log,TEXT(" HandleDirectionInput CurrentCursor (%d,%d)"),CurrentCursor.X,CurrentCursor.Y);
+		//所以说X正轴 角度为0
+		UE_LOG(LogTemp,Log,TEXT("%f"),FVector(0,1,0).Rotation().Yaw)//90.000000
+		UE_LOG(LogTemp,Log,TEXT("%f"),FVector(1,0,0).Rotation().Yaw)//0.000000
+		UE_LOG(LogTemp,Log,TEXT("%f"),FVector(0,-1,0).Rotation().Yaw)// -90.000000
+		UE_LOG(LogTemp,Log,TEXT("%f"),FVector(-1,0,0).Rotation().Yaw)//180.000000
+		//当前的朝向和选择的目标夹角是否大于45度 
+		// FVector Location = UnitInstance->GetActorLocation();
+		// const FTileData* TargetTileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
+		// FVector TargetLocation = TargetTileData->Transform.GetLocation();
+		// float Degree = (TargetLocation - Location).GetSafeNormal().Rotation().Yaw;
+		// if(Degree >= 45 && Degree <= -45)
+		// {
+		// 	UnitInstance->TurnShadowForward();
+		// }
+		// else if(Degree >= 90-45 && Degree <= 90+45)
+		// {
+		// 	UnitInstance->TurnShadowRight();
+		// }
+		// else if(Degree >= 180-45 && Degree <= 180+45)
+		// {
+		// 	UnitInstance->TurnShadowBack();
+		// }
+		// else if(Degree >= -90-45 && Degree <= -90+45)
+		// {
+		// 	UnitInstance->TurnShadowLeft();
+		// }
+		UnitInstance->RotateSelfByDestination(CurrentCursor,UnitInstance->GetTempDestinationGridIndex());
 	}
 	
 	ShowTargetUnitBriefInfo(CurrentCursor);
+
 	
 }
 
@@ -127,7 +156,7 @@ void UPawnProcess_ChooseTarget::HandleConfirmInput()
 	
 	if(!ChosenAbility->IsValidTarget(*TileData))return;
 	
-	UnitInstance->SetAbilityTargetPosition(CurrentCursor);
+	UnitInstance->SetAbilityTargetGridIndex(CurrentCursor);
 	if(UnitInstance->NeedToMove())
 	{
 		PawnInstance->SwitchToMove();	
@@ -136,7 +165,7 @@ void UPawnProcess_ChooseTarget::HandleConfirmInput()
 	{
 		PawnInstance->SwitchToCalcAnim();
 	}
-	
+	UnitInstance->HideShadowUnit();
 }
 
 void UPawnProcess_ChooseTarget::ExitProcess()
@@ -148,6 +177,6 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::AbilityRange);
 	}
 	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
-	PawnInstance->UpdateTileStatusByIndex(CurrentCursor,ETileState::Selected);
-	UnitInstance->HideShadowUnit();
+	UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);	
+	// PawnInstance->UpdateTileStatusByIndex(CurrentCursor,ETileState::Selected);
 }

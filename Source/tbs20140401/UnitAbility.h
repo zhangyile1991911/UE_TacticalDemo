@@ -58,4 +58,6 @@ public:
 
 	virtual TArray<TObjectPtr<AMyUnit>> TakeTargets(const FIntPoint& Point,AGrid* MyGrid);
 
+	virtual bool IsIdle(){return false;}
+
 };

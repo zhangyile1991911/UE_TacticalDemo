@@ -442,7 +442,6 @@ void AMy_Pawn::SwitchToIdle()
 void AMy_Pawn::SwitchToChooseTarget()
 {
 	SwitchProcess(ChooseTargetProcess);
-
 }
 
 void AMy_Pawn::SwitchToBeforeTurn()

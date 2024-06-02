@@ -34,7 +34,10 @@ void AAction_FindPath::ExecuteAction(const FIntPoint& index)
 		if(Unit->IsInWalkableTile(Finish))
 		{
 			const FTileData* pData = MyPlayerPawn->GetMyGrid()->GetTileDataByIndex(Start);
-			MyPlayerPawn->GetMyGridPathFinding()->UnitFindPath(Start,Finish,pData->UnitOnTile->UnitCanWalkTileType(),FPathFindingCompleted::CreateUObject(this,&AAction_FindPath::WaitPathFinding));	
+			int UnitSide = pData->UnitOnTile->GetRuntimeProperty().UnitSide;
+			MyPlayerPawn->GetMyGridPathFinding()->UnitFindPath(UnitSide,Start,Finish,
+				pData->UnitOnTile->UnitCanWalkTileType()
+				,FPathFindingCompleted::CreateUObject(this,&AAction_FindPath::WaitPathFinding));	
 		}
 	}
 	else

@@ -65,6 +65,9 @@ void UUGameUI_UnitBriefInfo::RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Attacker,T
 	const float fHP = Defender->GetRuntimeProperty().HP;
 	const float fHPConfig = Defender->GetProperty().HP;
 	HPBar->SetPercent(fHP/fHPConfig);
+	
+	CurHPText->SetText(FText::FromString(FString::FormatAsNumber(fHP)));
+	CurHPText->SetText(FText::FromString(FString::FormatAsNumber(fHPConfig)));
 }
 
 void UUGameUI_UnitBriefInfo::ShowMoveOnly()

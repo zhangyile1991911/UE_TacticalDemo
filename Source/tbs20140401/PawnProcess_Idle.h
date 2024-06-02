@@ -15,6 +15,7 @@ class TBS20140401_API UPawnProcess_Idle : public UPawnProcess
 {
 	GENERATED_BODY()
 protected:
+	bool RotateShadow = false;
 	TObjectPtr<AMyUnit> UnitInstance;
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn) override; 

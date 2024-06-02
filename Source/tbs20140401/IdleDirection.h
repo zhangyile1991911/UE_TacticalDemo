@@ -59,6 +59,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent,BlueprintCallable)
     void DoRightArrowAnimation();
 
-	void ShowArrow(){bShow = true;}
-	void HideArrow(){bShow = false;}
+	void ShowArrow();
+	void HideArrow();
+	
 };

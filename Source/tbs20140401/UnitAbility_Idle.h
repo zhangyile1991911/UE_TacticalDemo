@@ -22,4 +22,6 @@ protected:
 public:
 	// Called every frame
 	// virtual void Tick(float DeltaTime) override;
+	virtual bool CanExecute()override{return true;}
+	virtual bool IsIdle() override{return true;}
 };

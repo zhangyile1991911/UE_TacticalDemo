@@ -12,6 +12,7 @@ void UPawnProcess_BeforeTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	Super::EnterProcess(Pawn);
 
 	auto Unit = PawnInstance->GetMyCombatSystem()->SortActionPriority();
+	if(Unit == nullptr)return;
 	Unit->BeforeStartTurn();
 	PawnInstance->UpdateTileStatusByIndex(Unit->GetGridIndex(),ETileState::Selected);
 }
