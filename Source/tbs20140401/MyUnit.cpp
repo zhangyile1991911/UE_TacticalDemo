@@ -112,7 +112,7 @@ void AMyUnit::BeginPlay()
 	{
 		FOnTimelineFloat DodgeUpdate;
 		DodgeUpdate.BindDynamic(this,&AMyUnit::HandleDodgeAlpha);
-		DodgeMovement.AddInterpFloat(LocationCurve,DodgeUpdate);
+		DodgeMovement.AddInterpFloat(DodgeCurve,DodgeUpdate);
 		DodgeMovement.SetLooping(false);
 		DodgeMovement.SetTimelineLengthMode(TL_LastKeyFrame);
 		FOnTimelineEvent DodgeFinish;
@@ -390,6 +390,10 @@ void AMyUnit::StartWalkPath(FPathCompleted Completed)
 	FinishRotateAngles.Yaw = AngleDegrees - 90;
 	IIMyUnitAnimation::Execute_SetUnitAnimationState(MyAnimInstance,EUnitAnimation::Walk);
 	UnitMovement.PlayFromStart();
+	if(pData->UnitOnTile != nullptr)
+	{
+		pData->UnitOnTile->DoDodgeAnim(GetGridIndex());
+	}
 }
 
 
@@ -404,6 +408,7 @@ void AMyUnit::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	UnitMovement.TickTimeline(DeltaTime);
+	DodgeMovement.TickTimeline(DeltaTime);
 }
 
 void AMyUnit::HandleLocationAlpha(float Value)
@@ -604,20 +609,22 @@ void AMyUnit::DoDodgeAnim(const FIntPoint& FromIndex)
 	bool IsUpDown = FMath::RandBool();
 	if(DeltaX == 0)
 	{
-		if(IsUpDown)DodgeIndex.Y += 1;
-		else DodgeIndex.Y -= 1;
+		if(IsUpDown)DodgeIndex.X += 1;
+		else DodgeIndex.X -= 1;
 		
 	}
 	else if(DeltaY == 0)
 	{
-		if(IsUpDown)DodgeIndex.X += 1;
-		else DodgeIndex.X -= 1;
-	}
-	else if(DeltaX > 0)
-	{
 		if(IsUpDown)DodgeIndex.Y += 1;
 		else DodgeIndex.Y -= 1;
 	}
+	else if(DeltaX > 0)
+	{
+		if(IsUpDown)DodgeIndex.X += 1;
+		else DodgeIndex.X -= 1;
+	}
+	UE_LOG(LogTemp,Log,TEXT("DodgeMovement.PlayFromStart()"))
+	DodgeMovement.PlayFromStart();
 }
 
 
@@ -685,11 +692,13 @@ void AMyUnit::FinishLocationAlpha()
 		pData->UnitOnTile->DoDodgeAnim(MoveIndex);
 	}
 	// UE_LOG(LogTemp,Log,TEXT(" StartHeight = %f TargetHeight = %f "),StartHeight,TargetHeight);
+
 	UnitMovement.PlayFromStart();
 }
 
 void AMyUnit::HandleDodgeAlpha(float Value)
 {
+	UE_LOG(LogTemp,Log,TEXT("HandleDodgeAlpha %f"),Value)
 	const FTileData* CurrentTile = MyGrid->GetTileDataByIndex(GridIndex);
 	const FTileData* DodgeTile = MyGrid->GetTileDataByIndex(DodgeIndex);
 	auto tmp = FMath::Lerp(CurrentTile->Transform.GetLocation(),DodgeTile->Transform.GetLocation(),Value);
@@ -698,6 +707,7 @@ void AMyUnit::HandleDodgeAlpha(float Value)
 
 void AMyUnit::FinishDodgeAlpha()
 {
+	UE_LOG(LogTemp,Log,TEXT("FinishDodgeAlpha "))
 }
 
 void AMyUnit::HandleRotationAlpha(float Value)
