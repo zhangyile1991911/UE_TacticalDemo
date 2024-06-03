@@ -16,6 +16,21 @@ void UUnitAbility_Idle::BeginDestroy()
 	Super::BeginDestroy();
 }
 
+FBattleReport UUnitAbility_Idle::DoCalculation(TObjectPtr<AMyUnit> Target, AGrid* MyGrid)
+{
+	FBattleReport Report;
+	Report.Attacker = OwnerInstance;
+	Report.Defender = nullptr;
+	Report.Cooperator = nullptr;
+	Report.IsBackAtk = false;
+	Report.IsHit = false;
+	Report.IsCritical = false;
+	Report.HitPercent = 0;
+	Report.RandSeed = 0;
+	Report.Damage = 0;
+	return Report;
+}
+
 // Called when the game starts or when spawned
 // void AUnitAbility_Idle::BeginPlay()
 // {

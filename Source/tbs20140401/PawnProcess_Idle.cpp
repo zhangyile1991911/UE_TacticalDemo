@@ -44,7 +44,7 @@ void UPawnProcess_Idle::HandleDirectionInput(const FVector2D& Input)
 		{
 			UnitInstance->TurnForward();	
 		}
-		
+		UnitInstance->SetTempIdleDirection(EUnitDirectType::FORWARD);
 	}
 	else if(Input.Y < 0)
 	{
@@ -57,7 +57,7 @@ void UPawnProcess_Idle::HandleDirectionInput(const FVector2D& Input)
 		{
 			UnitInstance->TurnBack();	
 		}
-		
+		UnitInstance->SetTempIdleDirection(EUnitDirectType::BACKWARD);
 	}
 	else if(Input.X > 0)
 	{
@@ -70,7 +70,7 @@ void UPawnProcess_Idle::HandleDirectionInput(const FVector2D& Input)
 		{
 			UnitInstance->TurnRight();	
 		}
-		
+		UnitInstance->SetTempIdleDirection(EUnitDirectType::RIGHT);
 	}
 	else if(Input.X < 0)
 	{
@@ -83,6 +83,7 @@ void UPawnProcess_Idle::HandleDirectionInput(const FVector2D& Input)
 		{
 			UnitInstance->TurnLeft();	
 		}
+		UnitInstance->SetTempIdleDirection(EUnitDirectType::LEFT);
 	}
 }
 
@@ -103,12 +104,27 @@ void UPawnProcess_Idle::HandleCancelInput()
 void UPawnProcess_Idle::HandleConfirmInput()
 {
 	Super::HandleConfirmInput();
-	UnitInstance->FinishTurn();
-	PawnInstance->SwitchToBeforeTurn();
+	if(UnitInstance->NeedToMove())
+	{
+		PawnInstance->SwitchToMove();
+	}
+	else
+	{
+		UnitInstance->FinishTurn();
+		PawnInstance->SwitchToBeforeTurn();
+	}
 }
 
 void UPawnProcess_Idle::ExitProcess()
 {
 	Super::ExitProcess();
+	if(RotateShadow)
+	{
+		UnitInstance->HideShadowUnit();
+	}
+	else
+	{
+		UnitInstance->ShowShadowUnit();
+	}
 	UnitInstance->HideDirectionArrow();
 }

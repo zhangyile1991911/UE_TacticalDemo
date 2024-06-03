@@ -21,6 +21,16 @@ class AGrid;
 class AMyUnit;
 DECLARE_DELEGATE(FPathCompleted)
 
+
+UENUM(BlueprintType)
+enum class EUnitDirectType:uint8
+{
+	RIGHT UMETA(DisplayName="Right"),
+	LEFT UMETA(DisplayName="Left"),
+	FORWARD UMETA(DisplayName="Forward"),
+	BACKWARD UMETA(DisplayName="Backward")
+};
+
 UCLASS(Blueprintable)
 class TBS20140401_API AMyUnit : public AActor
 {
@@ -113,6 +123,9 @@ protected:
 	FVector TargetPosition;
 	FIntPoint TempDestinationGridIndex;
 	FIntPoint AbilityTargetGridIndex;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	EUnitDirectType TempIdleDirection;
 	
 	UPROPERTY()
 	TObjectPtr<AGrid> MyGrid;
@@ -210,10 +223,14 @@ public:
 	
 
 	TObjectPtr<AIdleDirection> GetMyDirection()const{return MyDirection;}
-	
+	void SetTempIdleDirection(EUnitDirectType Direction){TempIdleDirection = Direction;}
+	UFUNCTION(BlueprintCallable)
 	void TurnLeft();
+	UFUNCTION(BlueprintCallable)
 	void TurnRight();
+	UFUNCTION(BlueprintCallable)
 	void TurnForward();
+	UFUNCTION(BlueprintCallable)
 	void TurnBack();
 
 	void TurnShadowLeft();

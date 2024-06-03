@@ -70,8 +70,17 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
 	Super::EnterProcess(Pawn);
 	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
-	UnitInstance->ShowShadowUnit();
 	ChosenAbility = UnitInstance->GetChosenAbility();
+
+	if(UnitInstance->NeedToMove())
+		UnitInstance->ShowShadowUnit();
+
+	if(ChosenAbility->IsIdle())
+	{
+		PawnInstance->SwitchToIdle();
+		return;
+	}
+	
 	// ChosenAbilityAnim = UnitInstance->GetChosenAbilityAnim();
 
 	CurrentCursor = PawnInstance->GetSelectedTile();
@@ -177,6 +186,7 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::AbilityRange);
 	}
 	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
-	UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);	
+	if(UnitBriefInfoInstance != nullptr)
+		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);	
 	// PawnInstance->UpdateTileStatusByIndex(CurrentCursor,ETileState::Selected);
 }

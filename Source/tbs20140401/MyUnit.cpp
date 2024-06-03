@@ -478,7 +478,7 @@ void AMyUnit::TurnBack()
 	MySkeletalMeshComponent->SetRelativeRotation(FRotator(0,90,0));
 	// SetActorRotation(FRotator(0,90,0));
 }
-
+//-----------------------------------------------------------------------------------------
 void AMyUnit::TurnShadowLeft()
 {
 	MyShadowUnit->SetActorRotation(FRotator(0,0,0));
@@ -603,6 +603,7 @@ void AMyUnit::RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoin
 
 void AMyUnit::DoDodgeAnim(const FIntPoint& FromIndex)
 {
+	DodgeIndex = GridIndex;
 	DodgeIndex = GridIndex;
 	int DeltaX = GridIndex.X - FromIndex.X;
 	int DeltaY = GridIndex.Y - FromIndex.Y;

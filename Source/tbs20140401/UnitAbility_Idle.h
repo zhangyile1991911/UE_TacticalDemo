@@ -24,4 +24,5 @@ public:
 	// virtual void Tick(float DeltaTime) override;
 	virtual bool CanExecute()override{return true;}
 	virtual bool IsIdle() override{return true;}
+	virtual FBattleReport DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid)override; 
 };

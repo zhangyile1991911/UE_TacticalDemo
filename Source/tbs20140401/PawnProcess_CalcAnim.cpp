@@ -12,6 +12,7 @@
 void UPawnProcess_CalcAnim::AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Ability)
 {
 	UnitInstance->AttackDone();
+	//todo
 	PawnInstance->SwitchToIdle();
 }
 
@@ -25,22 +26,24 @@ void UPawnProcess_CalcAnim::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	Super::EnterProcess(Pawn);
 	
 	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
-	ChosenAbility = UnitInstance->GetChosenAbility();
-	ChosenAbilityAnim = UnitInstance->GetChosenAbilityAnim();
 	
-	ChosenAbilityAnim->CompletedCallback.BindUObject(this,&UPawnProcess_CalcAnim::AbilityCompleted);
-	ChosenAbilityAnim->CompletedEvent.AddUObject(this,&UPawnProcess_CalcAnim::AbilityCompletedEvent);
-
-	FIntPoint TargetLocation = UnitInstance->GetAbilityTargetGridIndex();
-	//控制流程
-
-	//目标选择
-	TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbility->TakeTargets(TargetLocation,PawnInstance->GetMyGrid());
-	
-	//计算战报
-	Report = ChosenAbility->DoCalculation(TargetUnits,PawnInstance->GetMyGrid());
-	//进入演出环节
-	ChosenAbilityAnim->DoAnimation(Report,PawnInstance);
+	// UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
+	// ChosenAbility = UnitInstance->GetChosenAbility();
+	// ChosenAbilityAnim = UnitInstance->GetChosenAbilityAnim();
+	//
+	// ChosenAbilityAnim->CompletedCallback.BindUObject(this,&UPawnProcess_CalcAnim::AbilityCompleted);
+	// ChosenAbilityAnim->CompletedEvent.AddUObject(this,&UPawnProcess_CalcAnim::AbilityCompletedEvent);
+	//
+	// FIntPoint TargetLocation = UnitInstance->GetAbilityTargetGridIndex();
+	// //控制流程
+	//
+	// //目标选择
+	// TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbility->TakeTargets(TargetLocation,PawnInstance->GetMyGrid());
+	//
+	// //计算战报
+	// Report = ChosenAbility->DoCalculation(TargetUnits,PawnInstance->GetMyGrid());
+	// //进入演出环节
+	// ChosenAbilityAnim->DoAnimation(Report,PawnInstance);
 	
 }
 

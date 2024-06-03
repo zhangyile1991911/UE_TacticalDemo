@@ -60,17 +60,8 @@ void UPawnProcess_CMD::HandleConfirmInput()
 		return;
 	}
 	UnitInstance->SetChosenAbility(CmdIndex);
-
-	if(ChosenAbility->IsIdle())
-	{
-		PawnInstance->SwitchToIdle();
-	}
-	else
-	{
-		PawnInstance->SwitchToChooseTarget();	
-	}
 	
-	
+	PawnInstance->SwitchToChooseTarget();	
 	// if(ChosenAbility->GetSkillData().SkillId == 10001)
 	// {
 	// 	PawnInstance->SwitchToIdle();
@@ -89,4 +80,5 @@ void UPawnProcess_CMD::ExitProcess()
 	BottomActionBarInstance = nullptr;
 	CmdWidgetInstance = nullptr;
 	UnitInstance->HideShadowUnit();
+	UnitInstance = nullptr;
 }

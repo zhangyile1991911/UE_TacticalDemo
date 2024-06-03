@@ -12,7 +12,7 @@ class AMyUnit;
 class AGrid;
 DECLARE_EVENT_OneParam(AMyCombatSystem,ReSortEvent,const TArray<TObjectPtr<AMyUnit>>&);
 
-UCLASS()
+UCLASS(Blueprintable)
 class TBS20140401_API AMyCombatSystem : public AActor
 {
 	GENERATED_BODY()
