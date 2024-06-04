@@ -15,6 +15,7 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
 #include "BattleFunc.h"
+#include "UnitAbilityAnim.h"
 
 void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 {
@@ -70,7 +71,7 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
 	Super::EnterProcess(Pawn);
 	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
-	ChosenAbility = UnitInstance->GetChosenAbility();
+	ChosenAbility = UnitInstance->GetChosenAbilityAnim();
 
 	if(UnitInstance->NeedToMove())
 		UnitInstance->ShowShadowUnit();
@@ -114,12 +115,12 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
 		PawnInstance->GetMyGrid()->AddStateToTile(next,ETileState::Selected);
 		CurrentCursor = next;
-		UE_LOG(LogTemp,Log,TEXT(" HandleDirectionInput CurrentCursor (%d,%d)"),CurrentCursor.X,CurrentCursor.Y);
+		// UE_LOG(LogTemp,Log,TEXT(" HandleDirectionInput CurrentCursor (%d,%d)"),CurrentCursor.X,CurrentCursor.Y);
 		//所以说X正轴 角度为0
-		UE_LOG(LogTemp,Log,TEXT("%f"),FVector(0,1,0).Rotation().Yaw)//90.000000
-		UE_LOG(LogTemp,Log,TEXT("%f"),FVector(1,0,0).Rotation().Yaw)//0.000000
-		UE_LOG(LogTemp,Log,TEXT("%f"),FVector(0,-1,0).Rotation().Yaw)// -90.000000
-		UE_LOG(LogTemp,Log,TEXT("%f"),FVector(-1,0,0).Rotation().Yaw)//180.000000
+		// UE_LOG(LogTemp,Log,TEXT("%f"),FVector(0,1,0).Rotation().Yaw)//90.000000
+		// UE_LOG(LogTemp,Log,TEXT("%f"),FVector(1,0,0).Rotation().Yaw)//0.000000
+		// UE_LOG(LogTemp,Log,TEXT("%f"),FVector(0,-1,0).Rotation().Yaw)// -90.000000
+		// UE_LOG(LogTemp,Log,TEXT("%f"),FVector(-1,0,0).Rotation().Yaw)//180.000000
 		//当前的朝向和选择的目标夹角是否大于45度 
 		// FVector Location = UnitInstance->GetActorLocation();
 		// const FTileData* TargetTileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
@@ -141,7 +142,7 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		// {
 		// 	UnitInstance->TurnShadowLeft();
 		// }
-		UnitInstance->RotateSelfByDestination(CurrentCursor,UnitInstance->GetTempDestinationGridIndex());
+		UnitInstance->RotateSelfByDestination(UnitInstance->GetTempDestinationGridIndex(),CurrentCursor);
 	}
 	
 	ShowTargetUnitBriefInfo(CurrentCursor);

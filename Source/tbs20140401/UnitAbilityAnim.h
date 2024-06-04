@@ -4,10 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "SkillData.h"
 #include "UnitAbilityAnim.generated.h"
 
 class AUnitAbilityAnim;
 class AMy_Pawn;
+class AMyUnit;
+class AGrid;
+struct FTileData;
+
 DECLARE_EVENT_OneParam(AUnitAbilityAnim,EAbilityComplete,TObjectPtr<AUnitAbilityAnim>)
 DECLARE_DELEGATE_OneParam(FAbilityComplete,TObjectPtr<AUnitAbilityAnim>)
 UCLASS(Abstract)
@@ -20,8 +25,10 @@ public:
 	AUnitAbilityAnim();
 
 protected:
-	// UFUNCTION(BlueprintCallable)
-	// void OnAbilityCalculationCompleted(const TArray<FBattleReport>& Reports);
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	TObjectPtr<AMyUnit> OwnerInstance;
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	FSkillData SkillData;
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -29,6 +36,30 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void OnAbilityCompleted();
 public:
+
+	const FSkillData& GetSkillData()
+	{
+		return SkillData;
+	}
+	void SetSkillData(FSkillData Data,TObjectPtr<AMyUnit> OwnerInst)
+	{
+		SkillData = Data;
+		OwnerInstance = OwnerInst;
+	}
+	const FText& GetAbilityName()const{return SkillData.SkillName;}
+	int GetCost()const{return SkillData.SpendPoint;}
+
+	virtual bool CanExecute(){return false;}
+	virtual bool IsValidTarget(const FTileData& TileData){return false;}
+
+	virtual TArray<FBattleReport> DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets,AGrid* MyGrid,bool NeedCooperator);
+	virtual TArray<FBattleReport> DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid,bool NeedCooperator);
+
+	virtual TArray<FIntPoint> Range(const FIntPoint&){ return TArray<FIntPoint>();}
+	virtual TArray<TObjectPtr<AMyUnit>> TakeTargets(const FIntPoint& Point,AGrid* MyGrid);
+
+	virtual bool IsIdle(){return false;}
+	
 	EAbilityComplete CompletedEvent;
 	FAbilityComplete CompletedCallback;
 	// Called every frame
@@ -36,4 +67,5 @@ public:
 	//blueprintで実現する 
 	UFUNCTION(BlueprintImplementableEvent)
 	void DoAnimation(const FBattleReport& Report,AMy_Pawn* MyPawn);
+	
 };

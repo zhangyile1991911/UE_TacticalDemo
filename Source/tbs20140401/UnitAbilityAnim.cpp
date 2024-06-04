@@ -2,7 +2,8 @@
 
 
 #include "UnitAbilityAnim.h"
-
+#include "BattleReport.h"
+#include "MyUnit.h"
 
 // Sets default values
 AUnitAbilityAnim::AUnitAbilityAnim()
@@ -24,6 +25,7 @@ void AUnitAbilityAnim::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+
 void AUnitAbilityAnim::OnAbilityCompleted()
 {
 	if(CompletedEvent.IsBound())
@@ -35,4 +37,21 @@ void AUnitAbilityAnim::OnAbilityCompleted()
 		CompletedCallback.Execute(this);
 	}
 }
+
+TArray<FBattleReport> AUnitAbilityAnim::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,bool NeedCooperator)
+{
+	return TArray<FBattleReport>();
+}
+
+TArray<FBattleReport> AUnitAbilityAnim::DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid,bool NeedCooperator)
+{
+	return TArray<FBattleReport>();
+}
+
+TArray<TObjectPtr<AMyUnit>> AUnitAbilityAnim::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)
+{
+	TArray<TObjectPtr<AMyUnit>> Targets;
+	return MoveTemp(Targets);
+}
+
 

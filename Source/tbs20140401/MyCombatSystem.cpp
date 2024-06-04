@@ -81,7 +81,7 @@ void AMyCombatSystem::AddUnitInCombat(const FIntPoint& Index, TObjectPtr<AMy_Paw
 	auto pData = MyGrid->GetTileDataByIndex(Index);
 	Unit->SetActorLocation(pData->Transform.GetLocation());
 
-	UnitsInCombat.Add(Index,Unit);
+	UnitsInCombat.Add(Unit->GetUniqueID(),Unit);
 	UnitsActionPriority.Add(Unit);
 	
 	MyGrid->AddTileDataUnitByIndex(Index,Unit);
@@ -91,13 +91,22 @@ void AMyCombatSystem::AddUnitInCombat(const FIntPoint& Index, TObjectPtr<AMy_Paw
 
 void AMyCombatSystem::RemoveUnitInCombat(const FIntPoint& Index)
 {
-	if(UnitsInCombat.Contains(Index))
+	const FTileData* TileData = MyGrid->GetTileDataByIndex(Index);
+	if(TileData == nullptr || TileData->UnitOnTile == nullptr)return;
+	
+	RemoveUnitInCombat(TileData->UnitOnTile);
+}
+
+void AMyCombatSystem::RemoveUnitInCombat(TObjectPtr<AMyUnit> Unit)
+{
+	uint32 id = Unit->GetUniqueID();
+	if(UnitsInCombat.Contains(id))
 	{
-		UnitsActionPriority.Remove(UnitsInCombat[Index]);
-		UnitsInCombat.Remove(Index);
+		UnitsActionPriority.Remove(UnitsInCombat[id]);
+		UnitsInCombat.Remove(id);
 	}
 	
-	MyGrid->RemoveTileDataUnitByIndex(Index);
+	MyGrid->RemoveTileDataUnitByIndex(Unit->GetGridIndex());
 }
 
 void AMyCombatSystem::SetUnitIndexOnGrid(const FIntPoint& Index, TObjectPtr<AMyUnit> Unit)

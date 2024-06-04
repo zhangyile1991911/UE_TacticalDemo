@@ -66,6 +66,8 @@ protected:
 	TObjectPtr<UInputAction> ConfirmAction;
 	UPROPERTY()
 	TObjectPtr<UInputAction> CancelAction;
+	UPROPERTY()
+	TObjectPtr<UInputAction> SpaceAction;
 
 	float m_curArmLength;
 	FVector m_locationDesired;
@@ -149,6 +151,7 @@ protected:
 	void UnitMove(const FInputActionValue& value);
 	void ConfirmClick(const FInputActionValue& value);
 	void CancelClick(const FInputActionValue& value);
+	void SpaceClick(const FInputActionValue& value);
 
 	void SwitchProcess(TObjectPtr<UPawnProcess> NextProcess);
 public:
@@ -175,13 +178,17 @@ public:
 	void SetCurrentSelectedUnitType(EUnitType UnitType){CurrentSelectedUnitType = UnitType;}
 	EUnitType GetCurrentSelectedUnitType()const{return CurrentSelectedUnitType;}
 
-	UFUNCTION(BlueprintCallable)
-	AGrid* GetMyGridForBP()const{return MyGrid;}
+	// UFUNCTION(BlueprintCallable)
+	// AGrid* GetMyGridForBP()const{return MyGrid;}
 	
 	TObjectPtr<AGrid> GetMyGrid()const{return MyGrid;}
 	TObjectPtr<AMyCombatSystem> GetMyCombatSystem()const{return MyCombatSystem;}
 	TObjectPtr<AMyGridPathfinding> GetMyGridPathFinding()const{return MyGridPathfinding;}
+	
 	TObjectPtr<AMyHUD> GetMyHUD()const{return MyHUDInstance;}
+	UFUNCTION(BlueprintCallable)
+	AMyHUD* GetMyHUDForBP()const{return MyHUDInstance;}
+	
 	TObjectPtr<AMyUnit> GetUnitUnderCursor();
 
 	TObjectPtr<AMyUnit> GetSelectedUnit()const{return SelectedUnit;}

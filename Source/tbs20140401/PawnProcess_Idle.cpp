@@ -106,11 +106,11 @@ void UPawnProcess_Idle::HandleConfirmInput()
 	Super::HandleConfirmInput();
 	if(UnitInstance->NeedToMove())
 	{
+		UnitInstance->HideShadowUnit();
 		PawnInstance->SwitchToMove();
 	}
 	else
 	{
-		UnitInstance->FinishTurn();
 		PawnInstance->SwitchToBeforeTurn();
 	}
 }
@@ -118,13 +118,5 @@ void UPawnProcess_Idle::HandleConfirmInput()
 void UPawnProcess_Idle::ExitProcess()
 {
 	Super::ExitProcess();
-	if(RotateShadow)
-	{
-		UnitInstance->HideShadowUnit();
-	}
-	else
-	{
-		UnitInstance->ShowShadowUnit();
-	}
 	UnitInstance->HideDirectionArrow();
 }

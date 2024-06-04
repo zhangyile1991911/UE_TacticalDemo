@@ -117,7 +117,7 @@ void UUPawnProcess_Normal::HandleConfirmInput()
 	{
 		if(PawnInstance->GetMyGrid()->TileGridHasUnit(CurrentCursor))
 		{//进入指令界面(コマンドページへ変遷)
-			
+			PawnInstance->SwitchToCmdInput();
 		}
 	}
 	else

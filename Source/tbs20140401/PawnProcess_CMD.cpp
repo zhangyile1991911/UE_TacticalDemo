@@ -9,7 +9,8 @@
 #include "My_Pawn.h"
 #include "MyCombatSystem.h"
 #include "MyUnit.h"
-#include "UnitAbility.h"
+// #include "UnitAbility.h"
+#include "UnitAbilityAnim.h"
 
 void UPawnProcess_CMD::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
@@ -19,10 +20,11 @@ void UPawnProcess_CMD::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	//GameUIの事例を取得します
 	BottomActionBarInstance = PawnInstance->GetMyHUD()->GetGameUI();
 	//命令パネルを表示します
-	CmdWidgetInstance = BottomActionBarInstance->GetCmdPanel();
-	CmdWidgetInstance->SetVisibility(ESlateVisibility::Visible);
-	CmdWidgetInstance->RefreshUnitCmd(UnitInstance);
-	CmdWidgetInstance->SelectCmd(CmdIndex);
+	CmdWidgetInstance = BottomActionBarInstance->ShowCmdPanel(UnitInstance,CmdIndex);
+	// CmdWidgetInstance = BottomActionBarInstance->GetCmdPanel();
+	// CmdWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+	// CmdWidgetInstance->RefreshUnitCmd(UnitInstance);
+	// CmdWidgetInstance->SelectCmd(CmdIndex);
 }
 
 void UPawnProcess_CMD::TickProcess()
@@ -39,6 +41,7 @@ void UPawnProcess_CMD::HandleDirectionInput(const FVector2D& Index)
 	NextCmdIndex = FMath::Clamp(NextCmdIndex,0,UnitInstance->GetOwnAbilityList().Num()-1);
 	// UE_LOG(LogTemp,Log,TEXT("after CmdIndex = %d"),CmdIndex);
 	CmdWidgetInstance->SelectCmd(NextCmdIndex);
+	UnitInstance->SetChosenAbility(NextCmdIndex);
 	CmdIndex = NextCmdIndex;
 }
 
@@ -53,7 +56,7 @@ void UPawnProcess_CMD::HandleConfirmInput()
 {
 	Super::HandleConfirmInput();
 
-	const TObjectPtr<UUnitAbility> ChosenAbility = UnitInstance->GetOwnAbilityList()[CmdIndex];
+	const TObjectPtr<AUnitAbilityAnim> ChosenAbility = UnitInstance->GetChosenAbilityAnim();
 	//是否可以执行
 	if(!ChosenAbility->CanExecute())
 	{
@@ -61,7 +64,7 @@ void UPawnProcess_CMD::HandleConfirmInput()
 	}
 	UnitInstance->SetChosenAbility(CmdIndex);
 	
-	PawnInstance->SwitchToChooseTarget();	
+	PawnInstance->SwitchToChooseTarget();
 	// if(ChosenAbility->GetSkillData().SkillId == 10001)
 	// {
 	// 	PawnInstance->SwitchToIdle();
@@ -71,6 +74,11 @@ void UPawnProcess_CMD::HandleConfirmInput()
 	// 	PawnInstance->SwitchToChooseTarget();
 	// }
 	
+}
+
+void UPawnProcess_CMD::HandleSpaceInput()
+{
+	PawnInstance->SwitchToIdle();
 }
 
 void UPawnProcess_CMD::ExitProcess()

@@ -92,6 +92,12 @@ AMy_Pawn::AMy_Pawn()
 	{
 		CancelAction = CancelAsset.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> SpaceAsset(TEXT("InputAction'/Game/Input/Actions/SpaceAct'"));
+	if (SpaceAsset.Succeeded())
+	{
+		SpaceAction = SpaceAsset.Object;
+	}
 	
 }
 
@@ -174,8 +180,7 @@ void AMy_Pawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(UnitMoveAction,ETriggerEvent::Triggered,this,&AMy_Pawn::UnitMove);
 		EnhancedInputComponent->BindAction(ConfirmAction,ETriggerEvent::Completed,this,&AMy_Pawn::ConfirmClick);
 		EnhancedInputComponent->BindAction(CancelAction,ETriggerEvent::Completed,this,&AMy_Pawn::CancelClick);
-
-		
+		EnhancedInputComponent->BindAction(SpaceAction,ETriggerEvent::Completed,this,&AMy_Pawn::SpaceClick);
 	}
 }
 
@@ -348,6 +353,12 @@ void AMy_Pawn::CancelClick(const FInputActionValue& value)
 {
 	if(!IsStartGame)return;
 	CurrentProcess->HandleCancelInput();
+}
+
+void AMy_Pawn::SpaceClick(const FInputActionValue& value)
+{
+	if(!IsStartGame)return;
+	CurrentProcess->HandleSpaceInput();
 }
 
 void AMy_Pawn::SwitchProcess(TObjectPtr<UPawnProcess> NextProcess)

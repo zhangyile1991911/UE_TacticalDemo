@@ -62,6 +62,7 @@ protected:
 	
 	void OnActionBarChanged(const TArray<TObjectPtr<AMyUnit>>& array);
 public:
-	TObjectPtr<UCmdWidget> GetCmdPanel()const{return CmdList;}
+	// TObjectPtr<UCmdWidget> GetCmdPanel()const{return CmdList;}
+	TObjectPtr<UCmdWidget> ShowCmdPanel(TObjectPtr<AMyUnit> UnitInstance,int CmdIndex)const;
 	TObjectPtr<UUGameUI_UnitBriefInfo> GetUnitBriefInfo()const{return UnitBriefInfo;}
 };

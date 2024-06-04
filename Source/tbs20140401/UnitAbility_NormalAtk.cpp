@@ -8,7 +8,7 @@
 
 
 // Sets default values
-UUnitAbility_NormalAtk::UUnitAbility_NormalAtk()
+AUnitAbility_NormalAtk::AUnitAbility_NormalAtk()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	// PrimaryActorTick.bCanEverTick = false;
@@ -27,12 +27,12 @@ UUnitAbility_NormalAtk::UUnitAbility_NormalAtk()
 // 	Super::Tick(DeltaTime);
 // }
 
-bool UUnitAbility_NormalAtk::CanExecute()
+bool AUnitAbility_NormalAtk::CanExecute()
 {
 	return true;
 }
 
-TArray<FIntPoint> UUnitAbility_NormalAtk::Range(const FIntPoint& Int32Point)
+TArray<FIntPoint> AUnitAbility_NormalAtk::Range(const FIntPoint& Int32Point)
 {
 	TArray<FIntPoint> Result;
 	Result.Add(FIntPoint(Int32Point.X + 1,Int32Point.Y));
@@ -42,14 +42,14 @@ TArray<FIntPoint> UUnitAbility_NormalAtk::Range(const FIntPoint& Int32Point)
 	return MoveTemp(Result);
 }
 
-bool UUnitAbility_NormalAtk::IsValidTarget(const FTileData& TileData)
+bool AUnitAbility_NormalAtk::IsValidTarget(const FTileData& TileData)
 {
 	return TileData.UnitOnTile == nullptr ?
 		false :
 		TileData.UnitOnTile->GetRuntimeProperty().UnitSide != OwnerInstance->GetRuntimeProperty().UnitSide;
 }
 
-TArray<TObjectPtr<AMyUnit>> UUnitAbility_NormalAtk::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)
+TArray<TObjectPtr<AMyUnit>> AUnitAbility_NormalAtk::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)
 {
 	TArray<TObjectPtr<AMyUnit>> Targets;
 	TObjectPtr<AMyUnit> one = MyGrid->GetUnitOnTile(Point);
@@ -57,18 +57,18 @@ TArray<TObjectPtr<AMyUnit>> UUnitAbility_NormalAtk::TakeTargets(const FIntPoint&
 	return MoveTemp(Targets);
 }
 
-FBattleReport UUnitAbility_NormalAtk::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid)
+TArray<FBattleReport> AUnitAbility_NormalAtk::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,bool NeedCooperator)
 {
-	Super::DoCalculation(Targets, MyGrid);
+	Super::DoCalculation(Targets, MyGrid,NeedCooperator);
 	
-	return DoCalculation(Targets[0],MyGrid);
+	return DoCalculation(Targets[0],MyGrid,NeedCooperator);
 }
 
-FBattleReport UUnitAbility_NormalAtk::DoCalculation(TObjectPtr<AMyUnit> Target, AGrid* MyGrid)
+TArray<FBattleReport> AUnitAbility_NormalAtk::DoCalculation(TObjectPtr<AMyUnit> Target, AGrid* MyGrid,bool NeedCooperator)
 {
-	Super::DoCalculation(Target, MyGrid);
-	
-	TObjectPtr<AMyUnit> Cooperator = UBattleFunc::GetWrapAttackUnit(OwnerInstance,Target,MyGrid);
+	Super::DoCalculation(Target, MyGrid,NeedCooperator);
+	TArray<FBattleReport> ReportList;
+	TObjectPtr<AMyUnit> Cooperator = NeedCooperator ? nullptr : UBattleFunc::GetWrapAttackUnit(OwnerInstance,Target,MyGrid);
 	
 	FBattleReport Report;
 	Report.Attacker = OwnerInstance;
@@ -83,14 +83,19 @@ FBattleReport UUnitAbility_NormalAtk::DoCalculation(TObjectPtr<AMyUnit> Target, 
 	{//未命中
 		Report.Damage = 0;
 		Report.IsHit = false;
-		return MoveTemp(Report);	
+		ReportList.Add(Report);
+		return MoveTemp(ReportList);	
 	}
 
 	Report.IsHit = true;
 	float atk = OwnerInstance->GetRuntimeProperty().Power;
 	float def = Target->GetRuntimeProperty().PhysicDefend;
 	float per = FMath::FRandRange(0.8,1.0f);
-	Report.Damage = FMathf::Clamp(atk * per - def,0,999999999);
-	return MoveTemp(Report);
+	Report.Damage = 40;//FMathf::Clamp(atk * per - def,0,999999999);
+	//扣除血量
+	Target->AddHP(Report.Damage);
+	
+	ReportList.Add(Report);
+	return MoveTemp(ReportList);
 }
 

@@ -7,7 +7,6 @@
 #include "PawnProcess_ChooseTarget.generated.h"
 
 class AUnitAbilityAnim;
-class UUnitAbility;
 class UUGameUI_UnitBriefInfo;
 /**
  * 
@@ -19,7 +18,7 @@ class TBS20140401_API UPawnProcess_ChooseTarget : public UPawnProcess
 protected:
 	FIntPoint CurrentCursor;
 	TArray<FIntPoint> AbilityRange;
-	TObjectPtr<UUnitAbility> ChosenAbility;
+	TObjectPtr<AUnitAbilityAnim> ChosenAbility;
 	// TObjectPtr<AUnitAbilityAnim> ChosenAbilityAnim;
 	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoInstance;
 protected:

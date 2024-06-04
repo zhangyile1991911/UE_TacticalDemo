@@ -22,6 +22,9 @@ struct FUnitData:public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int UniqueID;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	EUnitType Type;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)

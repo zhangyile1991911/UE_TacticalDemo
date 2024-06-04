@@ -82,3 +82,11 @@ void UBottomActionBar::OnActionBarChanged(const TArray<TObjectPtr<AMyUnit>>& arr
 
 	
 }
+
+TObjectPtr<UCmdWidget> UBottomActionBar::ShowCmdPanel(TObjectPtr<AMyUnit> UnitInstance,int CmdIndex) const
+{
+	CmdList->SetVisibility(ESlateVisibility::Visible);
+	CmdList->RefreshUnitCmd(UnitInstance);
+	CmdList->SelectCmd(CmdIndex);
+	return CmdList;
+}

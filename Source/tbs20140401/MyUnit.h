@@ -20,7 +20,7 @@ class AMy_Pawn;
 class AGrid;
 class AMyUnit;
 DECLARE_DELEGATE(FPathCompleted)
-
+DECLARE_DELEGATE(FDeathCompleted)
 
 UENUM(BlueprintType)
 enum class EUnitDirectType:uint8
@@ -58,6 +58,7 @@ protected:
 	// UPROPERTY()
 	// TObjectPtr<USkeletalMesh> SkeletalMeshAsset;
 
+	// int UniqueID;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	EUnitType UnitType = EUnitType::Warrior;
 
@@ -70,6 +71,7 @@ protected:
 
 	FTimeline UnitMovement;
 	FTimeline DodgeMovement;
+	FTimeline DeathMovement;
 
 	UPROPERTY()
 	TObjectPtr<UCurveFloat> LocationCurve;
@@ -82,6 +84,9 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UCurveFloat> DodgeCurve;
+
+	UPROPERTY()
+	TObjectPtr<UCurveFloat> DeathCurve;
 
 	FUnitData MyData;
 	//属性相关
@@ -99,8 +104,8 @@ protected:
 	TArray<TObjectPtr<UChildActorComponent>> OwnAbilityActorComponents;
 	UPROPERTY()
 	TArray<TObjectPtr<AUnitAbilityAnim>> OwnAbilityAnimList;
-	UPROPERTY()
-	TArray<TObjectPtr<UUnitAbility>> OwnAbilityList;
+	// UPROPERTY()
+	// TArray<TObjectPtr<UUnitAbility>> OwnAbilityList;
 	
 	int ChosenAbilityIndex = 0;
 	//技能相关 结束
@@ -138,6 +143,7 @@ protected:
 	
 
 	FPathCompleted PathCompleted;
+	FDeathCompleted DeathCompleted;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -153,6 +159,11 @@ protected:
 	void FinishLocationAlpha();
 
 	UFUNCTION()
+	void HandleDeathAlpha(float Value);
+	UFUNCTION()
+	void FinishDeathAlpha();
+
+	UFUNCTION()
 	void HandleDodgeAlpha(float Value);
 	UFUNCTION()
 	void FinishDodgeAlpha();
@@ -166,7 +177,7 @@ protected:
 	// void FinishRotationAlpha();
 public:
 	virtual void OnConstruction(const FTransform& Transform) override;
-
+	virtual void BeginDestroy() override;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -216,9 +227,9 @@ public:
 	const FIntPoint& GetAbilityTargetGridIndex()const{return AbilityTargetGridIndex;}
 	
 
-	const TArray<TObjectPtr<UUnitAbility>>& GetOwnAbilityList()const{return OwnAbilityList;}
+	const TArray<TObjectPtr<AUnitAbilityAnim>>& GetOwnAbilityList()const{return OwnAbilityAnimList;}
 	void SetChosenAbility(int ChosenIndex);
-	TObjectPtr<UUnitAbility> GetChosenAbility(){return OwnAbilityList[ChosenAbilityIndex];}
+	// TObjectPtr<UUnitAbility> GetChosenAbility(){return OwnAbilityList[ChosenAbilityIndex];}
 	TObjectPtr<AUnitAbilityAnim> GetChosenAbilityAnim(){return OwnAbilityAnimList[ChosenAbilityIndex];}
 	
 
@@ -251,5 +262,11 @@ public:
 	void RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex);
 
 	void DoDodgeAnim(const FIntPoint& FromIndex);
+	void DoDeadAnim(FDeathCompleted Completed);
+	
+	bool IsDead()const{return MyRuntimeProperty.HP <= 0;}
+	void AddHP(int HP){MyRuntimeProperty.HP -= HP;}
+
+	// int GetUniqueID()const{return UniqueID;}
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

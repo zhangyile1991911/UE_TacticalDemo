@@ -5,16 +5,18 @@
 #include "CoreMinimal.h"
 #include "UnitAbility.h"
 #include "BattleReport.h"
+#include "UnitAbilityAnim.h"
 #include "UnitAbility_NormalAtk.generated.h"
 
+
 UCLASS()
-class TBS20140401_API UUnitAbility_NormalAtk : public UUnitAbility
+class TBS20140401_API AUnitAbility_NormalAtk : public AUnitAbilityAnim
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	UUnitAbility_NormalAtk();
+	AUnitAbility_NormalAtk();
 
 protected:
 	// Called when the game starts or when spawned
@@ -27,6 +29,6 @@ public:
 	virtual TArray<FIntPoint> Range(const FIntPoint&) override;
 	virtual bool IsValidTarget(const FTileData& TileData) override;
 	virtual TArray<TObjectPtr<AMyUnit>> TakeTargets(const FIntPoint& Point, AGrid* MyGrid) override;
-	virtual FBattleReport DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets,AGrid* MyGrid) override;
-	virtual FBattleReport DoCalculation(TObjectPtr<AMyUnit> Target, AGrid* MyGrid) override;
+	virtual TArray<FBattleReport> DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets,AGrid* MyGrid,bool NeedCooperator) override;
+	virtual TArray<FBattleReport> DoCalculation(TObjectPtr<AMyUnit> Target, AGrid* MyGrid,bool NeedCooperator) override;
 };

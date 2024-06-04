@@ -26,5 +26,6 @@ public:
 	virtual void HandleDirectionInput(const FVector2D& Input)override;
 	virtual void HandleCancelInput()override;
 	virtual void HandleConfirmInput()override;
+	virtual void HandleSpaceInput() override;
 	virtual void ExitProcess()override;
 };

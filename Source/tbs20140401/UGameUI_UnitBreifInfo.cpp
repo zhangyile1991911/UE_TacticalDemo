@@ -67,7 +67,7 @@ void UUGameUI_UnitBriefInfo::RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Attacker,T
 	HPBar->SetPercent(fHP/fHPConfig);
 	
 	CurHPText->SetText(FText::FromString(FString::FormatAsNumber(fHP)));
-	CurHPText->SetText(FText::FromString(FString::FormatAsNumber(fHPConfig)));
+	MaxHPText->SetText(FText::FromString(FString::FormatAsNumber(fHPConfig)));
 }
 
 void UUGameUI_UnitBriefInfo::ShowMoveOnly()

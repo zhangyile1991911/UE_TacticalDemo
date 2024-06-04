@@ -61,6 +61,12 @@ AMyUnit::AMyUnit()
 		DodgeCurve = DoDCurve.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UCurveFloat> DeDCurve(TEXT("'/Game/Art/Units/DeathAlpha.DeathAlpha'"));
+	if (DeDCurve.Succeeded())
+	{
+		DeathCurve = DeDCurve.Object;
+	}
+
 	static ConstructorHelpers::FClassFinder<AActor> ActorBPClass(TEXT("/Game/Art/Units/CPP_IdleDirection"));
 	if (ActorBPClass.Class != nullptr)
 	{
@@ -92,6 +98,30 @@ void AMyUnit::OnConstruction(const FTransform& Transform)
 	});
 }
 
+void AMyUnit::BeginDestroy()
+{
+	Super::BeginDestroy();
+	//todo 清理一些资源
+	MyGrid = nullptr;
+	My_Pawn = nullptr;
+	OwnAbilityActorComponents.Empty();
+	OwnAbilityAnimList.Empty();
+	WalkPath.Empty();
+	WalkableTiles.Empty();
+
+	MySkeletalMeshComponent = nullptr;
+	MyChildActor = nullptr;
+	MyShadowUnit = nullptr;
+	MyDirectionActor = nullptr;
+	MyDirection = nullptr;
+	
+	LocationCurve = nullptr;
+	RotationCurve = nullptr;
+	JumpCurve = nullptr;
+	DodgeCurve = nullptr;
+	DeathCurve = nullptr;
+}
+
 // Called when the game starts or when spawned
 void AMyUnit::BeginPlay()
 {
@@ -108,6 +138,17 @@ void AMyUnit::BeginPlay()
 		finish.BindDynamic(this,&AMyUnit::FinishLocationAlpha);
 		UnitMovement.SetTimelineFinishedFunc(finish);
 	}
+	if(DeathCurve)
+	{
+		FOnTimelineFloat DeathTmp;
+		DeathTmp.BindDynamic(this,&AMyUnit::HandleDeathAlpha);
+		DeathMovement.AddInterpFloat(DeathCurve,DeathTmp);
+		DeathMovement.SetLooping(false);
+		DeathMovement.SetTimelineLengthMode(TL_LastKeyFrame);
+		FOnTimelineEvent DeathFinish;
+		DeathFinish.BindDynamic(this,&AMyUnit::FinishDeathAlpha);
+		DeathMovement.SetTimelineFinishedFunc(DeathFinish);
+	}
 	if(DodgeCurve)
 	{
 		FOnTimelineFloat DodgeUpdate;
@@ -119,6 +160,7 @@ void AMyUnit::BeginPlay()
 		DodgeFinish.BindDynamic(this,&AMyUnit::FinishDodgeAlpha);
 		DodgeMovement.SetTimelineFinishedFunc(DodgeFinish);
 	}
+	
 	if(RotationCurve)
 	{
 		FOnTimelineFloat tmp;
@@ -185,7 +227,7 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 		UE_LOG(LogTemp,Error,TEXT("%d data is null"),UnitType);
 		return;
 	}
-
+	
 	if(UnitData->Assets.SkeletalMesh.IsValid())
 	{
 		MySkeletalMeshComponent->SetSkeletalMesh(UnitData->Assets.SkeletalMesh.Get());
@@ -253,17 +295,18 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 		{
 		case 10001:
 			{
-				auto Ability = NewObject<UUnitAbility_Idle>(this,TEXT("Idle"));
-				Ability->SetSkillData(AbilityData,this);
-				OwnAbilityList.Add(Ability);
+				// auto Ability = NewObject<UUnitAbility_Idle>(this,TEXT("Idle"));
+				// Ability->SetSkillData(AbilityData,this);
+				// OwnAbilityList.Add(Ability);
 				
 				UChildActorComponent* AAbilityActor = NewObject<UChildActorComponent>(this,UChildActorComponent::StaticClass(),TEXT("IdleActorAnim"));
 				AAbilityActor->SetupAttachment(RootComponent);
 				AAbilityActor->SetChildActorClass(AbilityData.SkillAnim.Get());
 				AAbilityActor->RegisterComponent();
-				AAbilityActor->CreateChildActor([this](AActor* Actor)
+				AAbilityActor->CreateChildActor([this,AbilityData](AActor* Actor)
 				{
 					AUnitAbilityAnim* Ability = Cast<AUnitAbilityAnim>(Actor);
+					Ability->SetSkillData(AbilityData,this);
 					OwnAbilityAnimList.Add(Ability);
 				});
 				
@@ -274,17 +317,18 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 		case 20001:
 		case 30001:
 			{
-				auto Ability = NewObject<UUnitAbility_NormalAtk>(this,TEXT("NormalAttack"));
-				Ability->SetSkillData(AbilityData,this);
-				OwnAbilityList.Add(Ability);
+				// auto Ability = NewObject<UUnitAbility_NormalAtk>(this,TEXT("NormalAttack"));
+				// Ability->SetSkillData(AbilityData,this);
+				// OwnAbilityList.Add(Ability);
 				
 				UChildActorComponent* AbilityActor = NewObject<UChildActorComponent>(this,UChildActorComponent::StaticClass(),TEXT("NormalAttackActorAnim"));
 				AbilityActor->SetupAttachment(RootComponent);
 				AbilityActor->SetChildActorClass(AbilityData.SkillAnim.Get());
 				AbilityActor->RegisterComponent();
-				AbilityActor->CreateChildActor([this](AActor* Actor)
+				AbilityActor->CreateChildActor([this,AbilityData](AActor* Actor)
 				{
 					AUnitAbilityAnim* Ability = Cast<AUnitAbilityAnim>(Actor);
+					Ability->SetSkillData(AbilityData,this);
 					OwnAbilityAnimList.Add(Ability);
 				});
 				OwnAbilityActorComponents.Add(AbilityActor);
@@ -409,6 +453,7 @@ void AMyUnit::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	UnitMovement.TickTimeline(DeltaTime);
 	DodgeMovement.TickTimeline(DeltaTime);
+	DeathMovement.TickTimeline(DeltaTime);
 }
 
 void AMyUnit::HandleLocationAlpha(float Value)
@@ -452,7 +497,7 @@ void AMyUnit::MoveShadowOnTile(const FVector& location)
 
 void AMyUnit::SetChosenAbility(int ChosenIndex)
 {
-	ChosenAbilityIndex = FMathf::Clamp(ChosenIndex,0,OwnAbilityList.Num()-1);
+	ChosenAbilityIndex = FMathf::Clamp(ChosenIndex,0,OwnAbilityAnimList.Num()-1);
 }
 
 void AMyUnit::TurnLeft()
@@ -481,22 +526,22 @@ void AMyUnit::TurnBack()
 //-----------------------------------------------------------------------------------------
 void AMyUnit::TurnShadowLeft()
 {
-	MyShadowUnit->SetActorRotation(FRotator(0,0,0));
+	MyShadowUnit->SetActorRotation(FRotator(0,-180,0));
 }
 
 void AMyUnit::TurnShadowRight()
 {
-	MyShadowUnit->SetActorRotation(FRotator(0,-180,0));
+	MyShadowUnit->SetActorRotation(FRotator(0,0,0));
 }
 
 void AMyUnit::TurnShadowForward()
 {
-	MyShadowUnit->SetActorRotation(FRotator(0,90,0));
+	MyShadowUnit->SetActorRotation(FRotator(0,-90,0));
 }
 
 void AMyUnit::TurnShadowBack()
 {
-	MyShadowUnit->SetActorRotation(FRotator(0,-90,0));
+	MyShadowUnit->SetActorRotation(FRotator(0,90,0));
 }
 
 void AMyUnit::ShowDirectionArrow()
@@ -547,8 +592,8 @@ void AMyUnit::FinishTurn()
 void AMyUnit::RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex)
 {
 	//计算方向 需要旋转角度
-	int DeltaX = TargetIndex.X - StandIndex.X;
-	int DeltaY = TargetIndex.Y - StandIndex.Y;
+	int DeltaX = FMath::Abs(StandIndex.X) - FMath::Abs(TargetIndex.X);
+	int DeltaY = FMath::Abs(StandIndex.Y) - FMath::Abs(TargetIndex.Y);
 	if(DeltaX == 0)
 	{//左右问题
 		if(NeedToMove())
@@ -575,7 +620,7 @@ void AMyUnit::RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoin
 	}
 	else
 	{
-		if(FMath::Abs(DeltaX) > FMath::Abs(DeltaY))
+		if(DeltaX > DeltaY)
 		{//上下问题
 			if(NeedToMove())
 			{
@@ -628,6 +673,12 @@ void AMyUnit::DoDodgeAnim(const FIntPoint& FromIndex)
 	DodgeMovement.PlayFromStart();
 }
 
+void AMyUnit::DoDeadAnim(FDeathCompleted Completed)
+{
+	DeathCompleted = Completed;
+	DeathMovement.PlayFromStart();
+}
+
 
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection)
 {
@@ -674,10 +725,11 @@ void AMyUnit::FinishLocationAlpha()
 			MyGrid->RemoveStateFromTile(one,ETileState::PathFinding);
 		}
 		MyGrid->AddTileDataUnitByIndex(GridIndex,nullptr);
-		GridIndex = MoveIndex;
+		TempDestinationGridIndex = GridIndex = MoveIndex;
 		MyGrid->AddTileDataUnitByIndex(GridIndex,this);
 		MyShadowUnit->SetActorLocation(GetActorLocation());
 		PathCompleted.Execute();
+		PathCompleted.Unbind();
 		return;
 	}
 	
@@ -695,6 +747,20 @@ void AMyUnit::FinishLocationAlpha()
 	// UE_LOG(LogTemp,Log,TEXT(" StartHeight = %f TargetHeight = %f "),StartHeight,TargetHeight);
 
 	UnitMovement.PlayFromStart();
+}
+
+void AMyUnit::HandleDeathAlpha(float Value)
+{
+	if(Value > 0)return;
+
+	UE_LOG(LogTemp,Log,TEXT("AMyUnit::HandleDeathAlpha %f"),Value)
+	IIMyUnitAnimation::Execute_SetUnitAnimationState(MyAnimInstance,EUnitAnimation::Death);
+}
+
+void AMyUnit::FinishDeathAlpha()
+{
+	UE_LOG(LogTemp,Log,TEXT("AMyUnit::FinishDeathAlpha"))
+	DeathCompleted.Execute();
 }
 
 void AMyUnit::HandleDodgeAlpha(float Value)

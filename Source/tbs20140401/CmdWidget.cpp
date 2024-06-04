@@ -5,8 +5,8 @@
 
 #include "CmdCell.h"
 #include "MyUnit.h"
-#include "UnitAbility.h"
-
+// #include "UnitAbility.h"
+#include "UnitAbilityAnim.h"
 void UCmdWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -21,7 +21,7 @@ void UCmdWidget::NativeConstruct()
 
 void UCmdWidget::RefreshUnitCmd(TObjectPtr<AMyUnit> Unit)
 {
-	const TArray<TObjectPtr<UUnitAbility>>& UnitAbilities = Unit->GetOwnAbilityList();
+	const TArray<TObjectPtr<AUnitAbilityAnim>>& UnitAbilities = Unit->GetOwnAbilityList();
 	int i = 0;
 	for(;i < UnitAbilities.Num();i++)
 	{

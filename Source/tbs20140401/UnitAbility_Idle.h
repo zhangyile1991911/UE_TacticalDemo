@@ -3,17 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UnitAbility.h"
+#include "UnitAbilityAnim.h"
 #include "UnitAbility_Idle.generated.h"
 
+
 UCLASS()
-class TBS20140401_API UUnitAbility_Idle : public UUnitAbility
+class TBS20140401_API AUnitAbility_Idle : public AUnitAbilityAnim
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	UUnitAbility_Idle();
+	AUnitAbility_Idle();
 
 protected:
 	// Called when the game starts or when spawned
@@ -24,5 +25,6 @@ public:
 	// virtual void Tick(float DeltaTime) override;
 	virtual bool CanExecute()override{return true;}
 	virtual bool IsIdle() override{return true;}
-	virtual FBattleReport DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid)override; 
+	virtual TArray<FBattleReport> DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,bool NeedCooperator)override;
+	virtual TArray<FBattleReport> DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid,bool NeedCooperator)override; 
 };

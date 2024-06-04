@@ -10,7 +10,10 @@
 void UPawnProcess_BeforeTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
 	Super::EnterProcess(Pawn);
-
+	//第一回合 会是空
+	auto PreUnit =PawnInstance->GetMyCombatSystem()->GetFirstUnit();
+	if(PreUnit != nullptr)PreUnit->FinishTurn();
+	
 	auto Unit = PawnInstance->GetMyCombatSystem()->SortActionPriority();
 	if(Unit == nullptr)return;
 	Unit->BeforeStartTurn();

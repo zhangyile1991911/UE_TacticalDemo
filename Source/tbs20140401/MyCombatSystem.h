@@ -28,7 +28,7 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AMyUnit> FirstUnit;
 	
-	TMap<FIntPoint,TObjectPtr<AMyUnit>> UnitsInCombat;
+	TMap<uint32,TObjectPtr<AMyUnit>> UnitsInCombat;
 
 	TArray<TObjectPtr<AMyUnit>> UnitsActionPriority;
 protected:
@@ -39,6 +39,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void AddUnitInCombat(const FIntPoint& Index,TObjectPtr<AMy_Pawn> myPawn);
 	void RemoveUnitInCombat(const FIntPoint& Index);
+	void RemoveUnitInCombat(TObjectPtr<AMyUnit> Unit);
 	void SetUnitIndexOnGrid(const FIntPoint& Index,TObjectPtr<AMyUnit> Unit);
 	void NextAllUnit();
 	void ResetAllUnit();

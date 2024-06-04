@@ -9,32 +9,32 @@
 // 	UE_LOG(LogTemp,Log,TEXT("AUnitAbility::BeginPlay()"))
 // }
 
-void UUnitAbility::BeginDestroy()
-{
-	UE_LOG(LogTemp,Log,TEXT("AUnitAbility::BeginDestroy()"))
-	UObject::BeginDestroy();
-}
-
-// void UUnitAbility::OnAbilityCalculationCompleted(const TArray<FBattleReport>& Reports)
+// void UUnitAbility::BeginDestroy()
 // {
-// 	
+// 	UE_LOG(LogTemp,Log,TEXT("AUnitAbility::BeginDestroy()"))
+// 	UObject::BeginDestroy();
 // }
-
-FBattleReport UUnitAbility::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid)
-{
-	return FBattleReport();
-}
-
-FBattleReport UUnitAbility::DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid)
-{
-	return FBattleReport();
-}
-
-TArray<TObjectPtr<AMyUnit>> UUnitAbility::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)
-{
-	TArray<TObjectPtr<AMyUnit>> Targets;
-	return MoveTemp(Targets);
-}
+//
+// // void UUnitAbility::OnAbilityCalculationCompleted(const TArray<FBattleReport>& Reports)
+// // {
+// // 	
+// // }
+//
+// FBattleReport UUnitAbility::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid)
+// {
+// 	return FBattleReport();
+// }
+//
+// FBattleReport UUnitAbility::DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid)
+// {
+// 	return FBattleReport();
+// }
+//
+// TArray<TObjectPtr<AMyUnit>> UUnitAbility::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)
+// {
+// 	TArray<TObjectPtr<AMyUnit>> Targets;
+// 	return MoveTemp(Targets);
+// }
 
 // void UUnitAbility::OnAbilityCompleted()
 // {

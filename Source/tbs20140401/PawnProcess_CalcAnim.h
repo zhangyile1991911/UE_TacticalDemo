@@ -9,6 +9,13 @@
 
 class UUnitAbility;
 class AUnitAbilityAnim;
+enum FlowControl
+{
+	IDLE,
+	DEATH,
+	COOPERATION,
+	ATTACK,
+};
 /**
  * 
  */
@@ -18,11 +25,18 @@ class TBS20140401_API UPawnProcess_CalcAnim : public UPawnProcess
 	GENERATED_BODY()
 protected:
 	TArray<FIntPoint> AbilityRange;
-	TObjectPtr<UUnitAbility> ChosenAbility;
+	// TObjectPtr<UUnitAbility> ChosenAbility;
 	TObjectPtr<AUnitAbilityAnim> ChosenAbilityAnim;
-	FBattleReport Report;
+	TArray<FBattleReport> ReportList;
+	int ReportIndex;
 	void AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Ability);
-	void AbilityCompletedEvent(TObjectPtr<AUnitAbilityAnim> Ability);
+	void OnDeathCompleted();
+
+	bool CheckIdle(TObjectPtr<AUnitAbilityAnim> Ability);
+	bool CheckDeath();
+	bool CheckCooperation();
+	void CheckFlow(FlowControl Control);
+	// void AbilityCompletedEvent(TObjectPtr<AUnitAbilityAnim> Ability);
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn)override;
 	virtual void TickProcess()override;
@@ -31,3 +45,4 @@ public:
 	virtual void HandleConfirmInput()override;
 	virtual void ExitProcess()override;
 };
+
