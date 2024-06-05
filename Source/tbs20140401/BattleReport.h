@@ -13,7 +13,7 @@ struct FBattleReport
 	AMyUnit* Attacker;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	AMyUnit* Defender;
+	TArray<AMyUnit*> Defender;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	AMyUnit* Cooperator;

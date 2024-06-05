@@ -6,6 +6,7 @@
 #include "PawnProcess.h"
 #include "PawnProcess_ChooseTarget.generated.h"
 
+class UGameUI_BattleInfo;
 class AUnitAbilityAnim;
 class UUGameUI_UnitBriefInfo;
 /**
@@ -20,7 +21,13 @@ protected:
 	TArray<FIntPoint> AbilityRange;
 	TObjectPtr<AUnitAbilityAnim> ChosenAbility;
 	// TObjectPtr<AUnitAbilityAnim> ChosenAbilityAnim;
+	UPROPERTY()
 	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoInstance;
+	UPROPERTY()
+	TObjectPtr<UGameUI_BattleInfo> BattleInfoInstance;
+
+	bool bIsBackAttack;
+	bool bIsWrapAttack;
 protected:
 	// void AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Ability);
 	// void AbilityCompletedEvent(TObjectPtr<AUnitAbilityAnim> Ability);

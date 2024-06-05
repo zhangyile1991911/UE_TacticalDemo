@@ -16,12 +16,12 @@ void AUnitAbility_Idle::BeginDestroy()
 	Super::BeginDestroy();
 }
 
-TArray<FBattleReport> AUnitAbility_Idle::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,bool NeedCooperator)
+FBattleReport AUnitAbility_Idle::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,bool NeedCooperator)
 {
 	return DoCalculation(nullptr,MyGrid,NeedCooperator);
 }
 
-TArray<FBattleReport> AUnitAbility_Idle::DoCalculation(TObjectPtr<AMyUnit> Target, AGrid* MyGrid,bool NeedCooperator)
+FBattleReport AUnitAbility_Idle::DoCalculation(TObjectPtr<AMyUnit> Target, AGrid* MyGrid,bool NeedCooperator)
 {
 	FBattleReport Report;
 	Report.Attacker = OwnerInstance;
@@ -34,9 +34,7 @@ TArray<FBattleReport> AUnitAbility_Idle::DoCalculation(TObjectPtr<AMyUnit> Targe
 	Report.RandSeed = 0;
 	Report.Damage = 0;
 	
-	TArray<FBattleReport> Reports;
-	Reports.Add(Report);
-	return MoveTemp(Reports);
+	return MoveTemp(Report);
 }
 
 // Called when the game starts or when spawned

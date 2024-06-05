@@ -52,23 +52,30 @@ void UPawnProcess_CalcAnim::CheckFlow(FlowControl Control)
 		}
 		break;
 	}
-	ReportIndex++;
-	if(ReportIndex < ReportList.Num())
-	{
-		CheckFlow(IDLE);
-	}
-	else
-	{
-		PawnInstance->SwitchToIdle();	
-	}
+	PawnInstance->SwitchToIdle();
+	// ReportIndex++;
+	// if(ReportIndex < ReportList.Num())
+	// {
+	// 	CheckFlow(IDLE);
+	// }
+	// else
+	// {
+	// 	PawnInstance->SwitchToIdle();	
+	// }
 	
 }
 
 
 void UPawnProcess_CalcAnim::OnDeathCompleted()
 {
-	const FBattleReport Report = ReportList[ReportIndex];
-	PawnInstance->GetMyCombatSystem()->RemoveUnitInCombat(Report.Defender);
+	DeathNum--;
+	if(DeathNum > 0)return;
+	// const FBattleReport Report = ReportList[ReportIndex];
+	for(auto Defender : Report.Defender)
+	{
+		PawnInstance->GetMyCombatSystem()->RemoveUnitInCombat(Defender);	
+	}
+	
 	CheckFlow(DEATH);
 }
 
@@ -85,31 +92,40 @@ bool UPawnProcess_CalcAnim::CheckIdle(TObjectPtr<AUnitAbilityAnim> Ability)
 
 bool UPawnProcess_CalcAnim::CheckDeath()
 {
-	AMyUnit* Defender = ReportList[ReportIndex].Defender;
-	if(Defender != nullptr)
+	// AMyUnit* Defender = ReportList[ReportIndex].Defender;
+	// AMyUnit* Defender = Report.Defender;
+	// if(Defender != nullptr)
+	// {
+	bool HasDead = false;
+	DeathNum = 0;
+	for(auto Defender : Report.Defender)
 	{
 		if(Defender->IsDead())
 		{
 			FDeathCompleted DeathCompleted;
 			DeathCompleted.BindUObject(this,&UPawnProcess_CalcAnim::OnDeathCompleted);
 			Defender->DoDeadAnim(DeathCompleted);
-			return false;
-		}	
+			HasDead = true;
+			DeathNum++;
+		}
 	}
-	return true;
+	return !HasDead;
 }
 
 bool UPawnProcess_CalcAnim::CheckCooperation()
 {
-	// if(Report.Cooperator != nullptr)
-	// {//夹击
-	// 	ChosenAbilityAnim = Report.Cooperator->GetChosenAbilityAnim();
-	// 	FIntPoint TargetLocation = Report.Defender->GetGridIndex();
-	// 	TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbilityAnim->TakeTargets(TargetLocation,PawnInstance->GetMyGrid());
-	// 	Report = ChosenAbilityAnim->DoCalculation(TargetUnits,PawnInstance->GetMyGrid(),false);
-	// 	ChosenAbilityAnim->DoAnimation(Report,PawnInstance);
-	// 	return;
-	// }
+	// const FBattleReport& Report = ReportList[ReportIndex];
+	if(Report.Cooperator != nullptr)
+	{//夹击
+		ChosenAbilityAnim = Report.Cooperator->GetCooperationAbilityAnim();
+		FIntPoint TargetLocation = Report.Defender[0]->GetGridIndex();
+		TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbilityAnim->TakeTargets(TargetLocation,PawnInstance->GetMyGrid());
+		Report = ChosenAbilityAnim->DoCalculation(TargetUnits,PawnInstance->GetMyGrid(),false);
+		// ReportList.Append(CoReport);
+		ChosenAbilityAnim->CompletedCallback.BindUObject(this,&UPawnProcess_CalcAnim::AbilityCompleted);
+		ChosenAbilityAnim->DoAnimation(Report,PawnInstance);
+		return false;
+	}
 	return true;
 }
 
@@ -127,6 +143,7 @@ void UPawnProcess_CalcAnim::AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Abilit
 
 void UPawnProcess_CalcAnim::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
+	// UE_LOG(LogTemp,Log,TEXT("UPawnProcess_CalcAnim::EnterProcess"))
 	Super::EnterProcess(Pawn);
 	
 	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
@@ -145,10 +162,10 @@ void UPawnProcess_CalcAnim::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbilityAnim->TakeTargets(TargetLocation,PawnInstance->GetMyGrid());
 	
 	//计算战报
-	ReportList = ChosenAbilityAnim->DoCalculation(TargetUnits,PawnInstance->GetMyGrid(),true);
-	ReportIndex = 0;
+	Report = ChosenAbilityAnim->DoCalculation(TargetUnits,PawnInstance->GetMyGrid(),true);
+	// ReportIndex = 0;
 	//进入演出环节
-	ChosenAbilityAnim->DoAnimation(ReportList[ReportIndex],PawnInstance);
+	ChosenAbilityAnim->DoAnimation(Report,PawnInstance);
 }
 
 void UPawnProcess_CalcAnim::TickProcess()
@@ -174,8 +191,9 @@ void UPawnProcess_CalcAnim::HandleConfirmInput()
 
 void UPawnProcess_CalcAnim::ExitProcess()
 {
+	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_CalcAnim::ExitProcess"))
 	Super::ExitProcess();
-	ReportList.Empty();
+	// ReportList.Empty();
 	ChosenAbilityAnim->CompletedCallback.Unbind();
 	ChosenAbilityAnim->CompletedEvent.Clear();
 }

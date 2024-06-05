@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ShadowUnit.h"
 #include "UnitData.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Actor.h"
@@ -129,7 +130,7 @@ protected:
 	FIntPoint TempDestinationGridIndex;
 	FIntPoint AbilityTargetGridIndex;
 
-	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	EUnitDirectType TempIdleDirection;
 	
 	UPROPERTY()
@@ -218,8 +219,10 @@ public:
 	void MoveShadowOnTile(const FVector& location);
 	void ShowShadowUnit();
 	void HideShadowUnit();
+	FVector GetShadowUnitLocation()const{return MyShadowUnit->GetActorLocation();}
 
 	void SetTempDestinationGridIndex(FIntPoint location){TempDestinationGridIndex = location;}
+	void ResetTempDestinationGridIndex(){TempDestinationGridIndex = GridIndex;}
 	FIntPoint GetTempDestinationGridIndex()const{return TempDestinationGridIndex;}
 	bool NeedToMove()const{return TempDestinationGridIndex != GridIndex;}
 
@@ -231,6 +234,8 @@ public:
 	void SetChosenAbility(int ChosenIndex);
 	// TObjectPtr<UUnitAbility> GetChosenAbility(){return OwnAbilityList[ChosenAbilityIndex];}
 	TObjectPtr<AUnitAbilityAnim> GetChosenAbilityAnim(){return OwnAbilityAnimList[ChosenAbilityIndex];}
+	//todo 之后做一个 夹击技能
+	TObjectPtr<AUnitAbilityAnim> GetCooperationAbilityAnim(){return OwnAbilityAnimList[1];}
 	
 
 	TObjectPtr<AIdleDirection> GetMyDirection()const{return MyDirection;}
@@ -267,6 +272,7 @@ public:
 	bool IsDead()const{return MyRuntimeProperty.HP <= 0;}
 	void AddHP(int HP){MyRuntimeProperty.HP -= HP;}
 
+	FRotator GetUnitForward()const;
 	// int GetUniqueID()const{return UniqueID;}
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

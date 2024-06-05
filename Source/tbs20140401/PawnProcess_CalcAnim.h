@@ -27,8 +27,11 @@ protected:
 	TArray<FIntPoint> AbilityRange;
 	// TObjectPtr<UUnitAbility> ChosenAbility;
 	TObjectPtr<AUnitAbilityAnim> ChosenAbilityAnim;
-	TArray<FBattleReport> ReportList;
-	int ReportIndex;
+	// TArray<FBattleReport> ReportList;
+	// int ReportIndex;
+	int DeathNum;
+	int HitNum;
+	FBattleReport Report;
 	void AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Ability);
 	void OnDeathCompleted();
 

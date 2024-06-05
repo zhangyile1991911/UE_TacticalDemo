@@ -15,6 +15,7 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
 #include "BattleFunc.h"
+#include "GameUI_BattleInfo.h"
 #include "UnitAbilityAnim.h"
 
 void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
@@ -31,13 +32,12 @@ void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 		bool IsValid = ChosenAbility->IsValidTarget(*TileData);
 		if(IsValid)
 		{
-			const bool bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,StandingUnit);
-			const bool bIsWrapAttack = UBattleFunc::HasWrapAttackUnit(UnitInstance,StandingUnit,PawnInstance->GetMyGrid());
+			// const bool bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,StandingUnit);
 			float HitPer = UBattleFunc::CalculateHitRate(UnitInstance,StandingUnit,PawnInstance->GetMyGrid(),bIsWrapAttack,bIsBackAttack);
 			HitPer = FMath::Clamp(HitPer,0,100);
 			//有效目标 确定 详情
 			UnitBriefInfoInstance->ShowTarget(UnitInstance,StandingUnit,HitPer,
-				FText::FromName(TEXT("确定")),FText::FromName(TEXT("详情")));	
+				FText::FromName(TEXT("确定")),FText::FromName(TEXT("详情")));
 		}
 		else
 		{//无效 详情
@@ -69,6 +69,7 @@ void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 
 void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
+	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_ChooseTarget::EnterProcess"))
 	Super::EnterProcess(Pawn);
 	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
 	ChosenAbility = UnitInstance->GetChosenAbilityAnim();
@@ -94,6 +95,7 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 
 	auto Tmp = PawnInstance->GetMyHUD()->GetGameUI();
 	UnitBriefInfoInstance = Tmp->GetUnitBriefInfo();
+	BattleInfoInstance = PawnInstance->GetMyHUD()->GetBattleInfoUI();
 	
 }
 
@@ -143,11 +145,52 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		// 	UnitInstance->TurnShadowLeft();
 		// }
 		UnitInstance->RotateSelfByDestination(UnitInstance->GetTempDestinationGridIndex(),CurrentCursor);
+		const TObjectPtr<AMyUnit> TempTarget = PawnInstance->GetMyGrid()->GetUnitOnTile(CurrentCursor);
+		do
+		{
+			bIsBackAttack = false;
+			if(TempTarget == nullptr)
+			{
+				BattleInfoInstance->HideBackAtkTips();
+				break;
+			}
+			FIntPoint Delta = CurrentCursor - UnitInstance->GetTempDestinationGridIndex();
+			if(FMathf::Abs(Delta.X) > 0 && FMathf::Abs(Delta.Y) > 0)break;
+			
+			//必须相邻 才会判断
+			bool IsBack = UBattleFunc::IsBackAttack(UnitInstance,TempTarget);
+			if(!IsBack)
+			{
+				BattleInfoInstance->HideBackAtkTips();
+				break;
+			}
+			BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
+			BattleInfoInstance->ShowBackAtkTips(TempTarget);
+			bIsBackAttack = true;
+		}
+		while (false);
+		
+		do
+		{
+			bIsWrapAttack = false;
+			if(TempTarget == nullptr)
+			{
+				BattleInfoInstance->HideCooperatorTips();
+				break;
+			}
+			auto Cooperator = UBattleFunc::HasWrapAttackUnit(UnitInstance,TempTarget,PawnInstance->GetMyGrid());
+			bIsWrapAttack = Cooperator != nullptr;
+			if(!bIsWrapAttack)
+			{
+				BattleInfoInstance->HideCooperatorTips();
+				break;
+			}
+			BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
+			BattleInfoInstance->ShowCooperatorTips(Cooperator);
+		}
+		while (false);
 	}
-	
 	ShowTargetUnitBriefInfo(CurrentCursor);
-
-	
 }
 
 void UPawnProcess_ChooseTarget::HandleCancelInput()
@@ -180,6 +223,7 @@ void UPawnProcess_ChooseTarget::HandleConfirmInput()
 
 void UPawnProcess_ChooseTarget::ExitProcess()
 {
+	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_ChooseTarget::ExitProcess"))
 	Super::ExitProcess();
 	
 	for(const FIntPoint& one : AbilityRange)
@@ -188,6 +232,18 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 	}
 	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
 	if(UnitBriefInfoInstance != nullptr)
-		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);	
+	{
+		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);
+		UnitBriefInfoInstance = nullptr;
+	}
+		
+
+	if(BattleInfoInstance != nullptr)
+	{
+		BattleInfoInstance->HideBackAtkTips();
+		BattleInfoInstance->SetVisibility(ESlateVisibility::Hidden);
+		BattleInfoInstance = nullptr;
+	}
+		
 	// PawnInstance->UpdateTileStatusByIndex(CurrentCursor,ETileState::Selected);
 }

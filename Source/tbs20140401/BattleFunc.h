@@ -18,15 +18,15 @@ public:
 	// static bool IsWrapAttack(AMyUnit* Attacker,AMyUnit* Defender,AMyUnit* Cooperator);
 
 	UFUNCTION(BlueprintCallable)
-	static bool HasWrapAttackUnit(AMyUnit* Attacker,AMyUnit* Defender,AGrid* Grid);
+	static AMyUnit* HasWrapAttackUnit(AMyUnit* Attacker,AMyUnit* Defender,AGrid* Grid);
 
 	UFUNCTION(BlueprintCallable)
 	static bool IsCritical(AMyUnit* Attacker,AMyUnit* Defender);
 
 	//ここで　TObjectPtrを使わない理由は　blueprintで使えるようにため
 	//TObjectPtr使ったら　UFUNCTIONは正しいパラメーターのタイプが知らなくなりました
-	UFUNCTION(BlueprintCallable)
-	static AMyUnit* GetWrapAttackUnit(AMyUnit* Attacker,AMyUnit* Defender,AGrid* Grid);
+	// UFUNCTION(BlueprintCallable)
+	// static AMyUnit* GetWrapAttackUnit(AMyUnit* Attacker,AMyUnit* Defender,AGrid* Grid);
 	
 	UFUNCTION(BlueprintCallable)
 	static int CalculateHitRate(AMyUnit* Attacker,AMyUnit* Defender,AGrid* MyGrid,bool HasWrap,bool IsBackAtk);

@@ -52,8 +52,8 @@ public:
 	virtual bool CanExecute(){return false;}
 	virtual bool IsValidTarget(const FTileData& TileData){return false;}
 
-	virtual TArray<FBattleReport> DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets,AGrid* MyGrid,bool NeedCooperator);
-	virtual TArray<FBattleReport> DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid,bool NeedCooperator);
+	virtual FBattleReport DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets,AGrid* MyGrid,bool NeedCooperator);
+	virtual FBattleReport DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid,bool NeedCooperator);
 
 	virtual TArray<FIntPoint> Range(const FIntPoint&){ return TArray<FIntPoint>();}
 	virtual TArray<TObjectPtr<AMyUnit>> TakeTargets(const FIntPoint& Point,AGrid* MyGrid);

@@ -25,6 +25,6 @@ public:
 	// virtual void Tick(float DeltaTime) override;
 	virtual bool CanExecute()override{return true;}
 	virtual bool IsIdle() override{return true;}
-	virtual TArray<FBattleReport> DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,bool NeedCooperator)override;
-	virtual TArray<FBattleReport> DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid,bool NeedCooperator)override; 
+	virtual FBattleReport DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,bool NeedCooperator)override;
+	virtual FBattleReport DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid,bool NeedCooperator)override; 
 };

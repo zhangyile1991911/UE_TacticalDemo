@@ -11,6 +11,7 @@
 void UPawnProcess_Idle::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
 	Super::EnterProcess(Pawn);
+	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_Idle::EnterProcess"))
 	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
 	UnitInstance->ShowDirectionArrow();
 	RotateShadow = UnitInstance->NeedToMove(); 
@@ -90,15 +91,15 @@ void UPawnProcess_Idle::HandleDirectionInput(const FVector2D& Input)
 void UPawnProcess_Idle::HandleCancelInput()
 {
 	Super::HandleCancelInput();
-	if(UnitInstance->CanWalk())
+	// if(UnitInstance->CanWalk())
+	// {
+	// 	PawnInstance->SwitchToNormal();
+	// }
+	// else
+	if(UnitInstance->CanAttack() || UnitInstance->CanWalk())
 	{
 		PawnInstance->SwitchToNormal();
 	}
-	else if(UnitInstance->CanAttack() && UnitInstance->CanWalk())
-	{
-		PawnInstance->SwitchToNormal();
-	}
-		
 }
 
 void UPawnProcess_Idle::HandleConfirmInput()
@@ -117,6 +118,7 @@ void UPawnProcess_Idle::HandleConfirmInput()
 
 void UPawnProcess_Idle::ExitProcess()
 {
+	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_Idle::ExitProcess"))
 	Super::ExitProcess();
 	UnitInstance->HideDirectionArrow();
 }

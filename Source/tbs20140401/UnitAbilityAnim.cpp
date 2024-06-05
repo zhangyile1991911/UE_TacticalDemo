@@ -38,14 +38,14 @@ void AUnitAbilityAnim::OnAbilityCompleted()
 	}
 }
 
-TArray<FBattleReport> AUnitAbilityAnim::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,bool NeedCooperator)
+FBattleReport AUnitAbilityAnim::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,bool NeedCooperator)
 {
-	return TArray<FBattleReport>();
+	return FBattleReport();
 }
 
-TArray<FBattleReport> AUnitAbilityAnim::DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid,bool NeedCooperator)
+FBattleReport AUnitAbilityAnim::DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid,bool NeedCooperator)
 {
-	return TArray<FBattleReport>();
+	return FBattleReport();
 }
 
 TArray<TObjectPtr<AMyUnit>> AUnitAbilityAnim::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)

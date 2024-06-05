@@ -57,22 +57,22 @@ TArray<TObjectPtr<AMyUnit>> AUnitAbility_NormalAtk::TakeTargets(const FIntPoint&
 	return MoveTemp(Targets);
 }
 
-TArray<FBattleReport> AUnitAbility_NormalAtk::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,bool NeedCooperator)
+FBattleReport AUnitAbility_NormalAtk::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,bool NeedCooperator)
 {
-	Super::DoCalculation(Targets, MyGrid,NeedCooperator);
+	// Super::DoCalculation(Targets, MyGrid,NeedCooperator);
 	
 	return DoCalculation(Targets[0],MyGrid,NeedCooperator);
 }
 
-TArray<FBattleReport> AUnitAbility_NormalAtk::DoCalculation(TObjectPtr<AMyUnit> Target, AGrid* MyGrid,bool NeedCooperator)
+FBattleReport AUnitAbility_NormalAtk::DoCalculation(TObjectPtr<AMyUnit> Target, AGrid* MyGrid,bool NeedCooperator)
 {
-	Super::DoCalculation(Target, MyGrid,NeedCooperator);
-	TArray<FBattleReport> ReportList;
-	TObjectPtr<AMyUnit> Cooperator = NeedCooperator ? nullptr : UBattleFunc::GetWrapAttackUnit(OwnerInstance,Target,MyGrid);
+	// Super::DoCalculation(Target, MyGrid,NeedCooperator);
+	// TArray<FBattleReport> ReportList;
+	TObjectPtr<AMyUnit> Cooperator = NeedCooperator ? UBattleFunc::HasWrapAttackUnit(OwnerInstance,Target,MyGrid) : nullptr;
 	
 	FBattleReport Report;
 	Report.Attacker = OwnerInstance;
-	Report.Defender = Target;
+	Report.Defender.Add(Target);
 	Report.IsCritical = UBattleFunc::IsCritical(OwnerInstance,Target);;
 	Report.Cooperator = Cooperator;
 	Report.IsBackAtk = UBattleFunc::IsBackAttack(OwnerInstance,Target);
@@ -83,19 +83,18 @@ TArray<FBattleReport> AUnitAbility_NormalAtk::DoCalculation(TObjectPtr<AMyUnit> 
 	{//未命中
 		Report.Damage = 0;
 		Report.IsHit = false;
-		ReportList.Add(Report);
-		return MoveTemp(ReportList);	
+		return MoveTemp(Report);	
 	}
 
 	Report.IsHit = true;
 	float atk = OwnerInstance->GetRuntimeProperty().Power;
 	float def = Target->GetRuntimeProperty().PhysicDefend;
 	float per = FMath::FRandRange(0.8,1.0f);
-	Report.Damage = 40;//FMathf::Clamp(atk * per - def,0,999999999);
+	Report.Damage = 100;//FMathf::Clamp(atk * per - def,0,999999999);
 	//扣除血量
 	Target->AddHP(Report.Damage);
 	
-	ReportList.Add(Report);
-	return MoveTemp(ReportList);
+	// ReportList.Add(Report);
+	return MoveTemp(Report);
 }
 

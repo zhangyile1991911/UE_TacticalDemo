@@ -9,6 +9,7 @@
 
 void UPawnProcess_BeforeTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
+	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_BeforeTurn::EnterProcess"))
 	Super::EnterProcess(Pawn);
 	//第一回合 会是空
 	auto PreUnit =PawnInstance->GetMyCombatSystem()->GetFirstUnit();
@@ -44,5 +45,6 @@ void UPawnProcess_BeforeTurn::HandleConfirmInput()
 
 void UPawnProcess_BeforeTurn::ExitProcess()
 {
+	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_BeforeTurn::ExitProcess"))
 	Super::ExitProcess();
 }

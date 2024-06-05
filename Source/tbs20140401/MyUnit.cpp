@@ -563,9 +563,17 @@ void AMyUnit::ShowDirectionArrow()
 	{
 		MyDirection->DoRightArrowAnimation();
 	}
-	FVector ShadowLocation = MyShadowUnit->GetActorLocation();
-	ShadowLocation.Z += 100;
-	MyDirection->SetActorLocation(ShadowLocation);
+	if(NeedToMove())
+	{
+		FVector ShadowLocation = MyShadowUnit->GetActorLocation();
+		ShadowLocation.Z += 100;
+		MyDirection->SetActorLocation(ShadowLocation);	
+	}
+	else
+	{
+		MyDirection->SetActorLocation(GetActorLocation());
+	}
+	
 	MyDirectionActor->SetVisibility(true);
 	MyDirection->ShowArrow();
 }
@@ -679,6 +687,15 @@ void AMyUnit::DoDeadAnim(FDeathCompleted Completed)
 	DeathMovement.PlayFromStart();
 }
 
+
+FRotator AMyUnit::GetUnitForward() const
+{
+	if(NeedToMove())
+	{
+		return MyShadowUnit->GetActorRotation();
+	}
+	return MySkeletalMeshComponent->GetRelativeRotation();
+}
 
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection)
 {

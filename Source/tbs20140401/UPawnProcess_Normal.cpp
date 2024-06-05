@@ -16,6 +16,7 @@
 
 void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
+	UE_LOG(LogTemp,Log,TEXT("UUPawnProcess_Normal::EnterProcess"))
 	Super::EnterProcess(Pawn);
 
 	// DoubleCheck = false;
@@ -55,6 +56,10 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	auto Tmp = PawnInstance->GetMyHUD()->GetGameUI();
 	UnitBriefInfoInstance = Tmp->GetUnitBriefInfo();
 	ShowTargetUnitBriefInfo(CurrentCursor);
+
+	UnitInstance->HideShadowUnit();
+
+	PawnInstance->LookAtUnit(UnitInstance);
 	// PawnInstance->GetMyGrid()->AddStateToTile(CurrentCursor,ETileState::Selected);
 }
 
@@ -104,7 +109,7 @@ void UUPawnProcess_Normal::HandleCancelInput()
 	UE_LOG(LogTemp,Log,TEXT("UUPawnProcess_Normal::HandleCancelInput()"))
 	
 	ClearPathFinding();
-	
+	UnitInstance->ResetTempDestinationGridIndex();
 	PawnInstance->UpdateTileStatusByIndex(UnitInstance->GetGridIndex(),ETileState::Selected);
 	PawnInstance->SwitchToIdle();
 }
@@ -129,6 +134,7 @@ void UUPawnProcess_Normal::HandleConfirmInput()
 			UE_LOG(LogTemp,Log,TEXT("CurrentCursor(%d,%d)"),CurrentCursor.X,CurrentCursor.Y);
 			return;
 		}
+		PawnInstance->LookAtGrid(CurrentCursor);
 		UnitInstance->MoveShadowOnTile(TileData->Transform.GetLocation());
 		UnitInstance->SetTempDestinationGridIndex(CurrentCursor);
 		PawnInstance->SwitchToCmdInput();
@@ -139,6 +145,7 @@ void UUPawnProcess_Normal::HandleConfirmInput()
 
 void UUPawnProcess_Normal::ExitProcess()
 {
+	UE_LOG(LogTemp,Log,TEXT("UUPawnProcess_Normal::ExitProcess"))
 	Super::ExitProcess();
 	Completed.Unbind();
 	ClearPathFinding();

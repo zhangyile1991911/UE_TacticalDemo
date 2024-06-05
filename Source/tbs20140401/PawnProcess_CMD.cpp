@@ -14,6 +14,7 @@
 
 void UPawnProcess_CMD::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
+	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_CMD::EnterProcess"))
 	Super::EnterProcess(Pawn);
 	CmdIndex = 0;
 	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
@@ -83,6 +84,7 @@ void UPawnProcess_CMD::HandleSpaceInput()
 
 void UPawnProcess_CMD::ExitProcess()
 {
+	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_CMD::ExitProcess"))
 	Super::ExitProcess();
 	CmdWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 	BottomActionBarInstance = nullptr;

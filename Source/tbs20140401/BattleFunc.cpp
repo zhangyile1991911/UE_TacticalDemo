@@ -1,4 +1,6 @@
 ﻿#include "BattleFunc.h"
+
+#include "Command.h"
 #include "MyUnit.h"
 #include "Grid.h"
 
@@ -24,7 +26,7 @@
 // 	return false;
 // }
 
-bool UBattleFunc::HasWrapAttackUnit(AMyUnit* Attacker, AMyUnit* Defender,AGrid* Grid)
+AMyUnit* UBattleFunc::HasWrapAttackUnit(AMyUnit* Attacker, AMyUnit* Defender,AGrid* Grid)
 {
 	FIntPoint Center = Defender->GetGridIndex();
 	TArray<FIntPoint> Around;
@@ -34,21 +36,41 @@ bool UBattleFunc::HasWrapAttackUnit(AMyUnit* Attacker, AMyUnit* Defender,AGrid* 
 	Around.Add(FIntPoint(Center.X,Center.Y+1));
 	Around.Add(FIntPoint(Center.X,Center.Y-1));
 
-	Around.RemoveAll([Attacker,Defender,Grid](const FIntPoint& one)->bool
+	Around.RemoveAll([Attacker,Grid](const FIntPoint& one)->bool
 	{
 		if(!Grid->IsValidGridIndex(one))return true;
-		if(!Grid->TileGridHasUnit(one))return true;
-
 		TObjectPtr<AMyUnit> Unit = Grid->GetUnitOnTile(one);
+		if(Unit == nullptr)return true;
+		if(Attacker->GetUniqueID() == Unit->GetUniqueID())return true;
 		if(Unit->GetRuntimeProperty().UnitSide != Attacker->GetRuntimeProperty().UnitSide)
 			return true;
-
 		return false;
 	});
+
+	FVector AttackerLocation = Attacker->NeedToMove() ? Attacker->GetShadowUnitLocation() : Attacker->GetActorLocation();
+	FVector DirA = AttackerLocation - Defender->GetActorLocation();
+	DirA = DirA.GetSafeNormal();
+
+	for(auto one : Around)
+	{
+		// if(one.X ==Attacker->GetGridIndex().X || one.Y == Attacker->GetGridIndex().Y)
+		// 	return Grid->GetUnitOnTile(one);
+		auto Cooperator = Grid->GetUnitOnTile(one);
+		FVector DirB = Cooperator->GetActorLocation() - Defender->GetActorLocation();
+		DirB = DirB.GetSafeNormal();
+
+		// 计算点积
+		float DotProduct = FVector::DotProduct(DirA, DirB);
+		// 计算夹角的弧度
+		float AngleRadians = FMath::Acos(DotProduct);
+		// 将弧度转换为度
+		float AngleDegrees = FMath::RadiansToDegrees(AngleRadians);
+		UE_LOG(LogTemp,Log,TEXT("DirA %s DirB %s"),*DirA.ToString(),*DirB.ToString())
+		UE_LOG(LogTemp,Log,TEXT("HasWrapAttackUnit AngleDegrees = %f"),AngleDegrees)
+		if(AngleDegrees > 90)return Cooperator;
+	}
 	
-	//todo 判断是否需要存在夹击 计算夹角
-	
-	return false;
+	return nullptr;
 }
 
 bool UBattleFunc::IsCritical(AMyUnit* Attacker,AMyUnit* Defender)
@@ -60,18 +82,22 @@ bool UBattleFunc::IsCritical(AMyUnit* Attacker,AMyUnit* Defender)
 	return Num <= Lucky;
 }
 
-AMyUnit* UBattleFunc::GetWrapAttackUnit(AMyUnit* Attacker, AMyUnit* Defender,AGrid* Grid)
-{
-	return nullptr;
-}
+// AMyUnit* UBattleFunc::GetWrapAttackUnit(AMyUnit* Attacker, AMyUnit* Defender,AGrid* Grid)
+// {
+// 	return nullptr;
+// }
 
 bool UBattleFunc::IsBackAttack(AMyUnit* Attacker,AMyUnit* Defender)
 {
-	FVector AttackerForward = Attacker->GetActorForwardVector();
-	FVector DefenderForward = Defender->GetActorForwardVector();
-
-	FVector Result = AttackerForward.Cross(DefenderForward);
-	return FMathf::Floor(Result.Length()) == 0;
+	FRotator AttackRotation = Attacker->GetUnitForward();
+	FRotator DefenderRotation = Defender->GetUnitForward();
+	float DeltaYaw = FMathf::Abs(AttackRotation.Yaw - DefenderRotation.Yaw);
+	return DeltaYaw <= 0.0001f;
+	// FVector AttackerForward = Attacker->GetActorForwardVector();
+	// FVector DefenderForward = Defender->GetActorForwardVector();
+	//
+	// FVector Result = AttackerForward.Cross(DefenderForward);
+	// return FMathf::Floor(Result.Length()) == 0;
 }
 
 /*

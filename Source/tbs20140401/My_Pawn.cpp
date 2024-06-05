@@ -416,8 +416,8 @@ void AMy_Pawn::LookAtGrid(const FIntPoint& index)
 {
 	auto pData = MyGrid->GetTileDataByIndex(index);
 	if(pData == nullptr)return;
-
-	m_springArm->SetWorldLocation(pData->Transform.GetLocation());
+	m_locationDesired = pData->Transform.GetLocation();
+	// m_springArm->SetWorldLocation(pData->Transform.GetLocation());
 }
 
 void AMy_Pawn::LookAtUnit(TObjectPtr<AMyUnit> Unit)
