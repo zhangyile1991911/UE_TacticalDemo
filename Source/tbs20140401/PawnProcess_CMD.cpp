@@ -39,7 +39,7 @@ void UPawnProcess_CMD::HandleDirectionInput(const FVector2D& Index)
 	// UE_LOG(LogTemp,Log,TEXT("x = %f y = %f"),Index.X,Index.Y);
 	// UE_LOG(LogTemp,Log,TEXT("before CmdIndex = %d"),CmdIndex);
 	int NextCmdIndex = CmdIndex - Index.Y;
-	NextCmdIndex = FMath::Clamp(NextCmdIndex,0,UnitInstance->GetOwnAbilityList().Num()-1);
+	NextCmdIndex = FMath::Clamp(NextCmdIndex,0,UnitInstance->GetSelectableAbilityNum());
 	// UE_LOG(LogTemp,Log,TEXT("after CmdIndex = %d"),CmdIndex);
 	CmdWidgetInstance->SelectCmd(NextCmdIndex);
 	UnitInstance->SetChosenAbility(NextCmdIndex);
@@ -50,6 +50,10 @@ void UPawnProcess_CMD::HandleCancelInput()
 {
 	Super::HandleCancelInput();
 	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_CMD::HandleCancelInput()"))
+	if(UnitInstance->HasAttackDone())
+	{
+		return;
+	}
 	PawnInstance->SwitchToNormal();
 }
 

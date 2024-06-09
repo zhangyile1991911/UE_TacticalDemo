@@ -30,7 +30,7 @@ AMyUnit* UBattleFunc::HasWrapAttackUnit(AMyUnit* Attacker, AMyUnit* Defender,AGr
 {
 	FIntPoint Center = Defender->GetGridIndex();
 	TArray<FIntPoint> Around;
-
+	Around.Reserve(4);
 	Around.Add(FIntPoint(Center.X+1,Center.Y));
 	Around.Add(FIntPoint(Center.X-1,Center.Y));
 	Around.Add(FIntPoint(Center.X,Center.Y+1));
@@ -42,8 +42,9 @@ AMyUnit* UBattleFunc::HasWrapAttackUnit(AMyUnit* Attacker, AMyUnit* Defender,AGr
 		TObjectPtr<AMyUnit> Unit = Grid->GetUnitOnTile(one);
 		if(Unit == nullptr)return true;
 		if(Attacker->GetUniqueID() == Unit->GetUniqueID())return true;
-		if(Unit->GetRuntimeProperty().UnitSide != Attacker->GetRuntimeProperty().UnitSide)
-			return true;
+		// if(Unit->GetRuntimeProperty().UnitSide != Attacker->GetRuntimeProperty().UnitSide)
+		// 	return true;
+		if(!Unit->IsFriend(Attacker->GetUnitSide()))return true;
 		return false;
 	});
 
@@ -89,15 +90,20 @@ bool UBattleFunc::IsCritical(AMyUnit* Attacker,AMyUnit* Defender)
 
 bool UBattleFunc::IsBackAttack(AMyUnit* Attacker,AMyUnit* Defender)
 {
-	FRotator AttackRotation = Attacker->GetUnitForward();
+	if(Attacker == Defender)return false;
+	FRotator AttackRotation;
+	if(Attacker->NeedToMove())
+	{
+		AttackRotation = Attacker->GetShadowUnitRotation();
+	}
+	else
+	{
+		AttackRotation = Attacker->GetUnitForward();		
+	}
 	FRotator DefenderRotation = Defender->GetUnitForward();
 	float DeltaYaw = FMathf::Abs(AttackRotation.Yaw - DefenderRotation.Yaw);
 	return DeltaYaw <= 0.0001f;
-	// FVector AttackerForward = Attacker->GetActorForwardVector();
-	// FVector DefenderForward = Defender->GetActorForwardVector();
-	//
-	// FVector Result = AttackerForward.Cross(DefenderForward);
-	// return FMathf::Floor(Result.Length()) == 0;
+
 }
 
 /*

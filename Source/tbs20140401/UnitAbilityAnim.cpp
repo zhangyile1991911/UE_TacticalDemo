@@ -3,6 +3,7 @@
 
 #include "UnitAbilityAnim.h"
 #include "BattleReport.h"
+#include "MyGridPathfinding.h"
 #include "MyUnit.h"
 
 // Sets default values
@@ -16,7 +17,6 @@ AUnitAbilityAnim::AUnitAbilityAnim()
 void AUnitAbilityAnim::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -36,6 +36,11 @@ void AUnitAbilityAnim::OnAbilityCompleted()
 	{
 		CompletedCallback.Execute(this);
 	}
+}
+
+bool AUnitAbilityAnim::IsValidUnit(TObjectPtr<AMyUnit> Unit)
+{
+	return false;
 }
 
 FBattleReport AUnitAbilityAnim::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,bool NeedCooperator)

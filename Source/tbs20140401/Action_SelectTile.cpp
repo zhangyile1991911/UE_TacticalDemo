@@ -25,7 +25,9 @@ void AAction_SelectTile::ExecuteAction(const FIntPoint& index)
 	MyPlayerPawn->GetMyGrid()->RemoveStateAllTile(ETileState::Reachable);
 	if(Unit)
 	{
-		TArray<FIntPoint> WalkableTiles = MyPlayerPawn->GetMyGridPathFinding()->UnitWalkablePath(index,5,Unit->UnitCanWalkTileType());
+		TArray<FIntPoint> WalkableTiles = MyPlayerPawn->GetMyGridPathFinding()->UnitWalkablePath(index,5,
+			Unit->UnitCanWalkTileType(),
+			Unit->GetUnitSide());
 		for(auto& one : WalkableTiles)
 		{
 			MyPlayerPawn->GetMyGrid()->AddStateToTile(one,ETileState::Reachable);	

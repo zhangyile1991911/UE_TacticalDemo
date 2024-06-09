@@ -220,7 +220,7 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	My_Pawn = Pawn;
 	UnitType = My_Pawn == nullptr ? UnitType : My_Pawn->GetCurrentSelectedUnitType();
 	MyGrid = grid;
-	MoveIndex = GridIndex = index;
+	TempDestinationGridIndex = MoveIndex = GridIndex = index;
 	const FUnitData* UnitData = GetUnitData(UnitType);
 	if(UnitData == nullptr)
 	{
@@ -279,6 +279,7 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	MyRuntimeProperty.WindResistance = MyProperty.WindResistance;
 	MyRuntimeProperty.ThunderResistance = MyProperty.ThunderResistance;
 	MyRuntimeProperty.UnitSide = MyProperty.UnitSide;
+	AtkNum = MyProperty.AtkCount;
 	
 	// SetActorRotation(FRotator(0,360-90,0));
 
@@ -322,6 +323,40 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 				// OwnAbilityList.Add(Ability);
 				
 				UChildActorComponent* AbilityActor = NewObject<UChildActorComponent>(this,UChildActorComponent::StaticClass(),TEXT("NormalAttackActorAnim"));
+				AbilityActor->SetupAttachment(RootComponent);
+				AbilityActor->SetChildActorClass(AbilityData.SkillAnim.Get());
+				AbilityActor->RegisterComponent();
+				AbilityActor->CreateChildActor([this,AbilityData](AActor* Actor)
+				{
+					AUnitAbilityAnim* Ability = Cast<AUnitAbilityAnim>(Actor);
+					Ability->SetSkillData(AbilityData,this);
+					OwnAbilityAnimList.Add(Ability);
+				});
+				OwnAbilityActorComponents.Add(AbilityActor);
+			}
+			break;
+		case 30002:
+			{
+				UChildActorComponent* AbilityActor = NewObject<UChildActorComponent>(this,UChildActorComponent::StaticClass(),TEXT("AreaAttackActorAnim"));
+				AbilityActor->SetupAttachment(RootComponent);
+				AbilityActor->SetChildActorClass(AbilityData.SkillAnim.Get());
+				AbilityActor->RegisterComponent();
+				AbilityActor->CreateChildActor([this,AbilityData](AActor* Actor)
+				{
+					AUnitAbilityAnim* Ability = Cast<AUnitAbilityAnim>(Actor);
+					Ability->SetSkillData(AbilityData,this);
+					OwnAbilityAnimList.Add(Ability);
+				});
+				OwnAbilityActorComponents.Add(AbilityActor);
+			}
+			break;
+		case 10003:
+			{
+				// auto Ability = NewObject<UUnitAbility_NormalAtk>(this,TEXT("NormalAttack"));
+				// Ability->SetSkillData(AbilityData,this);
+				// OwnAbilityList.Add(Ability);
+				
+				UChildActorComponent* AbilityActor = NewObject<UChildActorComponent>(this,UChildActorComponent::StaticClass(),TEXT("CooperateActorAnim"));
 				AbilityActor->SetupAttachment(RootComponent);
 				AbilityActor->SetChildActorClass(AbilityData.SkillAnim.Get());
 				AbilityActor->RegisterComponent();
@@ -495,9 +530,28 @@ void AMyUnit::MoveShadowOnTile(const FVector& location)
 		
 }
 
+int AMyUnit::GetSelectableAbilityNum()
+{
+	int num = 0;
+	for(auto one : OwnAbilityAnimList)
+	{
+		if(one->IsShowOnCmd())num++;
+	}
+	return num;
+}
+
 void AMyUnit::SetChosenAbility(int ChosenIndex)
 {
 	ChosenAbilityIndex = FMathf::Clamp(ChosenIndex,0,OwnAbilityAnimList.Num()-1);
+}
+
+TObjectPtr<AUnitAbilityAnim> AMyUnit::GetCooperationAbilityAnim()
+{
+	for(auto one : OwnAbilityAnimList)
+	{
+		if(one->IsCooperate())return one;
+	}
+	return nullptr;
 }
 
 void AMyUnit::TurnLeft()
@@ -586,10 +640,10 @@ void AMyUnit::HideDirectionArrow()
 
 void AMyUnit::BeforeStartTurn()
 {
-	AtkNum = 1;
+	AtkNum = MyProperty.AtkCount;
 	WalkNum = 1;
 	AbilityTargetGridIndex = FIntPoint(-999,-999);
-	TempDestinationGridIndex = FIntPoint(-999,-999);
+	TempDestinationGridIndex = GridIndex;
 }
 
 void AMyUnit::FinishTurn()

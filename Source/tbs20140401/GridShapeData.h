@@ -34,6 +34,7 @@ enum class ETileState
 	PathFinding UMETA(DisplayName="PathFinding"),
 	Reachable UMETA(DisplayName="Reachable"),
 	AbilityRange UMETA(DisplayName="AbilityRange"),
+	IndicatorRange UMETA(DisplayName="IndicatorRange"),
 	Invalid UMETA(DisplayName="Invalid")
 };
 

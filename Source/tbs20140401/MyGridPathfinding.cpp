@@ -45,6 +45,7 @@ void AMyGridPathfinding::Tick(float DeltaTime)
 TArray<FIntPoint> AMyGridPathfinding::GetNeighborIndexesForSquare(const FIntPoint& index)
 {
 	TArray<FIntPoint> result;
+	result.Reserve(8);
 	result.Add(FIntPoint(index.X+1,index.Y));
 	result.Add(FIntPoint(index.X,index.Y+1));
 	result.Add(FIntPoint(index.X-1,index.Y));
@@ -197,13 +198,13 @@ FMyPathFindingData AMyGridPathfinding::AddPathFindingData(const FMyPathFindingDa
 	case ETileType::FlyingUnitsOnly:
 		break;
 	case ETileType::Normal:
-		data.CostToEnterTile = 10;
+		data.CostToEnterTile = GridCost;
 		break;
 	case ETileType::DoubleCost:
-		data.CostToEnterTile = 20;
+		data.CostToEnterTile = GridCost * 2;
 		break;
 	case ETileType::TripleCost:
-		data.CostToEnterTile = 30;
+		data.CostToEnterTile = GridCost * 3;
 	}
 
 	if(ParentData == nullptr)
@@ -221,7 +222,7 @@ FMyPathFindingData AMyGridPathfinding::AddPathFindingData(const FMyPathFindingDa
 		const bool bIsDiagonal = FMath::Abs(deltaX) == 1 && FMath::Abs(deltaY) == 1;
 		data.CostFromStart = ParentData->CostFromStart + (bIsDiagonal ? data.CostToEnterTile+data.CostToEnterTile/2 : data.CostToEnterTile);//GetMinimumCostBetweenTwoTiles(Index,StartPoint,IncludeDiagonals);
 		// data.CostFromStart = ParentData->CostFromStart + data.CostToEnterTile;
-		data.MinimumCostToTarget = GetMinimumCostBetweenTwoTiles(Index,TargetPoint,IncludeDiagonals)*10;
+		data.MinimumCostToTarget = GetMinimumCostBetweenTwoTiles(Index,TargetPoint,IncludeDiagonals)*GridCost;
 		data.PreviousIndex = ParentData->Index;	
 	}
 	
@@ -422,6 +423,7 @@ void AMyGridPathfinding::UnitFindPath(const int UnitSide,const FIntPoint& Start,
 		}
 		
 		TArray<FIntPoint> path;
+		path.Reserve(16);
 		if(isFound)
 		{
 			while(currentTile.Index != FIntPoint(-999,-999))
@@ -448,7 +450,11 @@ bool AMyGridPathfinding::DiscoverTileByWalkableType(const int UnitSide,const FMy
 		auto pData = MyGrid->GetTileDataByIndex(Element);
 		if(pData == nullptr)return true;
 		//非同一阵营的人
-		if(pData->UnitOnTile != nullptr)return UnitSide != pData->UnitOnTile->GetRuntimeProperty().UnitSide;
+		if(pData->UnitOnTile != nullptr)
+		{
+			bool OneSide = UnitSide == pData->UnitOnTile->GetUnitSide();
+			return !OneSide;
+		}
 		//是否可以行走
 		if(!IsTileTypeWalkable(pData->TileType))return true;
 		float z = pData->Transform.GetLocation().Z;
@@ -545,19 +551,23 @@ bool AMyGridPathfinding::DiscoverTileByWalkableType(const int UnitSide,const FMy
 	return false;
 }
 
-TArray<FIntPoint> AMyGridPathfinding::UnitWalkablePath(const FIntPoint& Start,int MaxWalkPoint,TArray<ETileType> WalkableTileTypes)
+TArray<FIntPoint> AMyGridPathfinding::UnitWalkablePath(const FIntPoint& Start,int MaxWalkPoint,TArray<ETileType> WalkableTileTypes,int UnitSide)
 {
 	IncludeDiagonals = false;
 	PathFindingData.Empty();
 	
 	TArray<FIntPoint> ReachableTiles;
+	ReachableTiles.Reserve(64);
 	TSet<FIntPoint> DiscoverTiles;
+	ReachableTiles.Add(Start);
 	FMyPathFindingData data = AddPathFindingData(nullptr,Start);
 	bool next = true;
 	int ReachableIndex = 0;
 	for(;next;ReachableIndex++)
 	{
-		FIntPoint center = ReachableTiles.IsEmpty() ? Start : ReachableTiles[ReachableIndex - 1];
+		if(ReachableTiles.IsEmpty() || ReachableIndex >= ReachableTiles.Num())break;
+		
+		FIntPoint center = ReachableTiles[ReachableIndex];
 		if(DiscoverTiles.Contains(center))continue;
 		DiscoverTiles.Add(center);
 		data = PathFindingData[center];
@@ -568,7 +578,8 @@ TArray<FIntPoint> AMyGridPathfinding::UnitWalkablePath(const FIntPoint& Start,in
 			auto pData = MyGrid->GetTileDataByIndex(Element);
 			if(pData == nullptr)return true;
 			if(!IsTileTypeWalkable(pData->TileType))return true;
-			if(pData->UnitOnTile != nullptr)return true;
+			if(pData->UnitOnTile != nullptr &&
+				pData->UnitOnTile->IsFriend(UnitSide)==false)return true;
 			
 			float z = pData->Transform.GetLocation().Z;
 
@@ -615,15 +626,18 @@ TArray<FIntPoint> AMyGridPathfinding::UnitWalkablePath(const FIntPoint& Start,in
 TArray<FIntPoint> AMyGridPathfinding::UnitAbilityRange(const FIntPoint& Start,const FIntPoint& Range,int AllowableDeviation)
 {
 	PathFindingData.Empty();
+	TArray<FIntPoint> RangeResult;
 	TArray<FIntPoint> ReachableTiles;
+	ReachableTiles.Reserve(64);
 	TSet<FIntPoint> DiscoverTiles;
 	FMyPathFindingData data = AddPathFindingData(nullptr,Start);
-	bool next = true;
+
+	bool Next = true;
 	int ReachableIndex = 0;
 	ReachableTiles.Add(Start);
-	for(;next;ReachableIndex++)
+	for(;Next;ReachableIndex++)
 	{
-		if(ReachableTiles.IsEmpty())break;
+		if(ReachableTiles.IsEmpty()||ReachableIndex >= ReachableTiles.Num())break;
 		
 		FIntPoint center = ReachableTiles[ReachableIndex];
 		if(DiscoverTiles.Contains(center))continue;
@@ -643,26 +657,26 @@ TArray<FIntPoint> AMyGridPathfinding::UnitAbilityRange(const FIntPoint& Start,co
 			bool isRemove = FMathf::Abs(z - center_z) > MyGrid->GetGridTileSize().Z*AllowableDeviation;
 			if(isRemove)return isRemove;
 
-			return true;
+			return false;
 		};
 		
 		neighbor.RemoveAll(Predicate);
-		
+		ReachableTiles.Append(neighbor);
 		for(const FIntPoint one : neighbor)
 		{
 			auto c = AddPathFindingData(&data,one);
-			if(c.CostFromStart >= Range.X && c.CostFromStart <= Range.Y)
+			if(c.CostFromStart > Range.Y * GridCost)
 			{
-				ReachableTiles.Add(one);
-			}
-			else
-			{
-				next = false;
+				Next = false;
 				break;
+			}
+			if(c.CostFromStart >= Range.X * GridCost && c.CostFromStart <= Range.Y * GridCost)
+			{
+				RangeResult.Add(one);
 			}
 		}
 		
 	}
 	
-	return MoveTemp(ReachableTiles);
+	return MoveTemp(RangeResult);
 }

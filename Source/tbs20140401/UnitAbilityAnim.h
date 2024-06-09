@@ -7,6 +7,7 @@
 #include "SkillData.h"
 #include "UnitAbilityAnim.generated.h"
 
+class AMyGridPathfinding;
 class AUnitAbilityAnim;
 class AMy_Pawn;
 class AMyUnit;
@@ -25,6 +26,7 @@ public:
 	AUnitAbilityAnim();
 
 protected:
+	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	TObjectPtr<AMyUnit> OwnerInstance;
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
@@ -50,15 +52,26 @@ public:
 	int GetCost()const{return SkillData.SpendPoint;}
 
 	virtual bool CanExecute(){return false;}
-	virtual bool IsValidTarget(const FTileData& TileData){return false;}
+	virtual bool IsValidTarget(const FTileData& TileData,AGrid* MyGrid){return false;}
+	virtual bool IsValidUnit(TObjectPtr<AMyUnit> Unit);
 
 	virtual FBattleReport DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets,AGrid* MyGrid,bool NeedCooperator);
 	virtual FBattleReport DoCalculation(TObjectPtr<AMyUnit> Target,AGrid* MyGrid,bool NeedCooperator);
 
 	virtual TArray<FIntPoint> Range(const FIntPoint&){ return TArray<FIntPoint>();}
+	virtual TArray<FIntPoint> Indicator(const FIntPoint& Index)
+	{
+		TArray<FIntPoint> Result;
+		Result.Add(Index);
+		return Result;
+	};
 	virtual TArray<TObjectPtr<AMyUnit>> TakeTargets(const FIntPoint& Point,AGrid* MyGrid);
 
+	virtual bool IsShowOnCmd(){return true;}
+	
 	virtual bool IsIdle(){return false;}
+	virtual bool IsCooperate(){return false;}
+	virtual bool IsArea(){return false;}
 	
 	EAbilityComplete CompletedEvent;
 	FAbilityComplete CompletedCallback;

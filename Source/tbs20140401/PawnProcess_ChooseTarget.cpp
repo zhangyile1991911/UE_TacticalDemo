@@ -8,7 +8,6 @@
 #include "MyUnit.h"
 #include "Grid.h"
 #include "MyGridPathfinding.h"
-#include "UnitAbility.h"
 #include "UGameUI_UnitBreifInfo.h"
 #include "MyHUD.h"
 #include "BottomActionBar.h"
@@ -21,15 +20,21 @@
 void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 {
 	const FTileData* TileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(Index);
+	if(TileData == nullptr)
+	{
+		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);
+		return;
+	}
+	
 	TObjectPtr<AMyUnit> StandingUnit = TileData->UnitOnTile;
 	bool bShow = true;
+	bool IsValid = ChosenAbility->IsValidTarget(*TileData,PawnInstance->GetMyGrid());
 	if(StandingUnit == nullptr)
 	{
 		bShow = false;
 	}
 	else
 	{
-		bool IsValid = ChosenAbility->IsValidTarget(*TileData);
 		if(IsValid)
 		{
 			// const bool bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,StandingUnit);
@@ -112,84 +117,96 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 	next.X = CurrentCursor.X + Input.Y;
 	next.Y = CurrentCursor.Y + Input.X;
 
-	if(PawnInstance->GetMyGrid()->IsValidGridIndex(next))
+	if(!PawnInstance->GetMyGrid()->IsValidGridIndex(next))
 	{
-		PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
+		ShowTargetUnitBriefInfo(next);
+		return;
+	}
+	//先清理掉上一次 指示器范围
+	for(const auto& one : IndicatorRange)
+	{
+		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::IndicatorRange);	
+	}
+	IndicatorRange.Empty();
+	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::IndicatorRange);
+	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
+	//是否在施法范围
+	if(!AbilityRange.Contains(next))
+	{
+		ShowTargetUnitBriefInfo(next);
+		// PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
 		PawnInstance->GetMyGrid()->AddStateToTile(next,ETileState::Selected);
 		CurrentCursor = next;
-		// UE_LOG(LogTemp,Log,TEXT(" HandleDirectionInput CurrentCursor (%d,%d)"),CurrentCursor.X,CurrentCursor.Y);
-		//所以说X正轴 角度为0
-		// UE_LOG(LogTemp,Log,TEXT("%f"),FVector(0,1,0).Rotation().Yaw)//90.000000
-		// UE_LOG(LogTemp,Log,TEXT("%f"),FVector(1,0,0).Rotation().Yaw)//0.000000
-		// UE_LOG(LogTemp,Log,TEXT("%f"),FVector(0,-1,0).Rotation().Yaw)// -90.000000
-		// UE_LOG(LogTemp,Log,TEXT("%f"),FVector(-1,0,0).Rotation().Yaw)//180.000000
-		//当前的朝向和选择的目标夹角是否大于45度 
-		// FVector Location = UnitInstance->GetActorLocation();
-		// const FTileData* TargetTileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
-		// FVector TargetLocation = TargetTileData->Transform.GetLocation();
-		// float Degree = (TargetLocation - Location).GetSafeNormal().Rotation().Yaw;
-		// if(Degree >= 45 && Degree <= -45)
-		// {
-		// 	UnitInstance->TurnShadowForward();
-		// }
-		// else if(Degree >= 90-45 && Degree <= 90+45)
-		// {
-		// 	UnitInstance->TurnShadowRight();
-		// }
-		// else if(Degree >= 180-45 && Degree <= 180+45)
-		// {
-		// 	UnitInstance->TurnShadowBack();
-		// }
-		// else if(Degree >= -90-45 && Degree <= -90+45)
-		// {
-		// 	UnitInstance->TurnShadowLeft();
-		// }
-		UnitInstance->RotateSelfByDestination(UnitInstance->GetTempDestinationGridIndex(),CurrentCursor);
-		const TObjectPtr<AMyUnit> TempTarget = PawnInstance->GetMyGrid()->GetUnitOnTile(CurrentCursor);
-		do
+		return;
+	}
+	
+	if(ChosenAbility->IsArea())
+	{
+		IndicatorRange = ChosenAbility->Indicator(next);
+		for(const auto& one : IndicatorRange)
 		{
-			bIsBackAttack = false;
-			if(TempTarget == nullptr)
-			{
-				BattleInfoInstance->HideBackAtkTips();
-				break;
-			}
-			FIntPoint Delta = CurrentCursor - UnitInstance->GetTempDestinationGridIndex();
-			if(FMathf::Abs(Delta.X) > 0 && FMathf::Abs(Delta.Y) > 0)break;
+			PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::IndicatorRange);	
+		}
+	}
+	else
+	{
+		PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::IndicatorRange);
+		PawnInstance->GetMyGrid()->AddStateToTile(next,ETileState::IndicatorRange);
+	}
+	CurrentCursor = next;
+		
+	UnitInstance->RotateSelfByDestination(UnitInstance->GetTempDestinationGridIndex(),CurrentCursor);
+	const TObjectPtr<AMyUnit> TempTarget = PawnInstance->GetMyGrid()->GetUnitOnTile(CurrentCursor);
+	do
+	{//背击判断
+		if(ChosenAbility->IsArea())break;
+		
+		bIsBackAttack = false;
+		if(TempTarget == nullptr)
+		{
+			BattleInfoInstance->HideBackAtkTips();
+			break;
+		}
+		FIntPoint Delta = CurrentCursor - UnitInstance->GetTempDestinationGridIndex();
+		if(FMathf::Abs(Delta.X) > 0 && FMathf::Abs(Delta.Y) > 0)break;
 			
-			//必须相邻 才会判断
-			bool IsBack = UBattleFunc::IsBackAttack(UnitInstance,TempTarget);
-			if(!IsBack)
-			{
-				BattleInfoInstance->HideBackAtkTips();
-				break;
-			}
+		//必须相邻 才会判断
+		bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,TempTarget);
+		if(!bIsBackAttack)
+		{
+			BattleInfoInstance->HideBackAtkTips();
+			break;
+		}
+		bool IsValid = ChosenAbility->IsValidUnit(TempTarget);
+		if(IsValid)
+		{
 			BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
 			BattleInfoInstance->ShowBackAtkTips(TempTarget);
-			bIsBackAttack = true;
 		}
-		while (false);
-		
-		do
-		{
-			bIsWrapAttack = false;
-			if(TempTarget == nullptr)
-			{
-				BattleInfoInstance->HideCooperatorTips();
-				break;
-			}
-			auto Cooperator = UBattleFunc::HasWrapAttackUnit(UnitInstance,TempTarget,PawnInstance->GetMyGrid());
-			bIsWrapAttack = Cooperator != nullptr;
-			if(!bIsWrapAttack)
-			{
-				BattleInfoInstance->HideCooperatorTips();
-				break;
-			}
-			BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
-			BattleInfoInstance->ShowCooperatorTips(Cooperator);
-		}
-		while (false);
 	}
+	while (false);
+		
+	do
+	{//夹击判断
+		if(ChosenAbility->IsArea())break;
+		bIsWrapAttack = false;
+		if(TempTarget == nullptr)
+		{
+			BattleInfoInstance->HideCooperatorTips();
+			break;
+		}
+		auto Cooperator = UBattleFunc::HasWrapAttackUnit(UnitInstance,TempTarget,PawnInstance->GetMyGrid());
+		bIsWrapAttack = Cooperator != nullptr;
+		if(!bIsWrapAttack)
+		{
+			BattleInfoInstance->HideCooperatorTips();
+			break;
+		}
+		BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
+		BattleInfoInstance->ShowCooperatorTips(Cooperator);
+	}
+	while (false);
+
 	ShowTargetUnitBriefInfo(CurrentCursor);
 }
 
@@ -207,7 +224,7 @@ void UPawnProcess_ChooseTarget::HandleConfirmInput()
 	if(!AbilityRange.Contains(CurrentCursor))return;
 
 	
-	if(!ChosenAbility->IsValidTarget(*TileData))return;
+	if(!ChosenAbility->IsValidTarget(*TileData,PawnInstance->GetMyGrid()))return;
 	
 	UnitInstance->SetAbilityTargetGridIndex(CurrentCursor);
 	if(UnitInstance->NeedToMove())
@@ -230,7 +247,16 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 	{
 		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::AbilityRange);
 	}
+
+	for(const auto& one : IndicatorRange)
+	{
+		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::IndicatorRange);	
+	}
+	
+	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::IndicatorRange);
 	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
+	
+	// PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
 	if(UnitBriefInfoInstance != nullptr)
 	{
 		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);

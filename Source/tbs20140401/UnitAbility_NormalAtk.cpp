@@ -35,6 +35,7 @@ bool AUnitAbility_NormalAtk::CanExecute()
 TArray<FIntPoint> AUnitAbility_NormalAtk::Range(const FIntPoint& Int32Point)
 {
 	TArray<FIntPoint> Result;
+	Result.Reserve(4);
 	Result.Add(FIntPoint(Int32Point.X + 1,Int32Point.Y));
 	Result.Add(FIntPoint(Int32Point.X - 1,Int32Point.Y));
 	Result.Add(FIntPoint(Int32Point.X,Int32Point.Y + 1));
@@ -42,11 +43,21 @@ TArray<FIntPoint> AUnitAbility_NormalAtk::Range(const FIntPoint& Int32Point)
 	return MoveTemp(Result);
 }
 
-bool AUnitAbility_NormalAtk::IsValidTarget(const FTileData& TileData)
+bool AUnitAbility_NormalAtk::IsValidTarget(const FTileData& TileData,AGrid* MyGrid)
 {
-	return TileData.UnitOnTile == nullptr ?
-		false :
-		TileData.UnitOnTile->GetRuntimeProperty().UnitSide != OwnerInstance->GetRuntimeProperty().UnitSide;
+	if(TileData.UnitOnTile == nullptr)return false;
+	if(TileData.UnitOnTile->IsDead())return false;
+	if(TileData.UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return false;
+
+	return true;
+}
+
+bool AUnitAbility_NormalAtk::IsValidUnit(TObjectPtr<AMyUnit> Unit)
+{
+	if(Unit == nullptr)return false;
+	if(Unit->IsDead())return false;
+	if(Unit->GetRuntimeProperty().UnitSide == OwnerInstance->GetRuntimeProperty().UnitSide)return false;
+	return true;
 }
 
 TArray<TObjectPtr<AMyUnit>> AUnitAbility_NormalAtk::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)
@@ -72,9 +83,10 @@ FBattleReport AUnitAbility_NormalAtk::DoCalculation(TObjectPtr<AMyUnit> Target, 
 	
 	FBattleReport Report;
 	Report.Attacker = OwnerInstance;
-	Report.Defender.Add(Target);
+	Report.Defender = Target;
 	Report.IsCritical = UBattleFunc::IsCritical(OwnerInstance,Target);;
 	Report.Cooperator = Cooperator;
+	Report.CooperatorTarget = Cooperator != nullptr ? Target : nullptr;
 	Report.IsBackAtk = UBattleFunc::IsBackAttack(OwnerInstance,Target);
 	Report.HitPercent = UBattleFunc::CalculateHitRate(OwnerInstance,Target,MyGrid,Cooperator != nullptr,Report.IsBackAtk);
 
@@ -90,7 +102,7 @@ FBattleReport AUnitAbility_NormalAtk::DoCalculation(TObjectPtr<AMyUnit> Target, 
 	float atk = OwnerInstance->GetRuntimeProperty().Power;
 	float def = Target->GetRuntimeProperty().PhysicDefend;
 	float per = FMath::FRandRange(0.8,1.0f);
-	Report.Damage = 100;//FMathf::Clamp(atk * per - def,0,999999999);
+	Report.Damage = 10;//FMathf::Clamp(atk * per - def,0,999999999);
 	//扣除血量
 	Target->AddHP(Report.Damage);
 	

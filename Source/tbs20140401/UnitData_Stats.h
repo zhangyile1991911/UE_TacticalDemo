@@ -65,6 +65,9 @@ struct FUnitProperty
 	int Move;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int AtkCount = 1;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int FireResistance;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)

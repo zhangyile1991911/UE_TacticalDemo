@@ -22,13 +22,16 @@ void UCmdWidget::NativeConstruct()
 void UCmdWidget::RefreshUnitCmd(TObjectPtr<AMyUnit> Unit)
 {
 	const TArray<TObjectPtr<AUnitAbilityAnim>>& UnitAbilities = Unit->GetOwnAbilityList();
+	AbilityNum = 0;
 	int i = 0;
 	for(;i < UnitAbilities.Num();i++)
 	{
+		if(UnitAbilities[i]->IsShowOnCmd() == false)continue;
 		AbilityList[i]->RefreshCell(UnitAbilities[i]->GetAbilityName(),UnitAbilities[i]->GetCost());
 		AbilityList[i]->SetVisibility(ESlateVisibility::Visible);
+		AbilityNum++;
 	}
-	
+	i--;
 	for(;i < AbilityList.Num();i++)
 	{
 		AbilityList[i]->SetVisibility(ESlateVisibility::Hidden);
@@ -37,10 +40,10 @@ void UCmdWidget::RefreshUnitCmd(TObjectPtr<AMyUnit> Unit)
 
 void UCmdWidget::SelectCmd(int index)
 {
-	if(index < 0 || index >= AbilityList.Num())return;
+	if(index < 0 || index >= AbilityNum)return;
 	if(index == SelectedIndex)return;
 	
-	if(SelectedIndex >= 0 && SelectedIndex < AbilityList.Num())
+	if(SelectedIndex >= 0 && SelectedIndex < AbilityNum)
 		AbilityList[SelectedIndex]->DoUnSelected();
 
 	AbilityList[index]->DoSelected();

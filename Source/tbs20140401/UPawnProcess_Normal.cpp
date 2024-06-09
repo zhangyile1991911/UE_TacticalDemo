@@ -26,7 +26,8 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	TArray<FIntPoint> WalkableRange = PawnInstance->GetMyGridPathFinding()->UnitWalkablePath(
 			UnitInstance->GetGridIndex(),
 			UnitInstance->GetRuntimeProperty().Move,
-			UnitInstance->UnitCanWalkTileType());
+			UnitInstance->UnitCanWalkTileType(),
+			UnitInstance->GetUnitSide());
 	UnitInstance->SetWalkableTile(WalkableRange);
 
 	for(const FIntPoint& one : WalkableRange)
@@ -46,7 +47,7 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	if(CurrentCursor != UnitInstance->GetGridIndex())
 	{
 		PawnInstance->GetMyGridPathFinding()->UnitFindPath(
-			UnitInstance->GetRuntimeProperty().UnitSide,
+			UnitInstance->GetUnitSide(),
 			UnitInstance->GetGridIndex(),
 			CurrentCursor,
 			UnitInstance->UnitCanWalkTileType(),
@@ -74,6 +75,7 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 
 
 	FIntPoint next;
+
 	next.X = CurrentCursor.X + Input.Y;
 	next.Y = CurrentCursor.Y + Input.X;
 	
@@ -91,7 +93,7 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 	if(UnitInstance->IsInWalkableRange(CurrentCursor))
 	{//今選んだ目的地は行けるなら　路線を計算する
 		PawnInstance->GetMyGridPathFinding()->UnitFindPath(
-			UnitInstance->GetRuntimeProperty().UnitSide,
+			UnitInstance->GetUnitSide(),
 			UnitInstance->GetGridIndex(),
 			CurrentCursor,
 			UnitInstance->UnitCanWalkTileType(),
@@ -118,15 +120,17 @@ void UUPawnProcess_Normal::HandleConfirmInput()
 {
 	Super::HandleConfirmInput();
 	
-	if(!UnitInstance->IsInWalkableRange(CurrentCursor))
+	if(UnitInstance->IsInWalkableRange(CurrentCursor))
 	{
-		if(PawnInstance->GetMyGrid()->TileGridHasUnit(CurrentCursor))
-		{//进入指令界面(コマンドページへ変遷)
+		// if(PawnInstance->GetMyGrid()->TileGridHasUnit(CurrentCursor))
+		// {//进入指令界面(コマンドページへ変遷)
+		// 	PawnInstance->SwitchToCmdInput();
+		// }
+		if(CurrentCursor == UnitInstance->GetGridIndex())
+		{
 			PawnInstance->SwitchToCmdInput();
 		}
-	}
-	else
-	{
+
 		//将影子放到目的地上(キャラのスタンドインを目的に置いとく)
 		const auto TileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
 		if(TileData == nullptr)
@@ -134,13 +138,16 @@ void UUPawnProcess_Normal::HandleConfirmInput()
 			UE_LOG(LogTemp,Log,TEXT("CurrentCursor(%d,%d)"),CurrentCursor.X,CurrentCursor.Y);
 			return;
 		}
+		if(TileData->UnitOnTile != nullptr)
+		{
+			return;
+		}
 		PawnInstance->LookAtGrid(CurrentCursor);
 		UnitInstance->MoveShadowOnTile(TileData->Transform.GetLocation());
 		UnitInstance->SetTempDestinationGridIndex(CurrentCursor);
 		PawnInstance->SwitchToCmdInput();
 	}
-
-	
+		
 }
 
 void UUPawnProcess_Normal::ExitProcess()

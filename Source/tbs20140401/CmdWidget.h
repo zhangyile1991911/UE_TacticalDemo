@@ -40,6 +40,7 @@ protected:
 	TArray<TObjectPtr<UCmdCell>> AbilityList;
 
 	int SelectedIndex = -1;
+	int AbilityNum = 0;
 protected:
 	virtual void NativeConstruct() override;
 

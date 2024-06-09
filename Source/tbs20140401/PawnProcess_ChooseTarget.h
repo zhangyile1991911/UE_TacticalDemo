@@ -19,6 +19,7 @@ class TBS20140401_API UPawnProcess_ChooseTarget : public UPawnProcess
 protected:
 	FIntPoint CurrentCursor;
 	TArray<FIntPoint> AbilityRange;
+	TArray<FIntPoint> IndicatorRange;
 	TObjectPtr<AUnitAbilityAnim> ChosenAbility;
 	// TObjectPtr<AUnitAbilityAnim> ChosenAbilityAnim;
 	UPROPERTY()

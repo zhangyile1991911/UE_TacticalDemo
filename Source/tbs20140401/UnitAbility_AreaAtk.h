@@ -3,30 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UnitAbility.h"
-#include "BattleReport.h"
 #include "UnitAbilityAnim.h"
-#include "UnitAbility_NormalAtk.generated.h"
-
+#include "UnitAbility_AreaAtk.generated.h"
 
 UCLASS()
-class TBS20140401_API AUnitAbility_NormalAtk : public AUnitAbilityAnim
+class TBS20140401_API AUnitAbility_AreaAtk : public AUnitAbilityAnim
 {
 	GENERATED_BODY()
 
+	UPROPERTY()
+	TObjectPtr<AMyGridPathfinding> MyGridPathfinding;
 public:
 	// Sets default values for this actor's properties
-	AUnitAbility_NormalAtk();
-
-protected:
-	// Called when the game starts or when spawned
-	// virtual void BeginPlay() override;
-
-public:
-	// Called every frame
-	// virtual void Tick(float DeltaTime) override;
+	AUnitAbility_AreaAtk();
+	virtual void BeginPlay() override;
+	virtual void BeginDestroy() override;
 	virtual bool CanExecute() override;
 	virtual TArray<FIntPoint> Range(const FIntPoint&) override;
+	virtual TArray<FIntPoint> Indicator(const FIntPoint& Index)override;
+	virtual bool IsArea()override{return true;}
 	virtual bool IsValidTarget(const FTileData& TileData,AGrid* MyGrid) override;
 	virtual bool IsValidUnit(TObjectPtr<AMyUnit> Unit) override;
 	virtual TArray<TObjectPtr<AMyUnit>> TakeTargets(const FIntPoint& Point, AGrid* MyGrid) override;

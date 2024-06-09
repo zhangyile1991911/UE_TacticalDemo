@@ -26,7 +26,9 @@ void UPawnProcess_CalcAnim::CheckFlow(FlowControl Control)
     	if(UnitInstance->CanAttack())
     	{
     		PawnInstance->SwitchToCmdInput();
+    		return;
     	}
+		PawnInstance->SwitchToIdle();
 		break;
 	case DEATH:
 		// IsContinue = CheckCooperation();
@@ -35,7 +37,9 @@ void UPawnProcess_CalcAnim::CheckFlow(FlowControl Control)
 		if(UnitInstance->CanAttack())
 		{
 			PawnInstance->SwitchToCmdInput();
+			return;
 		}
+		PawnInstance->SwitchToIdle();
 		break;
 	case COOPERATION:
 		IsContinue = CheckDeath();
@@ -43,16 +47,18 @@ void UPawnProcess_CalcAnim::CheckFlow(FlowControl Control)
 		if(UnitInstance->CanAttack())
 		{
 			PawnInstance->SwitchToCmdInput();
+			return;
 		}
+		PawnInstance->SwitchToIdle();
 		break;
-	case ATTACK:
-		if(UnitInstance->CanAttack())
-		{
-			PawnInstance->SwitchToCmdInput();
-		}
-		break;
+	// case ATTACK:
+	// 	if(UnitInstance->CanAttack())
+	// 	{
+	// 		PawnInstance->SwitchToCmdInput();
+	// 	}
+	// 	break;
 	}
-	PawnInstance->SwitchToIdle();
+	
 	// ReportIndex++;
 	// if(ReportIndex < ReportList.Num())
 	// {
@@ -68,14 +74,19 @@ void UPawnProcess_CalcAnim::CheckFlow(FlowControl Control)
 
 void UPawnProcess_CalcAnim::OnDeathCompleted()
 {
-	DeathNum--;
-	if(DeathNum > 0)return;
-	// const FBattleReport Report = ReportList[ReportIndex];
-	for(auto Defender : Report.Defender)
+	if(Report.Defender!=nullptr)
 	{
-		PawnInstance->GetMyCombatSystem()->RemoveUnitInCombat(Defender);	
+		PawnInstance->GetMyCombatSystem()->RemoveUnitInCombat(Report.Defender);
 	}
-	
+
+	if(!Report.HitInfoList.IsEmpty())
+	{
+		for(int i = 0;i < Report.HitInfoList.Num();i++)
+		{
+			PawnInstance->GetMyCombatSystem()->RemoveUnitInCombat(Report.HitInfoList[i].Defender);
+		}
+	}
+		
 	CheckFlow(DEATH);
 }
 
@@ -98,14 +109,22 @@ bool UPawnProcess_CalcAnim::CheckDeath()
 	// {
 	bool HasDead = false;
 	DeathNum = 0;
-	for(auto Defender : Report.Defender)
+
+	if(Report.Defender != nullptr && Report.Defender->IsDead())
 	{
-		if(Defender->IsDead())
+		FDeathCompleted DeathCompleted;
+		DeathCompleted.BindUObject(this,&UPawnProcess_CalcAnim::OnDeathCompleted);
+		Report.Defender->DoDeadAnim(DeathCompleted);
+		HasDead = true;
+	}
+	if(!Report.HitInfoList.IsEmpty())
+	{
+		for(int i = 0; i < Report.HitInfoList.Num();i++)
 		{
+			if(!Report.HitInfoList[i].Defender->IsDead())continue;
 			FDeathCompleted DeathCompleted;
 			DeathCompleted.BindUObject(this,&UPawnProcess_CalcAnim::OnDeathCompleted);
-			Defender->DoDeadAnim(DeathCompleted);
-			HasDead = true;
+			Report.HitInfoList[i].Defender->DoDeadAnim(DeathCompleted);
 			DeathNum++;
 		}
 	}
@@ -118,13 +137,26 @@ bool UPawnProcess_CalcAnim::CheckCooperation()
 	if(Report.Cooperator != nullptr)
 	{//夹击
 		ChosenAbilityAnim = Report.Cooperator->GetCooperationAbilityAnim();
-		FIntPoint TargetLocation = Report.Defender[0]->GetGridIndex();
-		TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbilityAnim->TakeTargets(TargetLocation,PawnInstance->GetMyGrid());
-		Report = ChosenAbilityAnim->DoCalculation(TargetUnits,PawnInstance->GetMyGrid(),false);
+		// FIntPoint TargetLocation = Report.Defender[0]->GetGridIndex();
+		// TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbilityAnim->TakeTargets(TargetLocation,PawnInstance->GetMyGrid());
+		Report = ChosenAbilityAnim->DoCalculation(Report.CooperatorTarget,PawnInstance->GetMyGrid(),false);
 		// ReportList.Append(CoReport);
 		ChosenAbilityAnim->CompletedCallback.BindUObject(this,&UPawnProcess_CalcAnim::AbilityCompleted);
 		ChosenAbilityAnim->DoAnimation(Report,PawnInstance);
 		return false;
+	}
+	if(!Report.HitInfoList.IsEmpty())
+	{
+		for(int i = Report.HitInfoList.Num() - 1;i >=0;i--)
+		{
+			auto LastReport = Report.HitInfoList[i];
+			if(LastReport.Cooperator == nullptr)continue;
+			ChosenAbilityAnim = LastReport.Cooperator->GetCooperationAbilityAnim();
+			auto CoReport = ChosenAbilityAnim->DoCalculation(LastReport.CooperatorTarget,PawnInstance->GetMyGrid(),false);
+			ChosenAbilityAnim->CompletedCallback.BindUObject(this,&UPawnProcess_CalcAnim::AbilityCompleted);
+			ChosenAbilityAnim->DoAnimation(CoReport,PawnInstance);
+			Report.HitInfoList.RemoveAt(i);	
+		}
 	}
 	return true;
 }

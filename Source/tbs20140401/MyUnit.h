@@ -220,6 +220,7 @@ public:
 	void ShowShadowUnit();
 	void HideShadowUnit();
 	FVector GetShadowUnitLocation()const{return MyShadowUnit->GetActorLocation();}
+	FRotator GetShadowUnitRotation()const{return MyShadowUnit->GetActorRotation();}
 
 	void SetTempDestinationGridIndex(FIntPoint location){TempDestinationGridIndex = location;}
 	void ResetTempDestinationGridIndex(){TempDestinationGridIndex = GridIndex;}
@@ -231,11 +232,12 @@ public:
 	
 
 	const TArray<TObjectPtr<AUnitAbilityAnim>>& GetOwnAbilityList()const{return OwnAbilityAnimList;}
+	int GetSelectableAbilityNum();
 	void SetChosenAbility(int ChosenIndex);
 	// TObjectPtr<UUnitAbility> GetChosenAbility(){return OwnAbilityList[ChosenAbilityIndex];}
 	TObjectPtr<AUnitAbilityAnim> GetChosenAbilityAnim(){return OwnAbilityAnimList[ChosenAbilityIndex];}
-	//todo 之后做一个 夹击技能
-	TObjectPtr<AUnitAbilityAnim> GetCooperationAbilityAnim(){return OwnAbilityAnimList[1];}
+	
+	TObjectPtr<AUnitAbilityAnim> GetCooperationAbilityAnim();
 	
 
 	TObjectPtr<AIdleDirection> GetMyDirection()const{return MyDirection;}
@@ -260,6 +262,7 @@ public:
 	void WalkDone(){WalkNum-=1;}
 	bool CanAttack()const{return AtkNum > 0;}
 	void AttackDone(){AtkNum-=1;}
+	bool HasAttackDone()const{return AtkNum != MyProperty.AtkCount;}
 	//タン始まる前に　計算やプロパティリなどセットする
 	void BeforeStartTurn();
 	void FinishTurn();
@@ -273,6 +276,7 @@ public:
 	void AddHP(int HP){MyRuntimeProperty.HP -= HP;}
 
 	FRotator GetUnitForward()const;
+	bool IsFriend(int Side)const{return MyRuntimeProperty.UnitSide == Side;}
 	// int GetUniqueID()const{return UniqueID;}
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

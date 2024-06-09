@@ -5,6 +5,39 @@
 class AMyUnit;
 
 USTRUCT(BlueprintType)
+struct FHitInfo
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	AMyUnit* Defender = nullptr;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	AMyUnit* Cooperator = nullptr;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	AMyUnit* CooperatorTarget = nullptr;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	bool IsBackAtk = false;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	bool IsHit = false;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	bool IsCritical = false;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int HitPercent = 0;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int RandSeed = 0;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int Damage = 0;
+};
+
+USTRUCT(BlueprintType)
 struct FBattleReport
 {
 	GENERATED_BODY()
@@ -13,19 +46,22 @@ struct FBattleReport
 	AMyUnit* Attacker;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	TArray<AMyUnit*> Defender;
+	AMyUnit* Defender = nullptr;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	AMyUnit* Cooperator;
+	AMyUnit* Cooperator = nullptr;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	bool IsBackAtk;
+	AMyUnit* CooperatorTarget = nullptr;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	bool IsBackAtk = false;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	bool IsHit;
+	bool IsHit = false;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	bool IsCritical;
+	bool IsCritical = false;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int HitPercent;
@@ -36,4 +72,7 @@ struct FBattleReport
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int Damage;
 	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TArray<FHitInfo> HitInfoList;
 };
+
