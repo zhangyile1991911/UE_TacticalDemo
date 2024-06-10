@@ -107,7 +107,11 @@ FLinearColor AMyGridMeshInst::GetColorFromStates(const TSet<ETileState>& states,
 	// 	isFilled = 1.0f;
 	// 	return FLinearColor::Yellow;
 	// }
-
+	if(states.Contains(ETileState::DangerousRange))
+	{
+		isFilled = 1.0f;
+		return FLinearColor(0.9f,0.07f,1.0f);
+	}
 	if(states.Contains(ETileState::IndicatorRange))
 	{
 		isFilled = 1.0f;

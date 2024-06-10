@@ -43,7 +43,14 @@ public:
 	void SetUnitIndexOnGrid(const FIntPoint& Index,TObjectPtr<AMyUnit> Unit);
 	void NextAllUnit();
 	void ResetAllUnit();
+	TArray<TObjectPtr<AMyUnit>> GetAllUnits()
+	{
+		TArray<TObjectPtr<AMyUnit>> Result;
+		UnitsInCombat.GenerateValueArray(Result);
+		return MoveTemp(Result);
+	}
 	TObjectPtr<AMyUnit> SortActionPriority();
 	TObjectPtr<AMyUnit> GetFirstUnit()const{return FirstUnit;}
+	TArray<TObjectPtr<AMyUnit>> GetThreatenEnemies(TObjectPtr<AMyUnit>);
 	ReSortEvent ReSortEvent;
 };

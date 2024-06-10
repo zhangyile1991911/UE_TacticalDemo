@@ -11,6 +11,7 @@
 #include "MyUnit.generated.h"
 
 
+class AMyGridPathfinding;
 class UIMyUnitAnimation;
 class IIMyUnitAnimation;
 class AIdleDirection;
@@ -97,8 +98,10 @@ protected:
 	int CurrentDistanceToAction;
 	
 	TArray<FIntPoint> WalkPath;
-	TArray<FIntPoint> WalkableTiles;
+	TSet<FIntPoint> WalkableTiles;
 	int WalkPathIndex;
+
+	TSet<FIntPoint> AttackRanges;
 
 	//技能相关 开始
 	UPROPERTY()
@@ -141,6 +144,7 @@ protected:
 
 	int WalkNum;
 	int AtkNum;
+	int MaxAtkRange = 0;
 	
 
 	FPathCompleted PathCompleted;
@@ -200,8 +204,8 @@ public:
 	void SaveWalkPath(TArray<FIntPoint>);
 	void StartWalkPath(FPathCompleted);
 	void SetWalkableTile(TArray<FIntPoint>);
-	const TArray<FIntPoint>& GetWalkableTiles()const{return WalkableTiles;}
-	bool IsInWalkableTile(const FIntPoint& point)const{return WalkableTiles.Find(point) != INDEX_NONE;}
+	const TSet<FIntPoint>& GetWalkableTiles()const{return WalkableTiles;}
+	bool IsInWalkableTile(const FIntPoint& point)const{return WalkableTiles.Contains(point);}
 	const FUnitProperty& GetProperty()const{return MyProperty;}
 	
 	UFUNCTION(BlueprintCallable)
@@ -265,7 +269,7 @@ public:
 	bool HasAttackDone()const{return AtkNum != MyProperty.AtkCount;}
 	//タン始まる前に　計算やプロパティリなどセットする
 	void BeforeStartTurn();
-	void FinishTurn();
+	void FinishTurn(AMyGridPathfinding* MyPathfinding);
 
 	void RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex);
 
@@ -277,6 +281,9 @@ public:
 
 	FRotator GetUnitForward()const;
 	bool IsFriend(int Side)const{return MyRuntimeProperty.UnitSide == Side;}
+
+	int GetMaxAtkRange()const{return MaxAtkRange;}
 	// int GetUniqueID()const{return UniqueID;}
+	const TSet<FIntPoint>& GetAttackRanges()const{return AttackRanges;}
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

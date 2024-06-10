@@ -22,9 +22,8 @@ protected:
 	//记录寻路的路径
 	TArray<FIntPoint> PreviousPathFinding;
 	FPathFindingCompleted Completed;
-	
-	//记录临时选择目的地
-	FIntPoint TempTargetTile;
+
+	TArray<TObjectPtr<AMyUnit>> ThreatenEnemies;
 	
 	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoInstance;
 protected:

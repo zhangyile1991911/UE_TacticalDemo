@@ -11,6 +11,9 @@ enum class EUnitType:uint8
 	Warrior UMETA(DisplayName="Warrior"),
 	Ranger UMETA(DisplayName="Ranger"),
 	Slime UMETA(DisplayName="Slime"),
+	EnemyWarrior UMETA(DisplayName="EnemyWarrior"),
+	EnemyRanger UMETA(DisplayName="EnemyRanger"),
+	EnemySlime UMETA(DisplayName="EnemySlime")
 	// Priest UMETA(DisplayName="Priest"),
 	// Chicken UMETA(DisplayName="Chicken"),
 	// Bat UMETA(DisplayName="Bat") 

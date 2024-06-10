@@ -61,6 +61,15 @@ FUnitData* GetUnitData(const EUnitType unitType)
 	case EUnitType::Ranger:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Ranger")),"");
 		break;
+	case EUnitType::EnemyWarrior:
+		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyWarrior")),"");
+		break;
+	case EUnitType::EnemySlime:
+		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemySlime")),"");
+		break;
+	case EUnitType::EnemyRanger:
+		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyRanger")),"");
+		break;
 	}
 	return row;
 }

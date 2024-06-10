@@ -6,6 +6,7 @@
 #include "Grid.h"
 #include "IdleDirection.h"
 #include "IMyUnitAnimation.h"
+#include "MyGridPathfinding.h"
 #include "My_Pawn.h"
 #include "My_Utilities.h"
 #include "ShadowUnit.h"
@@ -378,6 +379,16 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 			break;
 		}
 	}
+
+	int MaxRange = 0;
+	for(int i = 0;i < OwnAbilityAnimList.Num();i++)
+	{
+		if(OwnAbilityAnimList[i]->GetSkillData().Range.Y > MaxRange)
+		{
+			MaxRange = OwnAbilityAnimList[i]->GetSkillData().Range.Y;
+		}
+	}
+	MaxAtkRange = MyRuntimeProperty.Move + MaxRange;
 }
 
 void AMyUnit::SetHovered(bool h)
@@ -478,7 +489,11 @@ void AMyUnit::StartWalkPath(FPathCompleted Completed)
 
 void AMyUnit::SetWalkableTile(TArray<FIntPoint> walkableTile)
 {
-	WalkableTiles =  MoveTemp(walkableTile);
+	WalkableTiles.Empty();
+	for(int i = 0;i < walkableTile.Num();i++)
+	{
+		WalkableTiles.Add(walkableTile[i]);	
+	}
 }
 
 
@@ -646,9 +661,20 @@ void AMyUnit::BeforeStartTurn()
 	TempDestinationGridIndex = GridIndex;
 }
 
-void AMyUnit::FinishTurn()
+void AMyUnit::FinishTurn(AMyGridPathfinding* MyPathfinding)
 {
 	CurrentDistanceToAction = 0;
+	//提前计算 单位的攻击范围 因为当前单位已经不会在移动了所以 攻击范围就是固定的
+	//このオブジェクトも移動できないんです、だから　攻撃の範囲は決めつけてて非同期で計算しておきます
+	FPathCalculationCompleted Completed;
+	Completed.BindLambda([this](TSet<FIntPoint> Result)->void
+	{
+		UE_LOG(LogTemp,Log,TEXT("%s Calucate Attack Range Completed"),*this->GetName())
+		AttackRanges = MoveTemp(Result);
+	});
+	
+	MyPathfinding->UnitAttackRange(GridIndex,MaxAtkRange,Completed);
+	
 }
 
 void AMyUnit::RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex)

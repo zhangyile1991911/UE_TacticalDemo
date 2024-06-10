@@ -606,7 +606,7 @@ TArray<FIntPoint> AMyGridPathfinding::UnitWalkablePath(const FIntPoint& Start,in
 		for(const FIntPoint one : neighbor)
 		{
 			auto c = AddPathFindingData(&data,one);
-			if(c.CostFromStart <= MaxWalkPoint)
+			if(c.CostFromStart <= MaxWalkPoint*GridCost)
 			{
 				ReachableTiles.Add(one);
 			}
@@ -679,4 +679,19 @@ TArray<FIntPoint> AMyGridPathfinding::UnitAbilityRange(const FIntPoint& Start,co
 	}
 	
 	return MoveTemp(RangeResult);
+}
+
+void AMyGridPathfinding::UnitAttackRange(const FIntPoint& Start, int MaxAtkDistance,FPathCalculationCompleted Completed)
+{
+	Async(EAsyncExecution::TaskGraphMainThread,[this,Start,MaxAtkDistance,Completed]()-> void
+	{
+		TArray<FIntPoint> Result = UnitAbilityRange(Start,FIntPoint(1,MaxAtkDistance));
+		TSet<FIntPoint> AttackRange;
+		AttackRange.Reserve(64);
+		for(const auto& one : Result)
+		{
+			AttackRange.Add(one);
+		}
+		Completed.Execute(AttackRange);
+	});
 }

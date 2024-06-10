@@ -66,6 +66,30 @@ TObjectPtr<AMyUnit>  AMyCombatSystem::SortActionPriority()
 	return FirstUnit = UnitsActionPriority[0];
 }
 
+float CalculateDistance(const FIntPoint& Point1, const FIntPoint& Point2)
+{
+	// 计算两个点之间的距离
+	return FMath::Sqrt(FMath::Square(float(Point1.X - Point2.X)) + FMath::Square(float(Point1.Y - Point2.Y)));
+}
+
+TArray<TObjectPtr<AMyUnit>> AMyCombatSystem::GetThreatenEnemies(TObjectPtr<AMyUnit> Unit)
+{
+	TArray<TObjectPtr<AMyUnit>> Result;
+	FIntPoint UnitIndex = Unit->GetGridIndex();
+	for(const auto& pair: UnitsInCombat)
+	{
+		auto Value = pair.Value;
+		if(Unit->IsFriend(Value->GetUnitSide()))continue;
+
+		FIntPoint EnemyIndex = Value->GetGridIndex();
+		float Distance = CalculateDistance(UnitIndex,EnemyIndex);
+		if(Distance > Value->GetMaxAtkRange() + Unit->GetRuntimeProperty().Move)continue;
+		
+		Result.Add(Value);
+	}
+	return MoveTemp(Result);
+}
+
 // Called every frame
 void AMyCombatSystem::Tick(float DeltaTime)
 {

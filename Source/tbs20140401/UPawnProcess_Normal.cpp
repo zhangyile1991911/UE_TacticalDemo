@@ -20,9 +20,10 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	Super::EnterProcess(Pawn);
 
 	// DoubleCheck = false;
-	
-	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
-	
+
+	auto MyBattleSystem = PawnInstance->GetMyCombatSystem();
+	UnitInstance = MyBattleSystem->GetFirstUnit();
+	//可移动范围
 	TArray<FIntPoint> WalkableRange = PawnInstance->GetMyGridPathFinding()->UnitWalkablePath(
 			UnitInstance->GetGridIndex(),
 			UnitInstance->GetRuntimeProperty().Move,
@@ -43,7 +44,7 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	UnitInstance->SetTempDestinationGridIndex(CurrentCursor);
 	PawnInstance->UpdateTileStatusByIndex(CurrentCursor,ETileState::Selected);
 	ClearPathFinding();
-
+	//查找路径
 	if(CurrentCursor != UnitInstance->GetGridIndex())
 	{
 		PawnInstance->GetMyGridPathFinding()->UnitFindPath(
@@ -53,15 +54,34 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 			UnitInstance->UnitCanWalkTileType(),
 			Completed);
 	}
-
+	//展示UI信息
 	auto Tmp = PawnInstance->GetMyHUD()->GetGameUI();
 	UnitBriefInfoInstance = Tmp->GetUnitBriefInfo();
 	ShowTargetUnitBriefInfo(CurrentCursor);
 
 	UnitInstance->HideShadowUnit();
-
+	//将 摄像机 移动到 当前单位
 	PawnInstance->LookAtUnit(UnitInstance);
 	// PawnInstance->GetMyGrid()->AddStateToTile(CurrentCursor,ETileState::Selected);
+	//查看 那些敌人会威胁到 当前目标
+	ThreatenEnemies = MyBattleSystem->GetThreatenEnemies(UnitInstance);
+	//把 敌人攻击范围 和 当前单位行动格子 取交集
+	for (int i = 0;i < ThreatenEnemies.Num();i++)
+	{
+		const auto& Range  = ThreatenEnemies[i]->GetAttackRanges();
+		for(int x = 0;x < WalkableRange.Num();x++)
+		{
+			const FIntPoint& Walk = WalkableRange[x];
+			if(Range.Contains(Walk))
+			{
+				PawnInstance->GetMyGrid()->AddStateToTile(Walk,ETileState::DangerousRange);
+			}
+		}
+	}
+	// for(auto one : ThreatenEnemies)
+	// {
+	// 	PawnInstance->GetMyGrid()->AddStateToTile(one->GetGridIndex(),ETileState::Hovered);
+	// }
 }
 
 void UUPawnProcess_Normal::TickProcess()
@@ -159,6 +179,7 @@ void UUPawnProcess_Normal::ExitProcess()
 	ClearWalkableTiles();
 	PawnInstance->RemoveTileStateByIndex(CurrentCursor,ETileState::Selected);
 	UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);
+	ThreatenEnemies.Empty();
 	// UnitInstance->HideShadowUnit();
 }
 

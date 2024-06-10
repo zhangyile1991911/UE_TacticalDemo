@@ -12,6 +12,7 @@
 class AMyDebugTextAndColorsOnTiles;
 class AGrid;
 DECLARE_DELEGATE_OneParam(FPathFindingCompleted,TArray<FIntPoint>);
+DECLARE_DELEGATE_OneParam(FPathCalculationCompleted,TSet<FIntPoint>);
 
 UCLASS()
 class TBS20140401_API AMyGridPathfinding : public AActor
@@ -88,6 +89,7 @@ public:
 	void UnitFindPath(const int UnitSide,const FIntPoint& Start,const FIntPoint& Target,TArray<ETileType> WalkableTileTypes,FPathFindingCompleted Completed,bool bDiagonal=true);
 	TArray<FIntPoint> UnitWalkablePath(const FIntPoint& Start,int MaxWalkPoint,TArray<ETileType> WalkableTileTypes,int UnitSide);
 	TArray<FIntPoint> UnitAbilityRange(const FIntPoint& Start,const FIntPoint& Range,int AllowableDeviation = 1);
+	void UnitAttackRange(const FIntPoint& Start,int MaxAtkDistance,FPathCalculationCompleted Completed);
 	void SetShowDebugOption(bool ShowCost,bool ShowStart,bool ShowTarget)
 	{
 		IsShowCost = ShowCost;

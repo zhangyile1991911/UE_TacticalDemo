@@ -35,6 +35,7 @@ enum class ETileState
 	Reachable UMETA(DisplayName="Reachable"),
 	AbilityRange UMETA(DisplayName="AbilityRange"),
 	IndicatorRange UMETA(DisplayName="IndicatorRange"),
+	DangerousRange UMETA(DisplayName="DangerousRange"),
 	Invalid UMETA(DisplayName="Invalid")
 };
 

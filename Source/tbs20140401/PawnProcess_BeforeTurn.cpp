@@ -11,11 +11,25 @@ void UPawnProcess_BeforeTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
 	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_BeforeTurn::EnterProcess"))
 	Super::EnterProcess(Pawn);
-	//第一回合 会是空
-	auto PreUnit =PawnInstance->GetMyCombatSystem()->GetFirstUnit();
-	if(PreUnit != nullptr)PreUnit->FinishTurn();
+
+	const auto MyCombatSystem = PawnInstance->GetMyCombatSystem();
+	const auto MyPathFinding = PawnInstance->GetMyGridPathFinding();
+	const auto PreUnit = MyCombatSystem->GetFirstUnit();
+	if(PreUnit == nullptr)
+	{//PreUnitが何も指し示さない場合なら　始めてということ
+		//すべてのオブジェクトの攻撃の範囲計算しておこうと思うんです
+		auto AllUnit = MyCombatSystem->GetAllUnits();
+		for(auto one : AllUnit)
+		{
+			one->FinishTurn(MyPathFinding);
+		}
+	}
+	else
+	{
+		PreUnit->FinishTurn(MyPathFinding);
+	}
 	
-	auto Unit = PawnInstance->GetMyCombatSystem()->SortActionPriority();
+	auto Unit = MyCombatSystem->SortActionPriority();
 	if(Unit == nullptr)return;
 	Unit->BeforeStartTurn();
 	PawnInstance->UpdateTileStatusByIndex(Unit->GetGridIndex(),ETileState::Selected);
