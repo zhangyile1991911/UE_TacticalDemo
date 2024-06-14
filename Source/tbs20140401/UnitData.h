@@ -13,7 +13,8 @@ enum class EUnitType:uint8
 	Slime UMETA(DisplayName="Slime"),
 	EnemyWarrior UMETA(DisplayName="EnemyWarrior"),
 	EnemyRanger UMETA(DisplayName="EnemyRanger"),
-	EnemySlime UMETA(DisplayName="EnemySlime")
+	EnemySlime UMETA(DisplayName="EnemySlime"),
+	EnemyTank UMETA(DisplayName="EnemyTank")
 	// Priest UMETA(DisplayName="Priest"),
 	// Chicken UMETA(DisplayName="Chicken"),
 	// Bat UMETA(DisplayName="Bat") 
@@ -23,9 +24,6 @@ USTRUCT(BlueprintType)
 struct FUnitData:public FTableRowBase
 {
 	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	int UniqueID;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	EUnitType Type;

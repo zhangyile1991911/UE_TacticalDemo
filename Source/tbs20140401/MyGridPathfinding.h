@@ -23,7 +23,7 @@ public:
 	// Sets default values for this actor's properties
 	AMyGridPathfinding();
 protected:
-
+	
 	UPROPERTY()
 	AGrid* MyGrid;
 
@@ -88,8 +88,9 @@ public:
 	
 	void UnitFindPath(const int UnitSide,const FIntPoint& Start,const FIntPoint& Target,TArray<ETileType> WalkableTileTypes,FPathFindingCompleted Completed,bool bDiagonal=true);
 	TArray<FIntPoint> UnitWalkablePath(const FIntPoint& Start,int MaxWalkPoint,TArray<ETileType> WalkableTileTypes,int UnitSide);
+	// TArray<FUnitRangeData> UnitWalkableTest(const FIntPoint& Start,int MaxWalkPoint,TArray<ETileType> WalkableTileTypes,int UnitSide);
 	TArray<FIntPoint> UnitAbilityRange(const FIntPoint& Start,const FIntPoint& Range,int AllowableDeviation = 1);
-	void UnitAttackRange(const FIntPoint& Start,int MaxAtkDistance,FPathCalculationCompleted Completed);
+	void UnitAttackRange(const FIntPoint& Start, int StartRange,int MaxAtkDistance,FPathCalculationCompleted Completed);
 	void SetShowDebugOption(bool ShowCost,bool ShowStart,bool ShowTarget)
 	{
 		IsShowCost = ShowCost;
@@ -102,7 +103,6 @@ public:
 		UE_LOG(LogTemp,Log,TEXT("current max calculation per frame %d"),count);
 		MaxCalculationPerFrame = count;
 	}
-	
 };
 
 

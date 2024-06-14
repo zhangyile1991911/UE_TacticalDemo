@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MyGridPathfinding.h"
 #include "PawnProcess.h"
 #include "UPawnProcess_Normal.generated.h"
 
@@ -21,17 +20,25 @@ protected:
 	FIntPoint CurrentCursor;
 	//记录寻路的路径
 	TArray<FIntPoint> PreviousPathFinding;
-	FPathFindingCompleted Completed;
+	
 
 	TArray<TObjectPtr<AMyUnit>> ThreatenEnemies;
-	
+	TMap<uint32,TObjectPtr<AMyUnit>> RelatedEnemies;//影響をされた敵
+	TSet<FIntPoint> DangerousTiles;
 	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoInstance;
+
+
+	int Calucating = 0;
 protected:
 	void ClearPathFinding();
 	void ClearWalkableTiles();
-	void ShowWalkableTiles(TArray<FIntPoint> tiles);
+	void ShowWalkPath(TArray<FIntPoint> Path);
 	void ShowTargetUnitBriefInfo(FIntPoint Index);
 	void HideTargetUnitBriefInfo();
+	void CheckDangerousRange(bool First);
+	void CheckMoveToDangerousRange();
+	void ShowUnitWalkableRange();
+	void WaitCalculating();
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn) override;
 	virtual void TickProcess() override;
@@ -39,4 +46,6 @@ public:
 	virtual void HandleCancelInput()override;
 	virtual void HandleConfirmInput() override;
 	virtual void ExitProcess()override;
+
+	void abeee(TSet<FIntPoint> range);
 };

@@ -83,7 +83,7 @@ TArray<TObjectPtr<AMyUnit>> AMyCombatSystem::GetThreatenEnemies(TObjectPtr<AMyUn
 
 		FIntPoint EnemyIndex = Value->GetGridIndex();
 		float Distance = CalculateDistance(UnitIndex,EnemyIndex);
-		if(Distance > Value->GetMaxAtkRange() + Unit->GetRuntimeProperty().Move)continue;
+		if(Distance > Value->GetMaxAtkRange() + Unit->GetMove())continue;
 		
 		Result.Add(Value);
 	}

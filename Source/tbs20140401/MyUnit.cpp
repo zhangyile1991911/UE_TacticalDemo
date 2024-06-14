@@ -13,9 +13,8 @@
 #include "Curves/CurveFloat.h"
 #include "Components/TimelineComponent.h"
 #include "UnitAbility.h"
-#include "UnitAbility_NormalAtk.h"
-#include "UnitAbility_Idle.h"
 #include "UnitAbilityAnim.h"
+#include "UnitPathComponent.h"
 
 
 // Sets default values
@@ -73,6 +72,10 @@ AMyUnit::AMyUnit()
 	{
 		MyDirectionActor->SetChildActorClass(ActorBPClass.Class);
 	}
+
+	PathComponent = CreateDefaultSubobject<UUnitPathComponent>(TEXT("PathComponent"));
+	PathComponent->ParentPtr = this;
+	AddOwnedComponent(PathComponent);
 }
 
 void AMyUnit::OnConstruction(const FTransform& Transform)
@@ -380,15 +383,17 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 		}
 	}
 
-	int MaxRange = 0;
+	// int MaxRange = 0;
+	MaxAtkRange = 0;
 	for(int i = 0;i < OwnAbilityAnimList.Num();i++)
 	{
-		if(OwnAbilityAnimList[i]->GetSkillData().Range.Y > MaxRange)
+		if(OwnAbilityAnimList[i]->GetSkillData().Range.Y > MaxAtkRange)
 		{
-			MaxRange = OwnAbilityAnimList[i]->GetSkillData().Range.Y;
+			MaxAtkRange = OwnAbilityAnimList[i]->GetSkillData().Range.Y;
 		}
 	}
-	MaxAtkRange = MyRuntimeProperty.Move + MaxRange;
+	// MaxAtkRange += MyRuntimeProperty.Move;
+
 }
 
 void AMyUnit::SetHovered(bool h)
@@ -474,15 +479,15 @@ void AMyUnit::StartWalkPath(FPathCompleted Completed)
 	PathCompleted = Completed;
 	WalkPathIndex = 1;
 	
-	auto pData = MyGrid->GetTileDataByIndex(WalkPath[WalkPathIndex]);
+	auto TileDataPtr = MyGrid->GetTileDataByIndex(WalkPath[WalkPathIndex]);
 	StartRotateAngles = GetActorForwardVector().Rotation();
-	float AngleDegrees = CalculateRotationAngleToTarget(GetActorLocation(),pData->Transform.GetLocation());
-	FinishRotateAngles.Yaw = AngleDegrees - 90;
+	float fAngleDegrees = CalculateRotationAngleToTarget(GetActorLocation(),TileDataPtr->Transform.GetLocation());
+	FinishRotateAngles.Yaw = fAngleDegrees - 90;
 	IIMyUnitAnimation::Execute_SetUnitAnimationState(MyAnimInstance,EUnitAnimation::Walk);
 	UnitMovement.PlayFromStart();
-	if(pData->UnitOnTile != nullptr)
+	if(TileDataPtr->UnitOnTile != nullptr)
 	{
-		pData->UnitOnTile->DoDodgeAnim(GetGridIndex());
+		TileDataPtr->UnitOnTile->DoDodgeAnim(GetGridIndex());
 	}
 }
 
@@ -661,20 +666,20 @@ void AMyUnit::BeforeStartTurn()
 	TempDestinationGridIndex = GridIndex;
 }
 
-void AMyUnit::FinishTurn(AMyGridPathfinding* MyPathfinding)
+void AMyUnit::FinishTurn(bool bAsync)
 {
 	CurrentDistanceToAction = 0;
 	//提前计算 单位的攻击范围 因为当前单位已经不会在移动了所以 攻击范围就是固定的
 	//このオブジェクトも移動できないんです、だから　攻撃の範囲は決めつけてて非同期で計算しておきます
-	FPathCalculationCompleted Completed;
-	Completed.BindLambda([this](TSet<FIntPoint> Result)->void
+	if(bAsync)
 	{
-		UE_LOG(LogTemp,Log,TEXT("%s Calucate Attack Range Completed"),*this->GetName())
-		AttackRanges = MoveTemp(Result);
-	});
-	
-	MyPathfinding->UnitAttackRange(GridIndex,MaxAtkRange,Completed);
-	
+		FUnitWalkRangeCompleted xxx;
+		PathComponent->UnitWalkablePathAsync(xxx);	
+	}
+	else
+	{
+		PathComponent->UnitWalkablePath();
+	}
 }
 
 void AMyUnit::RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex)
@@ -776,6 +781,7 @@ FRotator AMyUnit::GetUnitForward() const
 	}
 	return MySkeletalMeshComponent->GetRelativeRotation();
 }
+
 
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection)
 {

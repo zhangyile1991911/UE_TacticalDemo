@@ -11,6 +11,7 @@
 #include "MyUnit.generated.h"
 
 
+class UUnitPathComponent;
 class AMyGridPathfinding;
 class UIMyUnitAnimation;
 class IIMyUnitAnimation;
@@ -41,6 +42,8 @@ public:
 	// Sets default values for this actor's properties
 	AMyUnit();
 protected:
+	friend class UUnitPathComponent;
+	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	USkeletalMeshComponent* MySkeletalMeshComponent;
 
@@ -52,6 +55,9 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UChildActorComponent> MyDirectionActor;
 	TObjectPtr<AIdleDirection> MyDirection;
+
+	UPROPERTY()
+	TObjectPtr<UUnitPathComponent> PathComponent;
 	
 	// UPROPERTY()
 	// TObjectPtr<USkeletalMeshComponent> ShadowSkeletalMeshComponent;
@@ -269,7 +275,7 @@ public:
 	bool HasAttackDone()const{return AtkNum != MyProperty.AtkCount;}
 	//タン始まる前に　計算やプロパティリなどセットする
 	void BeforeStartTurn();
-	void FinishTurn(AMyGridPathfinding* MyPathfinding);
+	void FinishTurn(bool bAsync);
 
 	void RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex);
 
@@ -282,8 +288,11 @@ public:
 	FRotator GetUnitForward()const;
 	bool IsFriend(int Side)const{return MyRuntimeProperty.UnitSide == Side;}
 
-	int GetMaxAtkRange()const{return MaxAtkRange;}
+	int GetMaxAtkRange()const{return MaxAtkRange+MyRuntimeProperty.Move;}
+	int GetMove()const{return MyRuntimeProperty.Move;}
 	// int GetUniqueID()const{return UniqueID;}
 	const TSet<FIntPoint>& GetAttackRanges()const{return AttackRanges;}
+
+	TObjectPtr<UUnitPathComponent> GetPathComponent()const{return PathComponent;}
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

@@ -544,7 +544,8 @@ bool AMyGridPathfinding::DiscoverTileByWalkableType(const int UnitSide,const FMy
 		if(!AnalysedTileIndexes.Contains(one))
 		{
 			FMyPathFindingData nextPoint = TryNextNeighbor(TilePathData,one);
-			if(nextPoint.Index == TargetPoint)return true;
+			if(nextPoint.Index == TargetPoint)
+				return true;
 		}
 	}
 	
@@ -559,6 +560,7 @@ TArray<FIntPoint> AMyGridPathfinding::UnitWalkablePath(const FIntPoint& Start,in
 	TArray<FIntPoint> ReachableTiles;
 	ReachableTiles.Reserve(64);
 	TSet<FIntPoint> DiscoverTiles;
+	DiscoverTiles.Reserve(64);
 	ReachableTiles.Add(Start);
 	FMyPathFindingData data = AddPathFindingData(nullptr,Start);
 	bool next = true;
@@ -568,8 +570,8 @@ TArray<FIntPoint> AMyGridPathfinding::UnitWalkablePath(const FIntPoint& Start,in
 		if(ReachableTiles.IsEmpty() || ReachableIndex >= ReachableTiles.Num())break;
 		
 		FIntPoint center = ReachableTiles[ReachableIndex];
-		if(DiscoverTiles.Contains(center))continue;
-		DiscoverTiles.Add(center);
+		// if(DiscoverTiles.Contains(center))continue;
+		// DiscoverTiles.Add(center);
 		data = PathFindingData[center];
 		TArray<FIntPoint> neighbor = GetNeighborIndexesForSquare(center);
 
@@ -578,6 +580,7 @@ TArray<FIntPoint> AMyGridPathfinding::UnitWalkablePath(const FIntPoint& Start,in
 			auto pData = MyGrid->GetTileDataByIndex(Element);
 			if(pData == nullptr)return true;
 			if(!IsTileTypeWalkable(pData->TileType))return true;
+			if(pData->States.Contains(ETileState::PathFinding))return true;
 			if(pData->UnitOnTile != nullptr &&
 				pData->UnitOnTile->IsFriend(UnitSide)==false)return true;
 			
@@ -608,7 +611,11 @@ TArray<FIntPoint> AMyGridPathfinding::UnitWalkablePath(const FIntPoint& Start,in
 			auto c = AddPathFindingData(&data,one);
 			if(c.CostFromStart <= MaxWalkPoint*GridCost)
 			{
-				ReachableTiles.Add(one);
+				if(!DiscoverTiles.Contains(one))
+				{
+					ReachableTiles.Add(one);
+					DiscoverTiles.Add(one);	
+				}
 			}
 			else
 			{
@@ -617,11 +624,55 @@ TArray<FIntPoint> AMyGridPathfinding::UnitWalkablePath(const FIntPoint& Start,in
 			}
 		}
 		
+		
 	}
-	
 	
 	return MoveTemp(ReachableTiles);
 }
+
+// TArray<FUnitRangeData> AMyGridPathfinding::UnitWalkableTest(const FIntPoint& Start,int MaxWalkPoint,TArray<ETileType> WalkableTileTypes,int UnitSide)
+// {
+// 	
+// 	TArray<FUnitRangeData> ReachableTiles;
+// 	ReachableTiles.Reserve(64);
+//
+// 	TArray<FIntPoint> RangeList;
+// 	RangeList.Reserve(64);
+// 	RangeList.Add(Start);
+// 	int RangeIndex = 0;
+// 	
+// 	TSet<FIntPoint> DiscoveredTiles;
+// 	DiscoveredTiles.Reserve(64);
+//
+// 	//数据结构是图
+// 	//图的话 只提供 新建 查找
+// 	FUnitRangeData RootData;
+// 	RootData.Index = Start;
+// 	RootData.Cost = 0;
+// 	RootData.Parent = nullptr;
+// 	ReachableTiles.Add(RootData);
+//
+// 	auto f = [this,f,DiscoveredTiles](FUnitRangeData& Data,int MaxCost){
+// 		if(Data.Children.Num() <= 0)return;
+// 		auto Neighbor = GetNeighborIndexesForSquare(Data.Index);
+// 		for(int i = 0;i < Neighbor.Num();i++)
+// 		{
+// 			if(isvalid)continue;
+// 			if(isside)continue;
+// 			if(isheight)continue;
+// 			if(IsTileTypeWalkable)continue;
+// 		}
+// 		
+// 		Data.Children.Append(Neighbor);
+// 		for(int i = 0;i < Data.Children.Num();i++)
+// 		{
+// 			f(Data.Children[i],MaxCost);
+// 		}
+// 		
+// 	};
+// 	
+// 	return MoveTemp(ReachableTiles);
+// }
 
 TArray<FIntPoint> AMyGridPathfinding::UnitAbilityRange(const FIntPoint& Start,const FIntPoint& Range,int AllowableDeviation)
 {
@@ -650,6 +701,7 @@ TArray<FIntPoint> AMyGridPathfinding::UnitAbilityRange(const FIntPoint& Start,co
 			auto pData = MyGrid->GetTileDataByIndex(Element);
 			if(pData == nullptr)return true;
 			if(!IsTileTypeWalkable(pData->TileType))return true;
+			if(pData->States.Contains(ETileState::PathFinding))return true;
 			//高度差
 			float z = pData->Transform.GetLocation().Z;
 			auto pCenterData = MyGrid->GetTileDataByIndex(center);
@@ -681,11 +733,11 @@ TArray<FIntPoint> AMyGridPathfinding::UnitAbilityRange(const FIntPoint& Start,co
 	return MoveTemp(RangeResult);
 }
 
-void AMyGridPathfinding::UnitAttackRange(const FIntPoint& Start, int MaxAtkDistance,FPathCalculationCompleted Completed)
+void AMyGridPathfinding::UnitAttackRange(const FIntPoint& Start, int StartRange,int MaxAtkDistance,FPathCalculationCompleted Completed)
 {
-	Async(EAsyncExecution::TaskGraphMainThread,[this,Start,MaxAtkDistance,Completed]()-> void
+	Async(EAsyncExecution::TaskGraphMainThread,[this,Start,StartRange,MaxAtkDistance,Completed]()-> void
 	{
-		TArray<FIntPoint> Result = UnitAbilityRange(Start,FIntPoint(1,MaxAtkDistance));
+		TArray<FIntPoint> Result = UnitAbilityRange(Start,FIntPoint(StartRange,MaxAtkDistance));
 		TSet<FIntPoint> AttackRange;
 		AttackRange.Reserve(64);
 		for(const auto& one : Result)

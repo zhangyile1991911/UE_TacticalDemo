@@ -13,7 +13,7 @@ void UPawnProcess_BeforeTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	Super::EnterProcess(Pawn);
 
 	const auto MyCombatSystem = PawnInstance->GetMyCombatSystem();
-	const auto MyPathFinding = PawnInstance->GetMyGridPathFinding();
+	// const auto MyPathFinding = PawnInstance->GetMyGridPathFinding();
 	const auto PreUnit = MyCombatSystem->GetFirstUnit();
 	if(PreUnit == nullptr)
 	{//PreUnitが何も指し示さない場合なら　始めてということ
@@ -21,12 +21,12 @@ void UPawnProcess_BeforeTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 		auto AllUnit = MyCombatSystem->GetAllUnits();
 		for(auto one : AllUnit)
 		{
-			one->FinishTurn(MyPathFinding);
+			one->FinishTurn(false);
 		}
 	}
 	else
 	{
-		PreUnit->FinishTurn(MyPathFinding);
+		PreUnit->FinishTurn(true);
 	}
 	
 	auto Unit = MyCombatSystem->SortActionPriority();
