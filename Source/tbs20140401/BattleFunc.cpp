@@ -131,3 +131,5 @@ int UBattleFunc::CalculateHitRate(AMyUnit* Attacker,AMyUnit* Defender,AGrid* MyG
 	
 	return HitResult;
 }
+
+

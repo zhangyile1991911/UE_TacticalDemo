@@ -394,6 +394,58 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	}
 	// MaxAtkRange += MyRuntimeProperty.Move;
 
+	FUnitColorDataAsset* Color = GetUnitDataColor(UnitType);
+	if(!Color->Slot1.IsValid())
+	{
+		auto m1 = Color->Slot1.LoadSynchronous();
+		MySkeletalMeshComponent->SetMaterial(0,m1);
+	}
+	else
+	{
+		MySkeletalMeshComponent->SetMaterial(0,Color->Slot1.Get());
+	}
+	
+	if(!Color->Slot2.IsValid())
+	{
+		auto m1 = Color->Slot2.LoadSynchronous();
+		MySkeletalMeshComponent->SetMaterial(1,m1);
+	}
+	else
+	{
+		MySkeletalMeshComponent->SetMaterial(1,Color->Slot2.Get());
+	}
+	
+	if(!Color->Slot3.IsValid())
+	{
+		auto m1 = Color->Slot3.LoadSynchronous();
+		MySkeletalMeshComponent->SetMaterial(2,m1);
+	}
+	else
+	{
+		MySkeletalMeshComponent->SetMaterial(2,Color->Slot3.Get());
+	}
+	
+	if(!Color->Slot4.IsValid())
+	{
+		auto m1 = Color->Slot4.LoadSynchronous();
+		MySkeletalMeshComponent->SetMaterial(3,m1);
+	}
+	else
+	{
+		MySkeletalMeshComponent->SetMaterial(3,Color->Slot4.Get());
+	}
+	
+	if(!Color->Slot5.IsValid())
+	{
+		auto m1 = Color->Slot5.LoadSynchronous();
+		MySkeletalMeshComponent->SetMaterial(4,m1);
+	}
+	else
+	{
+		MySkeletalMeshComponent->SetMaterial(4,Color->Slot5.Get());
+	}
+	
+
 }
 
 void AMyUnit::SetHovered(bool h)

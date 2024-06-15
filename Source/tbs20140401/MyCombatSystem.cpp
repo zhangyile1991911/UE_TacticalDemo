@@ -3,6 +3,7 @@
 
 #include "MyCombatSystem.h"
 
+#include "AssaultTips.h"
 #include "Grid.h"
 #include "MyUnit.h"
 #include "My_Pawn.h"
@@ -15,6 +16,12 @@ AMyCombatSystem::AMyCombatSystem()
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("root"));
+	
+	static ConstructorHelpers::FClassFinder<AAssaultTips> AssaultTips(TEXT("/Game/Art/Units/BP_AssaultTips"));
+	if (AssaultTips.Succeeded())
+	{
+		AssaultTipsClass = AssaultTips.Class;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -23,7 +30,26 @@ void AMyCombatSystem::BeginPlay()
 	Super::BeginPlay();
 	auto actor = UGameplayStatics::GetActorOfClass(GetWorld(),AGrid::StaticClass());
 	MyGrid = Cast<AGrid>(actor);
+
+	for(int i = 0;i < 5;i++)
+	{
+		CreateOneTips();	
+	}
+	
 }
+
+void AMyCombatSystem::CreateOneTips()
+{
+	auto CurWorld = GetWorld();
+
+	auto Actor = CurWorld->SpawnActor(AssaultTipsClass);
+	auto Tips = Cast<AAssaultTips>(Actor);
+	Tips->SetHidden(true);
+	TipsObjectPool.Add(Tips);
+	Tips->StopAnimation();
+}
+
+
 
 TObjectPtr<AMyUnit>  AMyCombatSystem::SortActionPriority()
 {
@@ -88,6 +114,34 @@ TArray<TObjectPtr<AMyUnit>> AMyCombatSystem::GetThreatenEnemies(TObjectPtr<AMyUn
 		Result.Add(Value);
 	}
 	return MoveTemp(Result);
+}
+
+void AMyCombatSystem::ShowUnitThreaten(TArray<FThreatenInfo> Infos)
+{
+	HideUnitThreaten();
+	if(Infos.Num() > TipsObjectPool.Num())
+	{
+		int AddNum = Infos.Num() - TipsObjectPool.Num();
+		for(int i = 0;i < AddNum;i++)
+		{
+			CreateOneTips();	
+		}
+	}
+	for(int i = 0;i < Infos.Num();i++)
+	{
+		TipsObjectPool[i]->DoAnimation(Infos[i].Attacker,
+			Infos[i].Defender);
+		TipsObjectPool[i]->SetHidden(false);
+	}
+}
+
+void AMyCombatSystem::HideUnitThreaten()
+{
+	for(auto Tips : TipsObjectPool)
+	{
+		Tips->StopAnimation();
+		Tips->SetHidden(true);
+	}
 }
 
 // Called every frame

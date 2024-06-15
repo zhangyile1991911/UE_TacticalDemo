@@ -7,10 +7,21 @@
 #include "MyCombatSystem.generated.h"
 
 
+class AAssaultTips;
 class AMy_Pawn;
 class AMyUnit;
 class AGrid;
 DECLARE_EVENT_OneParam(AMyCombatSystem,ReSortEvent,const TArray<TObjectPtr<AMyUnit>>&);
+
+USTRUCT()
+struct FThreatenInfo
+{
+	GENERATED_BODY()
+
+	FVector Attacker;
+	FVector Defender;	
+};
+
 
 UCLASS(Blueprintable)
 class TBS20140401_API AMyCombatSystem : public AActor
@@ -31,9 +42,15 @@ protected:
 	TMap<uint32,TObjectPtr<AMyUnit>> UnitsInCombat;
 
 	TArray<TObjectPtr<AMyUnit>> UnitsActionPriority;
+
+	TArray<TObjectPtr<AAssaultTips>> TipsObjectPool;
+	UPROPERTY()
+	UClass* AssaultTipsClass;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void CreateOneTips();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -53,4 +70,7 @@ public:
 	TObjectPtr<AMyUnit> GetFirstUnit()const{return FirstUnit;}
 	TArray<TObjectPtr<AMyUnit>> GetThreatenEnemies(TObjectPtr<AMyUnit>);
 	ReSortEvent ReSortEvent;
+
+	void ShowUnitThreaten(TArray<FThreatenInfo> Infos);
+	void HideUnitThreaten();
 };

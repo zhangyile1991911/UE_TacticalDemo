@@ -70,6 +70,46 @@ FUnitData* GetUnitData(const EUnitType unitType)
 	case EUnitType::EnemyRanger:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyRanger")),"");
 		break;
+	case EUnitType::EnemyTank:
+		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyTank")),"");
+		break;
+	}
+	return row;
+}
+
+FUnitColorDataAsset* GetUnitDataColor(const EUnitType unitType)
+{
+	static UDataTable* LoadedDataTable = nullptr;
+	if(LoadedDataTable == nullptr)
+	{
+		FSoftObjectPath MyAssetPath(TEXT("DataTable'/Game/Art/Units/DT_UnitColor.DT_UnitColor'"));
+		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+		LoadedDataTable = Cast<UDataTable>(Streamable.LoadSynchronous(MyAssetPath));
+	}
+	FUnitColorDataAsset* row = nullptr;
+	switch (unitType)
+	{
+	case EUnitType::Warrior:
+		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("Warrior")),"");
+		break;
+	case EUnitType::Slime:
+		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("Slime")),"");
+		break;
+	case EUnitType::Ranger:
+		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("Ranger")),"");
+		break;
+	case EUnitType::EnemyWarrior:
+		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyWarrior")),"");
+		break;
+	case EUnitType::EnemySlime:
+		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemySlime")),"");
+		break;
+	case EUnitType::EnemyRanger:
+		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyRanger")),"");
+		break;
+	case EUnitType::EnemyTank:
+		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyTank")),"");
+		break;
 	}
 	return row;
 }

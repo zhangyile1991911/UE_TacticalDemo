@@ -254,7 +254,8 @@ void UUPawnProcess_Normal::CheckMoveToDangerousRange()
 			AffectedEnemy.Add(EnemyPtr->GetUniqueID());
 		}
 	}
-	
+	TArray<FThreatenInfo> Infos;
+	auto TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
 	for(int i = 0;i < ThreatenEnemies.Num();i++)
 	{
 		const auto EnemyPtr = ThreatenEnemies[i];
@@ -266,6 +267,7 @@ void UUPawnProcess_Normal::CheckMoveToDangerousRange()
 			EnemyPtr->GetPathComponent()->UnitWalkablePathAsync(Cal);
 			if(!RelatedEnemies.Contains(EnemyPtr->GetUniqueID()))
 				RelatedEnemies.Add(EnemyPtr->GetUniqueID(),EnemyPtr);
+			Infos.Add(FThreatenInfo{EnemyPtr->GetActorLocation(),TileDataPtr->Transform.GetLocation()});
 		}
 		else if(RelatedEnemies.Contains(EnemyPtr->GetUniqueID()))
 		{
@@ -276,6 +278,8 @@ void UUPawnProcess_Normal::CheckMoveToDangerousRange()
 			RelatedEnemies.Remove(EnemyPtr->GetUniqueID());
 		}
 	}
+
+	PawnInstance->GetMyCombatSystem()->ShowUnitThreaten(Infos);
 	
 	
 }

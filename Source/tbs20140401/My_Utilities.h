@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FunitColorDataAsset.h"
 #include "GridShapeData.h"
 #include "UnitData.h"
 
@@ -25,3 +26,4 @@ bool IsIntEven(int i);
 FUnitData* GetUnitData(const EUnitType unitType);
 FGridShapeData* GetShapeData(EGridShape shapeName);
 bool IsTileTypeWalkable(ETileType);
+FUnitColorDataAsset* GetUnitDataColor(const EUnitType unitType);

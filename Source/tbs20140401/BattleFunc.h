@@ -30,8 +30,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	static int CalculateHitRate(AMyUnit* Attacker,AMyUnit* Defender,AGrid* MyGrid,bool HasWrap,bool IsBackAtk);
-
+	
 	// UFUNCTION(BlueprintCallable)
 	// static int CalculateDamage(AMyUnit* Attacker,AMyUnit* Defender,AGrid* MyGrid,bool HasWrap,bool IsBackAtk);
+	
 };
 
