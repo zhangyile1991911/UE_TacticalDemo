@@ -459,6 +459,11 @@ bool UUnitPathComponent::IsMoveInReachableTiles(const FIntPoint& one) const
 	return false;
 }
 
+bool UUnitPathComponent::IsAssaultRangeTiles(const FIntPoint& one) const
+{
+	return AssaultRangeTiles.Contains(one);
+}
+
 void UUnitPathComponent::AddAssaultRange(const FIntPoint& Point,bool bIsTemp)
 {
 	

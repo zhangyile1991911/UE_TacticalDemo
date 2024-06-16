@@ -32,8 +32,9 @@ void AAssaultTips::GenerateBezierPath(FVector Start, FVector Finish)
 	Dir = Dir.GetSafeNormal();
 	float fDistance = FVector::Distance(Start,Finish);
 	FVector CtrlPoint = Start + Dir * fDistance / 2.0f;
-	CtrlPoint.Z += 800;
-	for(int i = 0;i < BezierPathNum;i++)
+	// CtrlPoint.Z += 800;
+	CtrlPoint.Z += 500;
+	for(int i = 1;i < BezierPathNum;i++)
 	{
 		float Per = float(i)/float(BezierPathNum);
 		FVector one = GetQuadraticCurvePoint(Start,Finish,CtrlPoint,Per);

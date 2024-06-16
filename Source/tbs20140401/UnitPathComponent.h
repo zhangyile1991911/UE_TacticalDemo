@@ -30,11 +30,11 @@ protected:
 	TArray<FIntPoint> AnalysedTileIndexes;
 
 	// TArray<FIntPoint> ReachableTiles;
-	TSet<FIntPoint> ReachableMap;
-	TSet<FIntPoint> AssaultRangeTiles;
+	TSet<FIntPoint> ReachableMap;//这个是临时的移动范围
+	TSet<FIntPoint> AssaultRangeTiles;//这个是临时的攻击范围
 
-	TSet<FIntPoint> TurnReachableMap;
-	TSet<FIntPoint> TurnAssaultRangeTiles;
+	TSet<FIntPoint> TurnReachableMap;//这个是这一回合开始前就计算好的
+	TSet<FIntPoint> TurnAssaultRangeTiles;//这个也是这回合开始前就计算好的
 	
 
 	FIntPoint StartIndex;
@@ -64,9 +64,11 @@ public:
 	
 	const TSet<FIntPoint>& GetAssaultRangeTiles()const{return AssaultRangeTiles;}
 	const TSet<FIntPoint>& GetReachableTiles()const{return ReachableMap;}
+	
 	const TSet<FIntPoint>& GetTurnAssaultRangeTiles()const{return TurnAssaultRangeTiles;}
 	const TSet<FIntPoint>& GetTurnReachableTiles()const{return TurnReachableMap;}
 	bool IsMoveInReachableTiles(const FIntPoint& one)const;
+	bool IsAssaultRangeTiles(const FIntPoint& one)const;
 	UPROPERTY()
 	TObjectPtr<AMyUnit> ParentPtr;
 };

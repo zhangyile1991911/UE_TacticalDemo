@@ -44,7 +44,7 @@ void AMyCombatSystem::CreateOneTips()
 
 	auto Actor = CurWorld->SpawnActor(AssaultTipsClass);
 	auto Tips = Cast<AAssaultTips>(Actor);
-	Tips->SetHidden(true);
+	Tips->SetActorHiddenInGame(true);
 	TipsObjectPool.Add(Tips);
 	Tips->StopAnimation();
 }
@@ -131,7 +131,7 @@ void AMyCombatSystem::ShowUnitThreaten(TArray<FThreatenInfo> Infos)
 	{
 		TipsObjectPool[i]->DoAnimation(Infos[i].Attacker,
 			Infos[i].Defender);
-		TipsObjectPool[i]->SetHidden(false);
+		TipsObjectPool[i]->SetActorHiddenInGame(false);
 	}
 }
 
@@ -140,7 +140,7 @@ void AMyCombatSystem::HideUnitThreaten()
 	for(auto Tips : TipsObjectPool)
 	{
 		Tips->StopAnimation();
-		Tips->SetHidden(true);
+		Tips->SetActorHiddenInGame(true);
 	}
 }
 

@@ -23,7 +23,7 @@ protected:
 	
 
 	TArray<TObjectPtr<AMyUnit>> ThreatenEnemies;
-	TMap<uint32,TObjectPtr<AMyUnit>> RelatedEnemies;//影響をされた敵
+	// TMap<uint32,TObjectPtr<AMyUnit>> RelatedEnemies;//影響をされた敵
 	TSet<FIntPoint> DangerousTiles;
 	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoInstance;
 
@@ -35,8 +35,9 @@ protected:
 	void ShowWalkPath(TArray<FIntPoint> Path);
 	void ShowTargetUnitBriefInfo(FIntPoint Index);
 	void HideTargetUnitBriefInfo();
-	void CheckDangerousRange(bool First);
-	void CheckMoveToDangerousRange();
+	void CheckDangerousRange();
+	void CheckDangerousLine();
+	void CheckMoveToDangerousRange(const FIntPoint& Previous,const FIntPoint& Current);
 	void ShowUnitWalkableRange();
 	void WaitCalculating();
 public:
