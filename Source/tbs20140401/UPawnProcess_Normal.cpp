@@ -119,21 +119,21 @@ void UUPawnProcess_Normal::HandleConfirmInput()
 	if(UnitInstance->GetPathComponent()->IsMoveInReachableTiles(CurrentCursor))
 	{
 		//将影子放到目的地上(キャラのスタンドインを目的に置いとく)
-		const auto TileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
-		if(TileData == nullptr)
-		{
-			UE_LOG(LogTemp,Log,TEXT("CurrentCursor(%d,%d)"),CurrentCursor.X,CurrentCursor.Y);
-			return;
-		}
-		if(TileData->UnitOnTile != nullptr)
-		{
-			return;
-		}
-		PawnInstance->LookAtGrid(CurrentCursor);
 		if(CurrentCursor != UnitInstance->GetGridIndex())
 		{
+			const auto TileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
+			if(TileData == nullptr)
+			{
+				UE_LOG(LogTemp,Log,TEXT("CurrentCursor(%d,%d)"),CurrentCursor.X,CurrentCursor.Y);
+				return;
+			}
+			if(TileData->UnitOnTile != nullptr)
+			{
+				return;
+			}
 			UnitInstance->MoveShadowOnTile(TileData->Transform.GetLocation());
 			UnitInstance->SetTempDestinationGridIndex(CurrentCursor);
+			PawnInstance->LookAtGrid(CurrentCursor);
 		}
 		PawnInstance->SwitchToCmdInput();
 	}
@@ -146,6 +146,7 @@ void UUPawnProcess_Normal::ExitProcess()
 	Super::ExitProcess();
 	ClearPathFinding();
 	ClearWalkableTiles();
+	ClearDangerousTiles();
 	PawnInstance->RemoveTileStateByIndex(CurrentCursor,ETileState::Selected);
 	UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);
 	ThreatenEnemies.Empty();
@@ -278,13 +279,19 @@ void UUPawnProcess_Normal::WaitCalculating()
 	}
 }
 
-void UUPawnProcess_Normal::CheckDangerousRange()
+void UUPawnProcess_Normal::ClearDangerousTiles()
 {
 	for(const auto& one : DangerousTiles)
 	{
 		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::DangerousRange);
 	}
 	DangerousTiles.Empty();
+}
+
+void UUPawnProcess_Normal::CheckDangerousRange()
+{
+	ClearDangerousTiles();
+	
 	PawnInstance->GetMyCombatSystem()->HideUnitThreaten();
 	
 	ThreatenEnemies = PawnInstance->GetMyCombatSystem()->GetThreatenEnemies(UnitInstance);

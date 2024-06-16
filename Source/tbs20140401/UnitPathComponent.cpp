@@ -467,7 +467,7 @@ bool UUnitPathComponent::IsAssaultRangeTiles(const FIntPoint& one) const
 void UUnitPathComponent::AddAssaultRange(const FIntPoint& Point,bool bIsTemp)
 {
 	
-	UE_LOG(LogTemp,Log,TEXT("AddAssaultRange %d %d"),Point.X,Point.Y)
+	// UE_LOG(LogTemp,Log,TEXT("AddAssaultRange %d %d"),Point.X,Point.Y)
 	if(bIsTemp)
 	{
 		if(AssaultRangeTiles.Contains(Point))return;
@@ -568,7 +568,7 @@ void UUnitPathComponent::UnitAssaultRange(bool bIsTemp)
 		AssaultRangeTiles = TurnAssaultRangeTiles;
 	}
 	
-	UE_LOG(LogTemp,Log,TEXT("UUnitPathComponent::UnitAssaultRange() Completed"))
+	// UE_LOG(LogTemp,Log,TEXT("UUnitPathComponent::UnitAssaultRange() Completed"))
 }
 
 

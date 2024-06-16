@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "GameUI_BattleInfo.generated.h"
 
+class UBorder;
+class UCanvasPanel;
+class UHitInfoFlow;
 class UVerticalBox;
 class UCanvasPanelSlot;
 class UTextBlock;
@@ -17,29 +20,38 @@ class TBS20140401_API UGameUI_BattleInfo : public UUserWidget
 {
 	GENERATED_BODY()
 protected:
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UTextBlock> HitNum;
-	UPROPERTY()
-	TObjectPtr<UCanvasPanelSlot> HitNumSlot;
-	
+
+	// UPROPERTY(meta=(BindWidget))
+	// TObjectPtr<UTextBlock> HitNum;
+	// UPROPERTY()
+	// TObjectPtr<UCanvasPanelSlot> HitNumSlot;
+	TSubclassOf<UUserWidget> ChildWidgetClass;
+	TArray<TObjectPtr<UHitInfoFlow>> HitInfoPool;
+	TArray<TObjectPtr<UHitInfoFlow>> UsingHitInfos;
 	
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> BackAtkTips;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UBorder> BackAtkBorder;
 	// UPROPERTY()
 	// TObjectPtr<UCanvasPanelSlot> BackAtkTipSlot;
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> CooperationTips;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UBorder> CooperationBorder;
 	// UPROPERTY()
 	// TObjectPtr<UCanvasPanelSlot> CooperationTipsSlot;
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UVerticalBox> TipsGroup;
 	UPROPERTY()
 	TObjectPtr<UCanvasPanelSlot> TipsGroupSlot;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UCanvasPanel> CanvasPanel;
 	
 
-	FVector2D StartFlowPosition;
-	FVector2D FinishFlowPosition;
+	
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;

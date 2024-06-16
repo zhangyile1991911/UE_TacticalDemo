@@ -32,6 +32,7 @@ protected:
 protected:
 	void ClearPathFinding();
 	void ClearWalkableTiles();
+	void ClearDangerousTiles();
 	void ShowWalkPath(TArray<FIntPoint> Path);
 	void ShowTargetUnitBriefInfo(FIntPoint Index);
 	void HideTargetUnitBriefInfo();

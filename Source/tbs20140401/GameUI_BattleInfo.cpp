@@ -3,17 +3,37 @@
 
 #include "GameUI_BattleInfo.h"
 
+#include "HitInfoFlow.h"
 #include "MyUnit.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/Border.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
+#include "Components/CanvasPanel.h"
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 
 
 void UGameUI_BattleInfo::NativeConstruct()
 {
 	Super::NativeConstruct();
-	HitNum->SetVisibility(ESlateVisibility::Hidden);
+	
+	FSoftObjectPath MyAssetPath(TEXT("/Game/DebugMenu/Widgets/ActionBar/BP_HitInfoFlow.BP_HitInfoFlow_C"));
+	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+	ChildWidgetClass = Cast<UClass>(Streamable.LoadSynchronous(MyAssetPath));
+	if (ChildWidgetClass != nullptr)
+	{
+		HitInfoPool.Reserve(5);
+		for (int i = 0;i < 5;i++)
+		{
+			auto UWidget = CreateWidget<UUserWidget>(this,ChildWidgetClass);
+			CanvasPanel->AddChildToCanvas(UWidget);
+			auto HitInfo = Cast<UHitInfoFlow>(UWidget);
+			HitInfoPool.Add(HitInfo);	
+		}
+	}
+	// HitNum->SetVisibility(ESlateVisibility::Hidden);
 	BackAtkTips->SetVisibility(ESlateVisibility::Hidden);
 	CooperationTips->SetVisibility(ESlateVisibility::Hidden);
 
@@ -42,73 +62,41 @@ void UGameUI_BattleInfo::StartHitNumFlowAnim(AMyUnit* Unit,int Num,bool IsHit)
 {
 	if(Unit == nullptr)return;
 	
+	UsingHitInfos.Add(HitInfoPool.Last());
+	HitInfoPool.RemoveAt(HitInfoPool.Num() - 1);
+	
+	auto OneHit = UsingHitInfos.Last();
+	
 	FVector2D ScreenLocation;
 	float Scale;
 	const bool Result = LocationToScreenPosition(Unit->GetActorLocation(),ScreenLocation,Scale);
 	if(Result)
 	{
-		if(IsHit)
-		{
-			HitNum->SetText(FText::Format(NSLOCTEXT("","","-{0}"),Num));	
-		}
-		else
-		{
-			HitNum->SetText(FText(NSLOCTEXT("","","MISSING")));
-		}
+		FVector2D StartFlowPosition;
+		FVector2D FinishFlowPosition;
 		
-		HitNumSlot = Cast<UCanvasPanelSlot>(HitNum->Slot);
-		auto TextSize = HitNumSlot->GetSize();
-		TextSize /= 2;
-		TextSize /= Scale;
-		ScreenLocation.X -= TextSize.X;
-		ScreenLocation.Y -= TextSize.Y;
-		HitNumSlot->SetPosition(ScreenLocation);
 		StartFlowPosition = ScreenLocation;
 		ScreenLocation.Y -= 100;
 		FinishFlowPosition = ScreenLocation;
-		HitNum->SetVisibility(ESlateVisibility::Visible);
+		
+		OneHit->StartHitNum(StartFlowPosition,FinishFlowPosition,Scale,Num,IsHit);
 	}
-	else
-	{
-		HitNum->SetVisibility(ESlateVisibility::Hidden);
-	}
-	// const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	//
-	// const FVector WorldPosition =Unit->GetActorLocation();
-	
-	// const bool Result = PlayerController->ProjectWorldLocationToScreen(WorldPosition,ScreenLocation,true);
-	// if(Result)
-	// {
-	// 	const float Scale = UWidgetLayoutLibrary::GetViewportScale(PlayerController);
-	// 	ScreenLocation /= Scale;
-	// 	HitNum->SetText(FText::Format(NSLOCTEXT("","","-{0}"),Num));
-	// 	HitNumSlot = Cast<UCanvasPanelSlot>(HitNum->Slot);
-	// 	auto TextSize = HitNumSlot->GetSize();
-	// 	TextSize /= 2;
-	// 	TextSize /= Scale;
-	// 	ScreenLocation.X -= TextSize.X;
-	// 	ScreenLocation.Y -= TextSize.Y;
-	// 	HitNumSlot->SetPosition(ScreenLocation);
-	// 	StartFlowPosition = ScreenLocation;
-	// 	ScreenLocation.Y -= 100;
-	// 	FinishFlowPosition = ScreenLocation;
-	// }
-	// UE_LOG(LogTemp,Log,TEXT("Target Location = %s Result = %hhd ScreenLocation = %s HitNum = %d"),*WorldPosition.ToString(),Result,*ScreenLocation.ToString(),Num)
-	// HitNum->SetVisibility(ESlateVisibility::Visible);	
 }
 
 void UGameUI_BattleInfo::UpdateHitNumFlowAnim(float Value)
 {
-	if(HitNumSlot)
+	for(int i = 0;i < UsingHitInfos.Num();i++)
 	{
-		FVector2D Cur = FMath::Lerp(StartFlowPosition,FinishFlowPosition,Value);
-		HitNumSlot->SetPosition(Cur);	
+		UsingHitInfos[i]->UpdateHitNumFlowAnim(Value);
 	}
 }
 
 void UGameUI_BattleInfo::FinishHitNumFlowAnim()
 {
-	HitNum->SetVisibility(ESlateVisibility::Hidden);	
+	if(!UsingHitInfos.IsEmpty())
+	{
+		UsingHitInfos.RemoveAt(0);
+	}
 }
 
 void UGameUI_BattleInfo::ShowBackAtkTips(AMyUnit* Unit)
@@ -124,13 +112,15 @@ void UGameUI_BattleInfo::ShowBackAtkTips(AMyUnit* Unit)
 		ScreenPosition.X -= TextSize.X;
 		ScreenPosition.Y -= TextSize.Y;
 		TipsGroupSlot->SetPosition(ScreenPosition);
-		BackAtkTips->SetVisibility(ESlateVisibility::Visible);	
+		BackAtkTips->SetVisibility(ESlateVisibility::Visible);
+		BackAtkBorder->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
 void UGameUI_BattleInfo::HideBackAtkTips()
 {
 	BackAtkTips->SetVisibility(ESlateVisibility::Hidden);
+	BackAtkBorder->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UGameUI_BattleInfo::ShowCooperatorTips(AMyUnit* Unit)
@@ -147,12 +137,14 @@ void UGameUI_BattleInfo::ShowCooperatorTips(AMyUnit* Unit)
 		ScreenPosition.Y -= TextSize.Y;
 		TipsGroupSlot->SetPosition(ScreenPosition);
 		CooperationTips->SetVisibility(ESlateVisibility::Visible);	
+		CooperationBorder->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
 void UGameUI_BattleInfo::HideCooperatorTips()
 {
 	CooperationTips->SetVisibility(ESlateVisibility::Hidden);
+	CooperationBorder->SetVisibility(ESlateVisibility::Hidden);
 }
 
 
