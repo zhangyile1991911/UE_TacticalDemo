@@ -68,9 +68,10 @@ bool AUnitAbility_AreaAtk::IsValidTarget(const FTileData& TileData,AGrid* MyGrid
 
 	for(int i = 0;i < Area.Num();i++)
 	{
-		const FTileData* Tmp = MyGrid->GetTileDataByIndex(Area[i]);
-		if(Tmp->UnitOnTile == nullptr)continue;
-		if(!Tmp->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return true;
+		const FTileData* Temp = MyGrid->GetTileDataByIndex(Area[i]);
+		if(Temp == nullptr)continue;
+		if(Temp->UnitOnTile == nullptr)continue;
+		if(!Temp->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return true;
 	}
 	
 	return false;

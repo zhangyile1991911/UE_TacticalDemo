@@ -35,6 +35,9 @@ public:
 	virtual void HandleDirectionInput(const FVector2D& Input){};
 	virtual void HandleCancelInput(){}
 	virtual void HandleConfirmInput(){}
+	virtual void HandleTabInput(){}
 	virtual void HandleSpaceInput(){}
-	virtual void ExitProcess(){};
+	virtual void HandleLeftInput(){}
+	virtual void HandleRightInput(){}
+	virtual void ExitProcess(){}
 };

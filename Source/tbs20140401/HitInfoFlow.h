@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "HitInfoFlow.generated.h"
 
+class UHorizontalBox;
 class UTextBlock;
 class UCanvasPanelSlot;
 /**
@@ -21,15 +22,18 @@ class TBS20140401_API UHitInfoFlow : public UUserWidget
 	TObjectPtr<UCanvasPanelSlot> MySlotPtr;
 protected:
 	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UTextBlock> HitNum;
+	TObjectPtr<UHorizontalBox> TextBlockBox;
 
 	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UTextBlock> IsCritical;
+	TObjectPtr<UTextBlock> HitNumTextBlock;
 
 	UPROPERTY(meta=(BindWidget))
-    TObjectPtr<UTextBlock> IsBackAtk;
+	TObjectPtr<UTextBlock> IsCriticalTextBlock;
+
+	UPROPERTY(meta=(BindWidget))
+    TObjectPtr<UTextBlock> IsBackAtkTextBlock;
 public:
-	void StartHitNum(FVector2D Start,FVector2D Finish,float Scale,int Num,bool IsHit);
+	void StartHitNum(FVector2D Start,FVector2D Finish,float Scale,int Num,bool bIsHit,bool bIsCritical,bool bIsBackAtk);
 	void UpdateHitNumFlowAnim(float Value);
 	void FinishHitNumFlowAnim();
 };

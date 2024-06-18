@@ -98,6 +98,24 @@ AMy_Pawn::AMy_Pawn()
 	{
 		SpaceAction = SpaceAsset.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> TabAsset(TEXT("InputAction'/Game/Input/Actions/TabAct'"));
+	if (TabAsset.Succeeded())
+	{
+		TabAction = TabAsset.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> KeyboardLeftAsset(TEXT("InputAction'/Game/Input/Actions/LeftAct'"));
+	if (KeyboardLeftAsset.Succeeded())
+	{
+		KeyBoardLeftAction = KeyboardLeftAsset.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> KeyboardRightAsset(TEXT("InputAction'/Game/Input/Actions/RightAct'"));
+	if (KeyboardRightAsset.Succeeded())
+	{
+		KeyBoardRightAction = KeyboardRightAsset.Object;
+	}
 	
 }
 
@@ -181,6 +199,9 @@ void AMy_Pawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(ConfirmAction,ETriggerEvent::Completed,this,&AMy_Pawn::ConfirmClick);
 		EnhancedInputComponent->BindAction(CancelAction,ETriggerEvent::Completed,this,&AMy_Pawn::CancelClick);
 		EnhancedInputComponent->BindAction(SpaceAction,ETriggerEvent::Completed,this,&AMy_Pawn::SpaceClick);
+		EnhancedInputComponent->BindAction(TabAction,ETriggerEvent::Completed,this,&AMy_Pawn::TabClick);
+		EnhancedInputComponent->BindAction(KeyBoardLeftAction,ETriggerEvent::Completed,this,&AMy_Pawn::LeftClick);
+		EnhancedInputComponent->BindAction(KeyBoardRightAction,ETriggerEvent::Completed,this,&AMy_Pawn::RightClick);
 	}
 }
 
@@ -236,21 +257,21 @@ void AMy_Pawn::RemoveTileStateByIndex(const FIntPoint& index, ETileState state)
 
 void AMy_Pawn::SetSelectedActions(UClass* left, UClass* right)
 {
-	if(LeftAction != nullptr)
+	if(MouseLeftAction != nullptr)
 	{
-		LeftAction->Destroy();
-		LeftAction = nullptr;
+		MouseLeftAction->Destroy();
+		MouseLeftAction = nullptr;
 	}
 
-	if(RightAction != nullptr)
+	if(MouseRightAction != nullptr)
 	{
-		RightAction->Destroy();
-		RightAction = nullptr;
+		MouseRightAction->Destroy();
+		MouseRightAction = nullptr;
 	}
 	
 	auto world = GetWorld();
-	if(left)LeftAction = Cast<AMyAction>(world->SpawnActor(left));
-	if(right)RightAction = Cast<AMyAction>(world->SpawnActor(right));
+	if(left)MouseLeftAction = Cast<AMyAction>(world->SpawnActor(left));
+	if(right)MouseRightAction = Cast<AMyAction>(world->SpawnActor(right));
 }
 
 void AMy_Pawn::AddNewTileUnderCursor()
@@ -315,10 +336,10 @@ void AMy_Pawn::CamMove(const FInputActionValue& val)
 void AMy_Pawn::MouseLeftClick(const FInputActionValue& value)
 {
 	UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::MouseLeftClick"))
-	if(LeftAction)
+	if(MouseLeftAction)
 	{
 		FIntPoint index = MyGrid->GetTileIndexUnderCursor(GetWorld()->GetFirstPlayerController(),true,CanHoverEmptySpace());
-		LeftAction->ExecuteAction(index);	
+		MouseLeftAction->ExecuteAction(index);	
 	}
 	
 }
@@ -326,10 +347,10 @@ void AMy_Pawn::MouseLeftClick(const FInputActionValue& value)
 void AMy_Pawn::MouseRightClick(const FInputActionValue& value)
 {
 	UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::MouseRightClick"))
-	if(RightAction)
+	if(MouseRightAction)
 	{
 		FIntPoint index = MyGrid->GetTileIndexUnderCursor(GetWorld()->GetFirstPlayerController(),true,CanHoverEmptySpace());
-		RightAction->ExecuteAction(index);	
+		MouseRightAction->ExecuteAction(index);	
 	}
 }
 
@@ -361,6 +382,24 @@ void AMy_Pawn::SpaceClick(const FInputActionValue& value)
 	CurrentProcess->HandleSpaceInput();
 }
 
+void AMy_Pawn::TabClick(const FInputActionValue& value)
+{
+	if(!IsStartGame)return;
+	CurrentProcess->HandleTabInput();
+}
+
+void AMy_Pawn::LeftClick(const FInputActionValue& value)
+{
+	if(!IsStartGame)return;
+	CurrentProcess->HandleLeftInput();
+}
+
+void AMy_Pawn::RightClick(const FInputActionValue& value)
+{
+	if(!IsStartGame)return;
+	CurrentProcess->HandleRightInput();
+}
+
 void AMy_Pawn::SwitchProcess(TObjectPtr<UPawnProcess> NextProcess)
 {
 	if(CurrentProcess != nullptr)
@@ -374,21 +413,21 @@ void AMy_Pawn::SwitchProcess(TObjectPtr<UPawnProcess> NextProcess)
 bool AMy_Pawn::CanHoverEmptySpace()
 {
 	UClass* add = AAction_AddTile::StaticClass();
-	if(LeftAction == nullptr)return false;
-	if(LeftAction->GetClass() == add)return true;
+	if(MouseLeftAction == nullptr)return false;
+	if(MouseLeftAction->GetClass() == add)return true;
 	
-	if(RightAction == nullptr)return false;
-	return RightAction->GetClass() == add;
+	if(MouseRightAction == nullptr)return false;
+	return MouseRightAction->GetClass() == add;
 }
 
 bool AMy_Pawn::CanHoverGround()
 {
 	UClass* add = AAction_AddTile::StaticClass();
-	if(LeftAction == nullptr)return false;
-	if(LeftAction->GetClass() == add)return true;
+	if(MouseLeftAction == nullptr)return false;
+	if(MouseLeftAction->GetClass() == add)return true;
 	
-	if(RightAction == nullptr)return false;
-	return RightAction->GetClass() == add;
+	if(MouseRightAction == nullptr)return false;
+	return MouseRightAction->GetClass() == add;
 }
 
 void AMy_Pawn::UpdateTileTypeUnderCursor(FIntPoint index)

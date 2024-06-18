@@ -7,6 +7,7 @@
 #include "UPawnProcess_Normal.generated.h"
 
 class UUGameUI_UnitBriefInfo;
+class UUnitInfoDetail;
 /**
  * 
  */
@@ -25,8 +26,11 @@ protected:
 	TArray<TObjectPtr<AMyUnit>> ThreatenEnemies;
 	// TMap<uint32,TObjectPtr<AMyUnit>> RelatedEnemies;//影響をされた敵
 	TSet<FIntPoint> DangerousTiles;
-	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoInstance;
-
+	UPROPERTY()
+	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoPtr;
+	UPROPERTY()
+	TObjectPtr<UUnitInfoDetail> UnitDetailInfoPtr;
+	
 
 	int Calucating = 0;
 protected:
@@ -47,7 +51,9 @@ public:
 	virtual void HandleDirectionInput(const FVector2D& Input)override;
 	virtual void HandleCancelInput()override;
 	virtual void HandleConfirmInput() override;
+	virtual void HandleLeftInput()override;
+	virtual void HandleRightInput()override;
+	virtual void HandleTabInput()override;
 	virtual void ExitProcess()override;
-
-	void abeee(TSet<FIntPoint> range);
+	
 };

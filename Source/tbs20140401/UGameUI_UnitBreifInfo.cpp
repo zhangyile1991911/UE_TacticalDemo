@@ -43,8 +43,7 @@ void UUGameUI_UnitBriefInfo::RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Attacker,T
 		UnitNameText->SetText(FText::FromName(TEXT("游侠")));
 		break;
 	}
-
-	//todo 等运行时候属性设计完成
+	
 	for(int  i = 0;i < 3;i++)
 	{
 		APList[i]->SetVisibility(ESlateVisibility::Visible);

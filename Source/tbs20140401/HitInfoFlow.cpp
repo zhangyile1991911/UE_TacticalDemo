@@ -5,9 +5,10 @@
 
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Components/HorizontalBox.h"
 #include "Components/TextBlock.h"
 
-void UHitInfoFlow::StartHitNum(FVector2D Start,FVector2D Finish,float Scale,int Num,bool IsHit)
+void UHitInfoFlow::StartHitNum(FVector2D Start,FVector2D Finish,float Scale,int Num,bool bIsHit,bool bIsCritical,bool bIsBackAtk)
 {
 	SetVisibility(ESlateVisibility::Visible);
 	
@@ -18,20 +19,37 @@ void UHitInfoFlow::StartHitNum(FVector2D Start,FVector2D Finish,float Scale,int 
 		MySlotPtr = Cast<UCanvasPanelSlot>(this->Slot);
 		// MySlotPtr = Cast<UCanvasPanelSlot>(this);
 	}
-	auto TextSize = MySlotPtr->GetSize();
-	TextSize /= 2;
-	TextSize /= Scale;
-	StartPos.X -= TextSize.X;
-	StartPos.Y -= TextSize.Y;
+	// auto DesiredSize = TextBlockBox->GetDesiredSize();
+	// UE_LOG(LogTemp,Log,TEXT("UHitInfoFlow::StartHitNum %f %f"),DesiredSize.X,DesiredSize.Y);
+	
+	// auto TextSize = MySlotPtr->GetSize();
+	// DesiredSize /= 2;
+	// DesiredSize /= Scale;
+	// StartPos.X -= DesiredSize.X;
+	// StartPos.Y -= DesiredSize.Y;
+	// FinishPos.X -= DesiredSize.X;
+	// FinishPos.Y -= DesiredSize.Y;
 	MySlotPtr->SetPosition(StartPos);
-	if(IsHit)
+	if(bIsHit)
 	{
-		HitNum->SetText(FText::Format(NSLOCTEXT("","","-{0}"),Num));	
+		HitNumTextBlock->SetText(FText::Format(NSLOCTEXT("","","-{0}"),Num));	
 	}
 	else
 	{
-		HitNum->SetText(FText(NSLOCTEXT("","","MISSING")));
+		HitNumTextBlock->SetText(FText(NSLOCTEXT("","","MISSING")));
 	}
+	if(bIsCritical)
+		IsCriticalTextBlock->SetVisibility(ESlateVisibility::Visible);
+	else
+		IsCriticalTextBlock->SetVisibility(ESlateVisibility::Collapsed);
+
+	if(bIsBackAtk)
+		IsBackAtkTextBlock->SetVisibility(ESlateVisibility::Visible);
+	else
+		IsBackAtkTextBlock->SetVisibility(ESlateVisibility::Collapsed);
+	
+	
+	
 }
 
 void UHitInfoFlow::UpdateHitNumFlowAnim(float Value)

@@ -144,6 +144,17 @@ void AMyCombatSystem::HideUnitThreaten()
 	}
 }
 
+TArray<TObjectPtr<AMyUnit>> AMyCombatSystem::GetOneSideTeam(int UnitSide)
+{
+	TArray<TObjectPtr<AMyUnit>> Result;
+	for(const auto& one : UnitsInCombat)
+	{
+		if(one.Value->GetUnitSide() == UnitSide)
+			Result.Add(one.Value);
+	}
+	return Result;
+}
+
 // Called every frame
 void AMyCombatSystem::Tick(float DeltaTime)
 {

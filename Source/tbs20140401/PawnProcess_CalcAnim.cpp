@@ -7,6 +7,7 @@
 #include "MyUnit.h"
 #include "UnitAbilityAnim.h"
 #include "BattleReport.h"
+#include "MyHUD.h"
 
 void UPawnProcess_CalcAnim::CheckFlow(FlowControl Control)
 {
@@ -198,6 +199,7 @@ void UPawnProcess_CalcAnim::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	// ReportIndex = 0;
 	//进入演出环节
 	ChosenAbilityAnim->DoAnimation(Report,PawnInstance);
+	PawnInstance->GetMyHUD()->ShowBattleInfoUI(true);
 }
 
 void UPawnProcess_CalcAnim::TickProcess()
@@ -228,4 +230,5 @@ void UPawnProcess_CalcAnim::ExitProcess()
 	// ReportList.Empty();
 	ChosenAbilityAnim->CompletedCallback.Unbind();
 	ChosenAbilityAnim->CompletedEvent.Clear();
+	PawnInstance->GetMyHUD()->ShowBattleInfoUI(false);
 }

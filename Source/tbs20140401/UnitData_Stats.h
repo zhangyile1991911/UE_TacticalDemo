@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GridShapeData.h"
+#include "WeaponData.h"
 #include "UnitData_Stats.generated.h"
 
 USTRUCT(BlueprintType)
@@ -21,6 +22,15 @@ USTRUCT(BlueprintType)
 struct FUnitProperty
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FText UnitName;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int Level;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FName WeaponId;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int HP;
@@ -81,4 +91,7 @@ struct FUnitProperty
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int UnitSide;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FWeaponData WeaponData;
 };

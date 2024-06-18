@@ -68,6 +68,12 @@ protected:
 	TObjectPtr<UInputAction> CancelAction;
 	UPROPERTY()
 	TObjectPtr<UInputAction> SpaceAction;
+	UPROPERTY()
+	TObjectPtr<UInputAction> TabAction;
+	UPROPERTY()
+	TObjectPtr<UInputAction> KeyBoardLeftAction;
+	UPROPERTY()
+	TObjectPtr<UInputAction> KeyBoardRightAction;
 
 	float m_curArmLength;
 	FVector m_locationDesired;
@@ -129,10 +135,10 @@ public:
 	FVector2f MaxMin_ArmLength = FVector2f(500.0f,5000.0f);
 
 	UPROPERTY()
-	AMyAction* LeftAction = nullptr;
+	AMyAction* MouseLeftAction = nullptr;
 
 	UPROPERTY()
-	AMyAction* RightAction = nullptr;
+	AMyAction* MouseRightAction = nullptr;
 
 	UFUNCTION()
 	void SetCurrentTileType(ETileType ttype){CurSetTileType = ttype;}
@@ -152,6 +158,9 @@ protected:
 	void ConfirmClick(const FInputActionValue& value);
 	void CancelClick(const FInputActionValue& value);
 	void SpaceClick(const FInputActionValue& value);
+	void TabClick(const FInputActionValue& value);
+	void LeftClick(const FInputActionValue& value);
+	void RightClick(const FInputActionValue& value);
 
 	void SwitchProcess(TObjectPtr<UPawnProcess> NextProcess);
 public:

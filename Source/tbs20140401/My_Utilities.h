@@ -25,5 +25,6 @@ bool IsFloatEven(float f);
 bool IsIntEven(int i);
 FUnitData* GetUnitData(const EUnitType unitType);
 FGridShapeData* GetShapeData(EGridShape shapeName);
+FWeaponData* GetWeaponData(FName WeaponId);
 bool IsTileTypeWalkable(ETileType);
 FUnitColorDataAsset* GetUnitDataColor(const EUnitType unitType);

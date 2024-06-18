@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameUI_BattleInfo.generated.h"
 
+class UUnitInfoDetail;
 class UBorder;
 class UCanvasPanel;
 class UHitInfoFlow;
@@ -49,7 +50,9 @@ protected:
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UCanvasPanel> CanvasPanel;
-	
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UUnitInfoDetail> UnitInfoDetailPanel;
 
 	
 protected:
@@ -58,7 +61,7 @@ protected:
 	bool LocationToScreenPosition(FVector UnitLocation,FVector2D& ScreenLocation,float& Scale);
 public:
 	UFUNCTION(BlueprintCallable)
-	void StartHitNumFlowAnim(AMyUnit* Unit,int Num,bool IsHit);
+	void StartHitNumFlowAnim(AMyUnit* Unit,int Num,bool bIsHit = false,bool bIsCritical = false,bool bIsBackAtk = false);
 	UFUNCTION(BlueprintCallable)
 	void UpdateHitNumFlowAnim(float Value);
 	UFUNCTION(BlueprintCallable)
@@ -69,7 +72,8 @@ public:
 
 	void ShowCooperatorTips(AMyUnit* Unit);
 	void HideCooperatorTips();
-	
-	
+
+	void ShowUnitInfoDetailPanel();
+	void HideUnitInfoDetailPanel();
 };
 

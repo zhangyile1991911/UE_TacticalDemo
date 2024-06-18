@@ -35,10 +35,19 @@ TArray<FIntPoint> AUnitAbility_LongRangeAtk::Range(const FIntPoint& Int32Point)
 
 bool AUnitAbility_LongRangeAtk::IsValidTarget(const FTileData& TileData,AGrid* MyGrid)
 {
-	if(TileData.UnitOnTile == nullptr)return false;
-	if(TileData.UnitOnTile->IsDead())return false;
-	if(TileData.UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return false;
-	return true;
+	auto IndicatorRange = Indicator(TileData.Index);
+	for(const auto& One : IndicatorRange)
+	{
+		const auto TempPtr = MyGrid->GetTileDataByIndex(One);
+		if(TempPtr == nullptr)continue;
+		if(TempPtr->UnitOnTile == nullptr)continue;
+		if(TempPtr->UnitOnTile->IsDead())continue;
+		if(TempPtr->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))continue;
+
+		return true;
+	}
+	
+	return false;
 }
 
 bool AUnitAbility_LongRangeAtk::IsValidUnit(TObjectPtr<AMyUnit> Unit)
@@ -51,28 +60,26 @@ bool AUnitAbility_LongRangeAtk::IsValidUnit(TObjectPtr<AMyUnit> Unit)
 
 TArray<FIntPoint> AUnitAbility_LongRangeAtk::Indicator(const FIntPoint& Index)
 {
-	FVector2D Dir;
+	FIntPoint StandPoint;
 	if(OwnerInstance->NeedToMove())
 	{
-		Dir = Index - OwnerInstance->GetTempDestinationGridIndex();
+		StandPoint = OwnerInstance->GetTempDestinationGridIndex();
 	}
 	else
 	{
-		Dir = Index - OwnerInstance->GetGridIndex();
+		StandPoint  = OwnerInstance->GetGridIndex();
 	}
+	FVector2D Dir = Index - StandPoint;
 	Dir = Dir.GetSafeNormal();
-    int X = Dir.X;
-    int Y = Dir.Y;
-    FIntPoint Tmp = OwnerInstance->GetGridIndex();
 	TArray<FIntPoint> IndicatorRange;
 	IndicatorRange.Reserve(SkillData.Range.Y);
     for(int i = SkillData.Range.X;i <= SkillData.Range.Y;i++)
     {
-    	Tmp.X += X;
-    	Tmp.Y += Y;
-    	IndicatorRange.Add(Tmp);
+    	StandPoint.X += Dir.X;
+    	StandPoint.Y += Dir.Y;
+    	IndicatorRange.Add(StandPoint);
     }
-	return IndicatorRange;
+	return MoveTemp(IndicatorRange);
 }
 
 TArray<TObjectPtr<AMyUnit>> AUnitAbility_LongRangeAtk::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)

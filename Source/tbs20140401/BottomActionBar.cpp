@@ -6,6 +6,7 @@
 #include "CmdWidget.h"
 #include "FirstRolePortrait.h"
 #include "MyCombatSystem.h"
+#include "UnitInfoDetail.h"
 #include "UnitPortrait.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -30,6 +31,8 @@ void UBottomActionBar::NativeConstruct()
 
 	CombatSystem->ReSortEvent.AddUObject(this,&UBottomActionBar::OnActionBarChanged);
 	CmdList->SetVisibility(ESlateVisibility::Hidden);
+
+	UnitDetailInfoPanel->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UBottomActionBar::NativeDestruct()

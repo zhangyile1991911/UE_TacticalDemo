@@ -18,9 +18,9 @@ class TBS20140401_API UPawnProcess_ChooseTarget : public UPawnProcess
 	GENERATED_BODY()
 protected:
 	FIntPoint CurrentCursor;
-	TArray<FIntPoint> AbilityRange;
-	TArray<FIntPoint> IndicatorRange;
-	TObjectPtr<AUnitAbilityAnim> ChosenAbility;
+	TArray<FIntPoint> ArrayOfAbilityRange;
+	TArray<FIntPoint> ArrayOfIndicatorRange;
+	TObjectPtr<AUnitAbilityAnim> ChosenAbilityPtr;
 	// TObjectPtr<AUnitAbilityAnim> ChosenAbilityAnim;
 	UPROPERTY()
 	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoInstance;
@@ -33,6 +33,7 @@ protected:
 	// void AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Ability);
 	// void AbilityCompletedEvent(TObjectPtr<AUnitAbilityAnim> Ability);
 	void ShowTargetUnitBriefInfo(const FIntPoint& Index);
+	void ClearIndicatorRange();
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn)override;
 	virtual void TickProcess()override;

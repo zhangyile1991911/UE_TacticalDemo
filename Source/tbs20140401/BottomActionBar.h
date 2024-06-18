@@ -11,6 +11,7 @@ class UCmdWidget;
 class AMyUnit;
 class UUnitPortrait;
 class UFirstRolePortrait;
+class UUnitInfoDetail;
 /**
  * 
  */
@@ -55,6 +56,9 @@ class TBS20140401_API UBottomActionBar : public UUserWidget
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfo;
 
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UUnitInfoDetail> UnitDetailInfoPanel;
+
 	TArray<TObjectPtr<UUnitPortrait>> Portraits;
 protected:
 	virtual void NativeConstruct() override;
@@ -65,4 +69,5 @@ public:
 	// TObjectPtr<UCmdWidget> GetCmdPanel()const{return CmdList;}
 	TObjectPtr<UCmdWidget> ShowCmdPanel(TObjectPtr<AMyUnit> UnitInstance,int CmdIndex)const;
 	TObjectPtr<UUGameUI_UnitBriefInfo> GetUnitBriefInfo()const{return UnitBriefInfo;}
+	TObjectPtr<UUnitInfoDetail> GetUnitDetailInfo()const{return UnitDetailInfoPanel;}
 };

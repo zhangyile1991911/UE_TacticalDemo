@@ -141,6 +141,19 @@ FGridShapeData* GetShapeData(const EGridShape shape)
 	return row;
 }
 
+FWeaponData* GetWeaponData(FName WeaponId)
+{
+	static UDataTable* LoadedDataTable = nullptr;
+	if(LoadedDataTable == nullptr)
+	{
+		FSoftObjectPath MyAssetPath(TEXT("DataTable'/Game/Art/Units/DT_WeaponData.DT_WeaponData'"));
+		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+		LoadedDataTable = Cast<UDataTable>(Streamable.LoadSynchronous(MyAssetPath));
+	}
+	FWeaponData* row = LoadedDataTable->FindRow<FWeaponData>(WeaponId,"");
+	return row;
+}
+
 bool IsTileTypeWalkable(ETileType  type)
 {
 	return !(type == ETileType::None || type == ETileType::Obstacle);

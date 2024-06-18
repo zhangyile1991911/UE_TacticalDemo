@@ -28,7 +28,7 @@ void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 	
 	TObjectPtr<AMyUnit> StandingUnit = TileData->UnitOnTile;
 	bool bShow = true;
-	bool IsValid = ChosenAbility->IsValidTarget(*TileData,PawnInstance->GetMyGrid());
+	bool IsValid = ChosenAbilityPtr->IsValidTarget(*TileData,PawnInstance->GetMyGrid());
 	if(StandingUnit == nullptr)
 	{
 		bShow = false;
@@ -72,17 +72,27 @@ void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 	}
 }
 
+void UPawnProcess_ChooseTarget::ClearIndicatorRange()
+{
+	for(const auto& one : ArrayOfIndicatorRange)
+	{
+		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::IndicatorRange);	
+	}
+	ArrayOfIndicatorRange.Empty();
+	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::IndicatorRange);
+}
+
 void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
 	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_ChooseTarget::EnterProcess"))
 	Super::EnterProcess(Pawn);
 	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
-	ChosenAbility = UnitInstance->GetChosenAbilityAnim();
+	ChosenAbilityPtr = UnitInstance->GetChosenAbilityAnim();
 
 	if(UnitInstance->NeedToMove())
 		UnitInstance->ShowShadowUnit();
 
-	if(ChosenAbility->IsIdle())
+	if(ChosenAbilityPtr->IsIdle())
 	{
 		PawnInstance->SwitchToIdle();
 		return;
@@ -92,8 +102,8 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 
 	CurrentCursor = PawnInstance->GetSelectedTile();
 	//显示攻击范围
-	AbilityRange = ChosenAbility->Range(CurrentCursor);
-	for(const FIntPoint& one : AbilityRange)
+	ArrayOfAbilityRange = ChosenAbilityPtr->Range(CurrentCursor);
+	for(const FIntPoint& one : ArrayOfAbilityRange)
 	{
 		PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::AbilityRange);
 	}
@@ -123,15 +133,13 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		return;
 	}
 	//先清理掉上一次 指示器范围
-	for(const auto& one : IndicatorRange)
-	{
-		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::IndicatorRange);	
-	}
-	IndicatorRange.Empty();
-	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::IndicatorRange);
+	//前回のインジケーターをクリアする
+	ClearIndicatorRange();
+	
+	
 	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
 	//是否在施法范围
-	if(!AbilityRange.Contains(next))
+	if(!ArrayOfAbilityRange.Contains(next))
 	{
 		ShowTargetUnitBriefInfo(next);
 		// PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
@@ -140,10 +148,10 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		return;
 	}
 	
-	if(ChosenAbility->IsArea())
+	if(ChosenAbilityPtr->IsArea())
 	{
-		IndicatorRange = ChosenAbility->Indicator(next);
-		for(const auto& one : IndicatorRange)
+		ArrayOfIndicatorRange = ChosenAbilityPtr->Indicator(next);
+		for(const auto& one : ArrayOfIndicatorRange)
 		{
 			PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::IndicatorRange);	
 		}
@@ -159,7 +167,7 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 	const TObjectPtr<AMyUnit> TempTarget = PawnInstance->GetMyGrid()->GetUnitOnTile(CurrentCursor);
 	do
 	{//背击判断
-		if(ChosenAbility->IsArea())break;
+		if(ChosenAbilityPtr->IsArea())break;
 		
 		bIsBackAttack = false;
 		if(TempTarget == nullptr)
@@ -177,7 +185,7 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 			BattleInfoInstance->HideBackAtkTips();
 			break;
 		}
-		bool IsValid = ChosenAbility->IsValidUnit(TempTarget);
+		bool IsValid = ChosenAbilityPtr->IsValidUnit(TempTarget);
 		if(IsValid)
 		{
 			BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
@@ -188,7 +196,7 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		
 	do
 	{//夹击判断
-		if(ChosenAbility->IsArea())break;
+		if(ChosenAbilityPtr->IsArea())break;
 		bIsWrapAttack = false;
 		if(TempTarget == nullptr)
 		{
@@ -221,10 +229,12 @@ void UPawnProcess_ChooseTarget::HandleConfirmInput()
 	Super::HandleConfirmInput();
 	auto TileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
 	
-	if(!AbilityRange.Contains(CurrentCursor))return;
+	if(!ArrayOfAbilityRange.Contains(CurrentCursor))return;
 
-	
-	if(!ChosenAbility->IsValidTarget(*TileData,PawnInstance->GetMyGrid()))return;
+	if(!ChosenAbilityPtr->IsValidTarget(*TileData,PawnInstance->GetMyGrid()))
+	{
+		return;	
+	}
 	
 	UnitInstance->SetAbilityTargetGridIndex(CurrentCursor);
 	if(UnitInstance->NeedToMove())
@@ -243,17 +253,13 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_ChooseTarget::ExitProcess"))
 	Super::ExitProcess();
 	
-	for(const FIntPoint& one : AbilityRange)
+	for(const FIntPoint& one : ArrayOfAbilityRange)
 	{
 		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::AbilityRange);
 	}
-
-	for(const auto& one : IndicatorRange)
-	{
-		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::IndicatorRange);	
-	}
 	
-	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::IndicatorRange);
+	ClearIndicatorRange();
+
 	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
 	
 	// PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);

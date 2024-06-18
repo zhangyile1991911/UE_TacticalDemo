@@ -5,6 +5,7 @@
 
 #include "HitInfoFlow.h"
 #include "MyUnit.h"
+#include "UnitInfoDetail.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/Border.h"
 #include "Components/CanvasPanelSlot.h"
@@ -27,13 +28,14 @@ void UGameUI_BattleInfo::NativeConstruct()
 		HitInfoPool.Reserve(5);
 		for (int i = 0;i < 5;i++)
 		{
-			auto UWidget = CreateWidget<UUserWidget>(this,ChildWidgetClass);
+			auto UWidget = CreateWidget<UUserWidget>(CanvasPanel,ChildWidgetClass);
 			CanvasPanel->AddChildToCanvas(UWidget);
 			auto HitInfo = Cast<UHitInfoFlow>(UWidget);
-			HitInfoPool.Add(HitInfo);	
+			HitInfo->SetVisibility(ESlateVisibility::Hidden);
+			HitInfoPool.Add(HitInfo);
+			HitInfo->SetAlignmentInViewport(FVector2D(0.5f,0.5f));
 		}
 	}
-	// HitNum->SetVisibility(ESlateVisibility::Hidden);
 	BackAtkTips->SetVisibility(ESlateVisibility::Hidden);
 	CooperationTips->SetVisibility(ESlateVisibility::Hidden);
 
@@ -58,7 +60,7 @@ bool UGameUI_BattleInfo::LocationToScreenPosition(FVector UnitLocation,FVector2D
 	return Result;
 }
 
-void UGameUI_BattleInfo::StartHitNumFlowAnim(AMyUnit* Unit,int Num,bool IsHit)
+void UGameUI_BattleInfo::StartHitNumFlowAnim(AMyUnit* Unit,int Num,bool bIsHit,bool bIsCritical,bool bIsBackAtk)
 {
 	if(Unit == nullptr)return;
 	
@@ -79,7 +81,7 @@ void UGameUI_BattleInfo::StartHitNumFlowAnim(AMyUnit* Unit,int Num,bool IsHit)
 		ScreenLocation.Y -= 100;
 		FinishFlowPosition = ScreenLocation;
 		
-		OneHit->StartHitNum(StartFlowPosition,FinishFlowPosition,Scale,Num,IsHit);
+		OneHit->StartHitNum(StartFlowPosition,FinishFlowPosition,Scale,Num,bIsHit,bIsCritical,bIsBackAtk);
 	}
 }
 
@@ -93,10 +95,15 @@ void UGameUI_BattleInfo::UpdateHitNumFlowAnim(float Value)
 
 void UGameUI_BattleInfo::FinishHitNumFlowAnim()
 {
-	if(!UsingHitInfos.IsEmpty())
+	if(UsingHitInfos.IsEmpty())
 	{
-		UsingHitInfos.RemoveAt(0);
+		return;
 	}
+	auto One = UsingHitInfos.Last();
+	One->FinishHitNumFlowAnim();
+	HitInfoPool.Add(One);
+	UsingHitInfos.RemoveAt(UsingHitInfos.Num() - 1);
+
 }
 
 void UGameUI_BattleInfo::ShowBackAtkTips(AMyUnit* Unit)
@@ -145,6 +152,16 @@ void UGameUI_BattleInfo::HideCooperatorTips()
 {
 	CooperationTips->SetVisibility(ESlateVisibility::Hidden);
 	CooperationBorder->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UGameUI_BattleInfo::ShowUnitInfoDetailPanel()
+{
+	UnitInfoDetailPanel->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UGameUI_BattleInfo::HideUnitInfoDetailPanel()
+{
+	UnitInfoDetailPanel->SetVisibility(ESlateVisibility::Hidden);
 }
 
 

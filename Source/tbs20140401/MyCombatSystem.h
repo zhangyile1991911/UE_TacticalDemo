@@ -39,10 +39,11 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AMyUnit> FirstUnit;
 	
+	UPROPERTY()
 	TMap<uint32,TObjectPtr<AMyUnit>> UnitsInCombat;
-
+	UPROPERTY()
 	TArray<TObjectPtr<AMyUnit>> UnitsActionPriority;
-
+	UPROPERTY()
 	TArray<TObjectPtr<AAssaultTips>> TipsObjectPool;
 	UPROPERTY()
 	UClass* AssaultTipsClass;
@@ -73,4 +74,5 @@ public:
 
 	void ShowUnitThreaten(TArray<FThreatenInfo> Infos);
 	void HideUnitThreaten();
+	TArray<TObjectPtr<AMyUnit>> GetOneSideTeam(int UnitSide);
 };

@@ -10,17 +10,10 @@
 #include "My_Pawn.h"
 #include "MyHUD.h"
 #include "UGameUI_UnitBreifInfo.h"
+#include "UnitInfoDetail.h"
 #include "UnitPathComponent.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
-
-void UUPawnProcess_Normal::abeee(TSet<FIntPoint> range)
-{
-	for(auto& one : range)
-	{
-		PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::Hovered);
-	}
-}
 
 void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
@@ -49,8 +42,10 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	
 	//展示UI信息
 	auto Tmp = PawnInstance->GetMyHUD()->GetGameUI();
-	UnitBriefInfoInstance = Tmp->GetUnitBriefInfo();
+	UnitBriefInfoPtr = Tmp->GetUnitBriefInfo();
 	ShowTargetUnitBriefInfo(CurrentCursor);
+	UnitDetailInfoPtr = Tmp->GetUnitDetailInfo();
+	
 
 	UnitInstance->HideShadowUnit();
 	//将 摄像机 移动到 当前单位
@@ -140,6 +135,26 @@ void UUPawnProcess_Normal::HandleConfirmInput()
 		
 }
 
+void UUPawnProcess_Normal::HandleLeftInput()
+{
+	
+}
+
+void UUPawnProcess_Normal::HandleRightInput()
+{
+	
+}
+
+void UUPawnProcess_Normal::HandleTabInput()
+{
+	const auto TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
+	if(TileDataPtr == nullptr)return;
+	if(TileDataPtr->UnitOnTile == nullptr)return;
+	auto Team = PawnInstance->GetMyCombatSystem()->GetOneSideTeam(TileDataPtr->UnitOnTile->GetUnitSide());
+	UnitDetailInfoPtr->ShowUnitTeamInfo(Team,TileDataPtr->UnitOnTile);
+}
+
+
 void UUPawnProcess_Normal::ExitProcess()
 {
 	UE_LOG(LogTemp,Log,TEXT("UUPawnProcess_Normal::ExitProcess"))
@@ -148,7 +163,7 @@ void UUPawnProcess_Normal::ExitProcess()
 	ClearWalkableTiles();
 	ClearDangerousTiles();
 	PawnInstance->RemoveTileStateByIndex(CurrentCursor,ETileState::Selected);
-	UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);
+	UnitBriefInfoPtr->SetVisibility(ESlateVisibility::Hidden);
 	ThreatenEnemies.Empty();
 	// UnitInstance->HideShadowUnit();
 	PawnInstance->GetMyCombatSystem()->HideUnitThreaten();
@@ -192,11 +207,11 @@ void UUPawnProcess_Normal::ShowTargetUnitBriefInfo(FIntPoint Index)
 	{
 		if(StandingUnit->GetGridIndex() == UnitInstance->GetGridIndex())
 		{//目标是自己 只显示详情
-			UnitBriefInfoInstance->ShowSelfCmd(UnitInstance);
+			UnitBriefInfoPtr->ShowSelfCmd(UnitInstance);
 		}
 		else
 		{//友军 敌人
-			UnitBriefInfoInstance->ShowTargetInfoAndConfirmAndTab(StandingUnit,FText::FromName(TEXT("演习")),FText::FromName(TEXT("详情")));
+			UnitBriefInfoPtr->ShowTargetInfoAndConfirmAndTab(StandingUnit,FText::FromName(TEXT("演习")),FText::FromName(TEXT("详情")));
 		}
 	}
 	else
@@ -204,7 +219,7 @@ void UUPawnProcess_Normal::ShowTargetUnitBriefInfo(FIntPoint Index)
 		bool IsContain = UnitInstance->GetWalkableTiles().Contains(Index);
 		if(IsContain)
 		{
-			UnitBriefInfoInstance->ShowConfirmCmd(FText::FromName(TEXT("移动")));
+			UnitBriefInfoPtr->ShowConfirmCmd(FText::FromName(TEXT("移动")));
 		}
 		else
 		{
@@ -223,15 +238,15 @@ void UUPawnProcess_Normal::ShowTargetUnitBriefInfo(FIntPoint Index)
     	{
     		const float Scale = UWidgetLayoutLibrary::GetViewportScale(PlayerController);
     		ScreenLocation /= Scale;
-    		UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(UnitBriefInfoInstance->Slot);
+    		UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(UnitBriefInfoPtr->Slot);
     		CanvasSlot->SetPosition(ScreenLocation);
     	}
     	// UE_LOG(LogTemp,Log,TEXT("Target Location = %s Result = %hhd ScreenLocation = %s"),*WorldPosition.ToString(),Result,*ScreenLocation.ToString())
-		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Visible);	
+		UnitBriefInfoPtr->SetVisibility(ESlateVisibility::Visible);	
 	}
 	else
 	{
-		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);	
+		UnitBriefInfoPtr->SetVisibility(ESlateVisibility::Hidden);	
 	}
 	
 	
@@ -239,7 +254,7 @@ void UUPawnProcess_Normal::ShowTargetUnitBriefInfo(FIntPoint Index)
 
 void UUPawnProcess_Normal::HideTargetUnitBriefInfo()
 {
-	UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);
+	UnitBriefInfoPtr->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UUPawnProcess_Normal::CheckMoveToDangerousRange(const FIntPoint& Previous,const FIntPoint& Current)
