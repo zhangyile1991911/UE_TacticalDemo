@@ -33,6 +33,7 @@ protected:
 	
 
 	int Calucating = 0;
+	bool bIsTab = false;
 protected:
 	void ClearPathFinding();
 	void ClearWalkableTiles();

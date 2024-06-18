@@ -97,14 +97,22 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 
 void UUPawnProcess_Normal::HandleCancelInput()
 {
-	Super::HandleCancelInput();
+	
 	UE_LOG(LogTemp,Log,TEXT("UUPawnProcess_Normal::HandleCancelInput()"))
+	if(!bIsTab)
+	{
+		ClearPathFinding();
+		UnitInstance->ResetTempDestinationGridIndex();
+		PawnInstance->UpdateTileStatusByIndex(UnitInstance->GetGridIndex(),ETileState::Selected);
 	
-	ClearPathFinding();
-	UnitInstance->ResetTempDestinationGridIndex();
-	PawnInstance->UpdateTileStatusByIndex(UnitInstance->GetGridIndex(),ETileState::Selected);
+		PawnInstance->SwitchToIdle();	
+	}
+	else
+	{
+		UnitDetailInfoPtr->HideUnitTeamInfo();
+		bIsTab = false;
+	}
 	
-	PawnInstance->SwitchToIdle();
 }
 
 void UUPawnProcess_Normal::HandleConfirmInput()
@@ -137,21 +145,39 @@ void UUPawnProcess_Normal::HandleConfirmInput()
 
 void UUPawnProcess_Normal::HandleLeftInput()
 {
-	
+	if(bIsTab)
+	{
+		UnitDetailInfoPtr->PreviousUnit();
+	}
+	else
+	{
+		
+	}
 }
 
 void UUPawnProcess_Normal::HandleRightInput()
 {
-	
+	if(bIsTab)
+	{
+		UnitDetailInfoPtr->NextUnit();
+	}
+	else
+	{
+		
+	}
 }
 
 void UUPawnProcess_Normal::HandleTabInput()
 {
-	const auto TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
-	if(TileDataPtr == nullptr)return;
-	if(TileDataPtr->UnitOnTile == nullptr)return;
-	auto Team = PawnInstance->GetMyCombatSystem()->GetOneSideTeam(TileDataPtr->UnitOnTile->GetUnitSide());
-	UnitDetailInfoPtr->ShowUnitTeamInfo(Team,TileDataPtr->UnitOnTile);
+	if(!bIsTab)
+	{
+		const auto TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
+		if(TileDataPtr == nullptr)return;
+		if(TileDataPtr->UnitOnTile == nullptr)return;
+		auto Team = PawnInstance->GetMyCombatSystem()->GetOneSideTeam(TileDataPtr->UnitOnTile->GetUnitSide());
+		UnitDetailInfoPtr->ShowUnitTeamInfo(Team,TileDataPtr->UnitOnTile);
+		bIsTab = true;
+	}
 }
 
 

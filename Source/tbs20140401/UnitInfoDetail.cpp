@@ -41,12 +41,14 @@ void UUnitInfoDetail::NativeConstruct()
 			PortraitClassPtr.LoadSynchronous();
 		}
 		const auto Widget = CreateWidget(this,PortraitClassPtr.Get());
-		PortraitBox->AddChild(Widget);
+		if(i <= 4)
+			Widget->SetPadding(FMargin(0,0,10,0));
+		PortraitBox->InsertChildAt(1+i,Widget);
 		
 		auto Portrait = Cast<UUnitInfoDetailPortrait>(Widget);
 		PortraitPool.Add(Portrait);	
 	}
-	ArrayOfUnitTeam.Reserve(8);
+	// ArrayOfUnitTeam.Reserve(8);
 }
 
 void UUnitInfoDetail::NativeDestruct()
@@ -107,14 +109,17 @@ void UUnitInfoDetail::ShowUnitDetailInfo(AMyUnit* MyUnit)
 	MoveNum->SetText(FText::Format(NSLOCTEXT("","","{0}"),RuntimeProperty.Move));
 
 	const auto& AbilityList = MyUnit->GetOwnAbilityList();
-	int i = 0;
-	for(;i < AbilityList.Num();i++)
+	int AbilityCount = 0;
+	for(int i = 0;i < AbilityList.Num();i++)
 	{
+		if(AbilityList[i]->IsIdle())continue;
+		if(!AbilityList[i]->IsShowOnCmd())continue;
 		ArrayOfSkillImg[i]->SetVisibility(ESlateVisibility::Visible);
 		ArrayOfSkillName[i]->SetVisibility(ESlateVisibility::Visible);
 		ArrayOfSkillName[i]->SetText(FText::Format(NSLOCTEXT("","","{0}"),AbilityList[i]->GetSkillData().SkillName));
+		AbilityCount++;
 	}
-	for(;i < ArrayOfSkillImg.Num();i++)
+	for(int i = AbilityCount;i < ArrayOfSkillImg.Num();i++)
 	{
 		ArrayOfSkillImg[i]->SetVisibility(ESlateVisibility::Hidden);
 		ArrayOfSkillName[i]->SetVisibility(ESlateVisibility::Hidden);
@@ -122,6 +127,9 @@ void UUnitInfoDetail::ShowUnitDetailInfo(AMyUnit* MyUnit)
 
 	EsotericImg->SetVisibility(ESlateVisibility::Collapsed);
 	EsotericName->SetVisibility(ESlateVisibility::Collapsed);
+
+	const FUnitData* UnitData = GetUnitData(MyUnit->GetUnitType());
+	HalfPortrait->SetBrushFromTexture(UnitData->Assets.Icon.Get());
 }
 
 void UUnitInfoDetail::ShowUnitTeamInfo(TArray<TObjectPtr<AMyUnit>> UnitTeam,TObjectPtr<AMyUnit> FocusUnit)
@@ -130,11 +138,15 @@ void UUnitInfoDetail::ShowUnitTeamInfo(TArray<TObjectPtr<AMyUnit>> UnitTeam,TObj
 	if(ArrayOfUnitTeam.Num() > PortraitPool.Num())
 	{
 		int delta = ArrayOfUnitTeam.Num() - PortraitPool.Num();
+		int InsertIndex = PortraitPool.Num();
 		for(int i = 0;i < delta;i++)
 		{
 			auto Widget = CreateWidget(PortraitBox,PortraitClassPtr.Get());
+			if(i <= delta - 1)
+				Widget->SetPadding(FMargin(0,0,10,0));
         	auto Portrait = Cast<UUnitInfoDetailPortrait>(Widget);
-        	PortraitPool.Add(Portrait);	
+        	PortraitPool.Add(Portrait);
+			PortraitBox->InsertChildAt(InsertIndex+i,Portrait);
 		}
 	}
 
@@ -148,5 +160,41 @@ void UUnitInfoDetail::ShowUnitTeamInfo(TArray<TObjectPtr<AMyUnit>> UnitTeam,TObj
 	{
 		PortraitPool[i]->HideUnitPortrait();
 	}
+	for(int x = 0;x < UnitTeam.Num();x++)
+	{
+		if(UnitTeam[x]->GetUniqueID() == FocusUnit->GetUniqueID())
+		{
+			FocusIndex = x;
+			break;
+		}
+	}
+	ShowUnitDetailInfo(FocusUnit);
 	SetVisibility(ESlateVisibility::Visible);
+}
+
+void UUnitInfoDetail::HideUnitTeamInfo()
+{
+	SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UUnitInfoDetail::NextUnit()
+{
+	int NewIndex = FocusIndex + 1;
+	if(NewIndex >= ArrayOfUnitTeam.Num())
+	{
+		NewIndex = 0;
+	}
+	FocusIndex = NewIndex;
+	ShowUnitDetailInfo(ArrayOfUnitTeam[NewIndex]);
+}
+
+void UUnitInfoDetail::PreviousUnit()
+{
+	int NewIndex = FocusIndex - 1;
+	if(NewIndex < 0)
+	{
+		NewIndex = ArrayOfUnitTeam.Num() - 1;
+	}
+	FocusIndex = NewIndex;
+	ShowUnitDetailInfo(ArrayOfUnitTeam[NewIndex]);
 }

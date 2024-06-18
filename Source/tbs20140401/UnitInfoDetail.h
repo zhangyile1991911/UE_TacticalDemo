@@ -140,6 +140,8 @@ protected:
 	TArray<TObjectPtr<UTextBlock>> ArrayOfSkillName;
 	UPROPERTY()
 	TArray<TObjectPtr<UImage>> ArrayOfSkillImg;
+	UPROPERTY()
+	TObjectPtr<UImage>  HalfPortrait;
 	
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -151,6 +153,11 @@ protected:
 	UPROPERTY()
 	TArray<TObjectPtr<AMyUnit>> ArrayOfUnitTeam;
 	void ShowUnitDetailInfo(AMyUnit*);
+
+	int FocusIndex;
 public:
 	void ShowUnitTeamInfo(TArray<TObjectPtr<AMyUnit>> UnitTeam,TObjectPtr<AMyUnit> FocusUnit);
+	void HideUnitTeamInfo();
+	void NextUnit();
+	void PreviousUnit();
 };

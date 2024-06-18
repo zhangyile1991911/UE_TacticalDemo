@@ -301,6 +301,7 @@ void AMy_Pawn::MouseZooming(const FInputActionValue& val)
 
 void AMy_Pawn::CamClockWise(const FInputActionValue& val)
 {
+	if(IsStartGame)return;
 	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::CamClockWise"))
 	float b1 = val.Get<FInputActionValue::Axis1D>();
 	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::CamClockWise %f"),b1)
