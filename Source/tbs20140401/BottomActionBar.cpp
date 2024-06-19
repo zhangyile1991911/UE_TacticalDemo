@@ -32,7 +32,7 @@ void UBottomActionBar::NativeConstruct()
 	CombatSystem->ReSortEvent.AddUObject(this,&UBottomActionBar::OnActionBarChanged);
 	CmdList->SetVisibility(ESlateVisibility::Hidden);
 
-	UnitDetailInfoPanel->SetVisibility(ESlateVisibility::Collapsed);
+	UnitDetailInfoPanel->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UBottomActionBar::NativeDestruct()

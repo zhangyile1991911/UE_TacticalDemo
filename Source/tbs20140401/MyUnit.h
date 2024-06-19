@@ -231,6 +231,7 @@ public:
 	void HideShadowUnit();
 	FVector GetShadowUnitLocation()const{return MyShadowUnit->GetActorLocation();}
 	FRotator GetShadowUnitRotation()const{return MyShadowUnit->GetActorRotation();}
+	FRotator GetUnitRotation()const{return MySkeletalMeshComponent->GetRelativeRotation();}
 
 	void SetTempDestinationGridIndex(FIntPoint location){TempDestinationGridIndex = location;}
 	void ResetTempDestinationGridIndex(){TempDestinationGridIndex = GridIndex;}
@@ -294,5 +295,8 @@ public:
 	const TSet<FIntPoint>& GetAttackRanges()const{return AttackRanges;}
 
 	TObjectPtr<UUnitPathComponent> GetPathComponent()const{return PathComponent;}
+
+	UFUNCTION(BlueprintCallable)
+	void TurnToTarget(AMyUnit* Unit);
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

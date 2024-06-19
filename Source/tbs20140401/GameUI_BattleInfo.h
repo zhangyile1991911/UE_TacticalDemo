@@ -51,10 +51,6 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UCanvasPanel> CanvasPanel;
 
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UUnitInfoDetail> UnitInfoDetailPanel;
-
-	
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;

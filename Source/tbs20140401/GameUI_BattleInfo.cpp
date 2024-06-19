@@ -82,6 +82,7 @@ void UGameUI_BattleInfo::StartHitNumFlowAnim(AMyUnit* Unit,int Num,bool bIsHit,b
 		FinishFlowPosition = ScreenLocation;
 		
 		OneHit->StartHitNum(StartFlowPosition,FinishFlowPosition,Scale,Num,bIsHit,bIsCritical,bIsBackAtk);
+		OneHit->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
@@ -103,7 +104,7 @@ void UGameUI_BattleInfo::FinishHitNumFlowAnim()
 	One->FinishHitNumFlowAnim();
 	HitInfoPool.Add(One);
 	UsingHitInfos.RemoveAt(UsingHitInfos.Num() - 1);
-
+	One->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UGameUI_BattleInfo::ShowBackAtkTips(AMyUnit* Unit)
@@ -152,16 +153,6 @@ void UGameUI_BattleInfo::HideCooperatorTips()
 {
 	CooperationTips->SetVisibility(ESlateVisibility::Hidden);
 	CooperationBorder->SetVisibility(ESlateVisibility::Hidden);
-}
-
-void UGameUI_BattleInfo::ShowUnitInfoDetailPanel()
-{
-	UnitInfoDetailPanel->SetVisibility(ESlateVisibility::Visible);
-}
-
-void UGameUI_BattleInfo::HideUnitInfoDetailPanel()
-{
-	UnitInfoDetailPanel->SetVisibility(ESlateVisibility::Hidden);
 }
 
 

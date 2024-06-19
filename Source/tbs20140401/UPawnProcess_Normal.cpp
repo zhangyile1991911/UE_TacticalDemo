@@ -193,6 +193,7 @@ void UUPawnProcess_Normal::ExitProcess()
 	ThreatenEnemies.Empty();
 	// UnitInstance->HideShadowUnit();
 	PawnInstance->GetMyCombatSystem()->HideUnitThreaten();
+	UnitDetailInfoPtr->HideUnitTeamInfo();
 }
 
 void UUPawnProcess_Normal::ClearPathFinding()

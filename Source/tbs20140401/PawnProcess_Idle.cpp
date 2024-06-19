@@ -14,14 +14,38 @@ void UPawnProcess_Idle::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_Idle::EnterProcess"))
 	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
 	UnitInstance->ShowDirectionArrow();
-	RotateShadow = UnitInstance->NeedToMove(); 
+	RotateShadow = UnitInstance->NeedToMove();
+
+	float ZRotation = 0;
 	if(RotateShadow)
 	{
 		UnitInstance->ShowShadowUnit();
+		ZRotation = UnitInstance->GetShadowUnitRotation().Yaw;
 	}
 	else
 	{
 		UnitInstance->HideShadowUnit();
+		ZRotation = UnitInstance->GetUnitRotation().Yaw;
+	}
+	if(ZRotation <= 0.01f)
+	{
+		ZRotation += 360.0f;
+	}
+	if(ZRotation >= 359.0f && ZRotation <= 361.0f)
+	{
+		UnitInstance->GetMyDirection()->DoRightArrowAnimation();
+	}
+	else if(ZRotation >= 89.0f && ZRotation <= 91.0f)
+	{
+		UnitInstance->GetMyDirection()->DoDownArrowAnimation();
+	}
+	else if(ZRotation >= 179.0f && ZRotation <= 181.0f)
+	{
+		UnitInstance->GetMyDirection()->DoLeftArrowAnimation();
+	}
+	else if(ZRotation >= 269.0f && ZRotation <= 271.0f)
+	{
+		UnitInstance->GetMyDirection()->DoUpArrowAnimation();
 	}
 }
 

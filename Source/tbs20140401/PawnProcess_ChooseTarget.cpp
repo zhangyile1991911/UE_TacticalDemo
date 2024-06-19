@@ -63,7 +63,7 @@ void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 			UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(UnitBriefInfoInstance->Slot);
 			CanvasSlot->SetPosition(ScreenLocation);
 		}
-		UE_LOG(LogTemp,Log,TEXT("Target Location = %s Result = %hhd ScreenLocation = %s"),*WorldPosition.ToString(),Result,*ScreenLocation.ToString())
+		// UE_LOG(LogTemp,Log,TEXT("Target Location = %s Result = %hhd ScreenLocation = %s"),*WorldPosition.ToString(),Result,*ScreenLocation.ToString())
 		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Visible);	
 	}
 	else
@@ -121,7 +121,7 @@ void UPawnProcess_ChooseTarget::TickProcess()
 
 void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 {
-	Super::HandleDirectionInput(Input);
+	// Super::HandleDirectionInput(Input);
 
 	FIntPoint next;
 	next.X = CurrentCursor.X + Input.Y;
@@ -188,7 +188,7 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		bool IsValid = ChosenAbilityPtr->IsValidUnit(TempTarget);
 		if(IsValid)
 		{
-			BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
+			// BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
 			BattleInfoInstance->ShowBackAtkTips(TempTarget);
 		}
 	}
@@ -210,7 +210,7 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 			BattleInfoInstance->HideCooperatorTips();
 			break;
 		}
-		BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
+		// BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
 		BattleInfoInstance->ShowCooperatorTips(Cooperator);
 	}
 	while (false);

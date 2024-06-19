@@ -598,6 +598,27 @@ void AMyUnit::MoveShadowOnTile(const FVector& location)
 	{
 		ShowShadowUnit();
 		MyShadowUnit->SetActorLocation(location);
+		float ZRotation = GetUnitRotation().Yaw;
+		if(ZRotation <= 0.01f)
+		{
+			ZRotation += 360.0f;
+		}
+		if(ZRotation >= 359.0f && ZRotation <= 361.0f)
+		{
+			TurnShadowRight();
+		}
+		else if(ZRotation >= 89.0f && ZRotation <= 91.0f)
+		{
+			TurnShadowBack();
+		}
+		else if(ZRotation >= 179.0f && ZRotation <= 181.0f)
+		{
+			TurnShadowLeft();
+		}
+		else if(ZRotation >= 269.0f && ZRotation <= 271.0f)
+		{
+			TurnShadowForward();
+		}
 	}
 		
 }
@@ -834,6 +855,35 @@ FRotator AMyUnit::GetUnitForward() const
 	return MySkeletalMeshComponent->GetRelativeRotation();
 }
 
+
+void AMyUnit::TurnToTarget(AMyUnit* TargetUnit)
+{
+	if(TargetUnit == nullptr)return;
+	FIntPoint TargetIndex = TargetUnit->GetGridIndex();
+	FIntPoint Delta = TargetIndex - GetGridIndex();
+	if(Delta.X == 0 )
+	{
+		if(Delta.Y > 0)
+		{//右边
+			TurnRight();
+		}
+		else
+		{//左边
+			TurnLeft();
+		}
+	}
+	else if(Delta.Y == 0)
+	{
+		if(Delta.X > 0)
+		{
+			TurnForward();
+		}
+		else
+		{
+			TurnBack();
+		}
+	}
+}
 
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection)
 {
