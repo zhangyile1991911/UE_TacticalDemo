@@ -73,6 +73,15 @@ struct FBattleReport
 	int Damage;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FVector FirstIndex;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FVector SecondIndex;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FVector ThirdIndex;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TArray<FHitInfo> HitInfoList;
 };
 

@@ -373,6 +373,21 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 				OwnAbilityActorComponents.Add(AbilityActor);
 			}
 			break;
+		case 10005:
+			{
+				UChildActorComponent* AbilityActor = NewObject<UChildActorComponent>(this,UChildActorComponent::StaticClass(),TEXT("ThrowActorAnim"));
+				AbilityActor->SetupAttachment(RootComponent);
+				AbilityActor->SetChildActorClass(AbilityData.SkillAnim.Get());
+				AbilityActor->RegisterComponent();
+				AbilityActor->CreateChildActor([this,AbilityData](AActor* Actor)
+				{
+					AUnitAbilityAnim* Ability = Cast<AUnitAbilityAnim>(Actor);
+					Ability->SetSkillData(AbilityData,this);
+					OwnAbilityAnimList.Add(Ability);
+				});
+				OwnAbilityActorComponents.Add(AbilityActor);
+			}
+			break;
 		default:
 			{
 				UE_LOG(LogTemp,Log,TEXT("error skillid %d"),UnitData->Ability[i].SkillId)
@@ -590,6 +605,32 @@ void AMyUnit::HideShadowUnit()
 {
 	if(MyShadowUnit)
 		MyShadowUnit->SetActorHiddenInGame(true);
+}
+
+EUnitDirectType AMyUnit::GetUnitDirect()
+{
+	float ZRotation = GetUnitRotation().Yaw;
+	if(ZRotation <= 0.01f)
+	{
+		ZRotation += 360.0f;
+	}
+	if(ZRotation >= 359.0f && ZRotation <= 361.0f)
+	{
+		return EUnitDirectType::RIGHT;
+	}
+	if(ZRotation >= 89.0f && ZRotation <= 91.0f)
+	{
+		return EUnitDirectType::BACKWARD;
+	}
+	if(ZRotation >= 179.0f && ZRotation <= 181.0f)
+	{
+		return EUnitDirectType::LEFT;
+	}
+	if(ZRotation >= 269.0f && ZRotation <= 271.0f)
+	{
+		return EUnitDirectType::FORWARD;
+	}
+	return EUnitDirectType::INVALID;
 }
 
 void AMyUnit::MoveShadowOnTile(const FVector& location)

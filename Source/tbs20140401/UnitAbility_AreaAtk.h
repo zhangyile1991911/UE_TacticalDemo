@@ -6,7 +6,7 @@
 #include "UnitAbilityAnim.h"
 #include "UnitAbility_AreaAtk.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class TBS20140401_API AUnitAbility_AreaAtk : public AUnitAbilityAnim
 {
 	GENERATED_BODY()

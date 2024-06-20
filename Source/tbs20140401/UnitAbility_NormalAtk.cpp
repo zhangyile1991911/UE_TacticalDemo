@@ -56,7 +56,7 @@ bool AUnitAbility_NormalAtk::IsValidUnit(TObjectPtr<AMyUnit> Unit)
 {
 	if(Unit == nullptr)return false;
 	if(Unit->IsDead())return false;
-	if(Unit->GetRuntimeProperty().UnitSide == OwnerInstance->GetRuntimeProperty().UnitSide)return false;
+	if(Unit->IsFriend(OwnerInstance->GetUnitSide()))return false;
 	return true;
 }
 
@@ -90,7 +90,7 @@ FBattleReport AUnitAbility_NormalAtk::DoCalculation(TObjectPtr<AMyUnit> Target, 
 	Report.IsBackAtk = UBattleFunc::IsBackAttack(OwnerInstance,Target);
 	Report.HitPercent = UBattleFunc::CalculateHitRate(OwnerInstance,Target,MyGrid,Cooperator != nullptr,Report.IsBackAtk);
 
-	int Num = FMath::RandRange(0,100);
+	const int Num = FMath::RandRange(0,100);
 	if(Num > Report.HitPercent)
 	{//未命中
 		Report.Damage = 0;
@@ -99,9 +99,9 @@ FBattleReport AUnitAbility_NormalAtk::DoCalculation(TObjectPtr<AMyUnit> Target, 
 	}
 
 	Report.IsHit = true;
-	float atk = OwnerInstance->GetRuntimeProperty().Power;
-	float def = Target->GetRuntimeProperty().PhysicDefend;
-	float per = FMath::FRandRange(0.8,1.0f);
+	// float atk = OwnerInstance->GetRuntimeProperty().Power;
+	// float def = Target->GetRuntimeProperty().PhysicDefend;
+	// float per = FMath::FRandRange(0.8,1.0f);
 	Report.Damage = 10;//FMathf::Clamp(atk * per - def,0,999999999);
 	//扣除血量
 	Target->AddHP(Report.Damage);

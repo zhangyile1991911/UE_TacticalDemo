@@ -31,7 +31,8 @@ enum class EUnitDirectType:uint8
 	RIGHT UMETA(DisplayName="Right"),
 	LEFT UMETA(DisplayName="Left"),
 	FORWARD UMETA(DisplayName="Forward"),
-	BACKWARD UMETA(DisplayName="Backward")
+	BACKWARD UMETA(DisplayName="Backward"),
+	INVALID UMETA(DisplayName="Invalid")
 };
 
 UCLASS(Blueprintable)
@@ -261,7 +262,9 @@ public:
 	void TurnForward();
 	UFUNCTION(BlueprintCallable)
 	void TurnBack();
-
+	UFUNCTION(BlueprintCallable)
+	EUnitDirectType GetUnitDirect();
+	
 	void TurnShadowLeft();
 	void TurnShadowRight();
 	void TurnShadowForward();
@@ -277,6 +280,7 @@ public:
 	//タン始まる前に　計算やプロパティリなどセットする
 	void BeforeStartTurn();
 	void FinishTurn(bool bAsync);
+	
 
 	void RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex);
 

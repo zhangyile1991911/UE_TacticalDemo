@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class TBS20140401_API AUnitAbility_LongRangeAtk : public AUnitAbilityAnim
 {
 	GENERATED_BODY()

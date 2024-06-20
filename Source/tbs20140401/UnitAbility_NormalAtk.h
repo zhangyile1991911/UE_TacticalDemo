@@ -9,7 +9,7 @@
 #include "UnitAbility_NormalAtk.generated.h"
 
 
-UCLASS()
+UCLASS(Blueprintable)
 class TBS20140401_API AUnitAbility_NormalAtk : public AUnitAbilityAnim
 {
 	GENERATED_BODY()
