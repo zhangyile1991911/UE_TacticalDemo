@@ -14,18 +14,22 @@ AMyGridVisual::AMyGridVisual()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("scene"));
-	ChildActor_GridInstMesh = CreateDefaultSubobject<UChildActorComponent>(TEXT("childActor"));
-	ChildActor_GridInstMesh->SetupAttachment(RootComponent);
-	ChildActor_GridInstMesh->SetChildActorClass(AMyGridMeshInst::StaticClass());
+	ChildActor_LayerA = CreateDefaultSubobject<UChildActorComponent>(TEXT("ChildActor_LayerA"));
+	ChildActor_LayerA->SetupAttachment(RootComponent);
+	ChildActor_LayerA->SetChildActorClass(AMyGridMeshInst::StaticClass());
 
-	UE_LOG(LogTemp,Log,TEXT("AMyGridVisual::AMyGridVisual default construct %s at %s thread:  %d"),*GetName(),*FDateTime::Now().ToString(), FPlatformTLS::GetCurrentThreadId())
+	ChildActor_LayerB = CreateDefaultSubobject<UChildActorComponent>(TEXT("ChildActor_LayerB"));
+	ChildActor_LayerB->SetupAttachment(RootComponent);
+	ChildActor_LayerB->SetChildActorClass(AMyGridMeshInst::StaticClass());
+
+	// UE_LOG(LogTemp,Log,TEXT("AMyGridVisual::AMyGridVisual default construct %s at %s thread:  %d"),*GetName(),*FDateTime::Now().ToString(), FPlatformTLS::GetCurrentThreadId())
 }
 
 // Called when the game starts or when spawned
 void AMyGridVisual::BeginPlay()
 {
 	Super::BeginPlay();
-	myGridMeshInst = Cast<AMyGridMeshInst>(ChildActor_GridInstMesh->GetChildActor());
+
 }
 
 void AMyGridVisual::OnConstruction(const FTransform& Transform)
@@ -49,10 +53,31 @@ void AMyGridVisual::InitializedGridVisual(AGrid* grid)
 	
 	if(!data->FlatMaterial.IsValid())
 		data->FlatMaterial.LoadSynchronous();
+
+	ChildActor_LayerA->CreateChildActor([this,data](AActor* Actor)
+	{
+		LayerAGridMeshInst = Cast<AMyGridMeshInst>(Actor);	
+		LayerAGridMeshInst->InitializeGridMeshInst(data->FlatMesh.Get(),data->FlatMaterial.Get(),FVector(0,0,0),ECollisionEnabled::Type::QueryOnly);
+		LayerAGridMeshInst->AddShowTileTypes(ETileState::Reachable);
+		LayerAGridMeshInst->AddShowTileTypes(ETileState::DangerousRange);
+		// LayerAGridMeshInst->AddShowTileTypes(ETileState::Selected);
+		// LayerAGridMeshInst->AddShowTileTypes(ETileState::Hovered);
+	});
+	ChildActor_LayerB->SetRelativeLocation(FVector::Zero());
 	
-	myGridMeshInst = Cast<AMyGridMeshInst>(ChildActor_GridInstMesh->GetChildActor());
-	myGridMeshInst->InitializeGridMeshInst(data->FlatMesh.Get(),data->FlatMaterial.Get(),FVector(0,0,0),ECollisionEnabled::Type::QueryOnly);
+	ChildActor_LayerB->CreateChildActor([this,data](AActor* Actor)
+	{
+		LayerBGridMeshInst = Cast<AMyGridMeshInst>(Actor);	
+		LayerBGridMeshInst->InitializeGridMeshInst(data->FlatMesh.Get(),data->FlatMaterial.Get(),FVector(0,0,0),ECollisionEnabled::Type::QueryOnly);
+		LayerBGridMeshInst->AddShowTileTypes(ETileState::PathFinding);
+		LayerBGridMeshInst->AddShowTileTypes(ETileState::Selected);
+		LayerBGridMeshInst->AddShowTileTypes(ETileState::Hovered);
+		LayerBGridMeshInst->AddShowTileTypes(ETileState::IndicatorRange);
+		LayerBGridMeshInst->AddShowTileTypes(ETileState::AbilityRange);
+	});
+	ChildActor_LayerB->SetRelativeLocation(FVector(0,0,1.0f));
 	SetActorLocation(FVector::Zero());
+	
 }
 
 // void AMyGridVisual::SetOffsetFromGround(float offset)
@@ -65,8 +90,10 @@ void AMyGridVisual::InitializedGridVisual(AGrid* grid)
 
 void AMyGridVisual::DestroyGridVisual()
 {
-	if(myGridMeshInst != nullptr)
-		myGridMeshInst->ClearInstance();
+	if(LayerAGridMeshInst != nullptr)
+		LayerAGridMeshInst->ClearInstance();
+	if(LayerBGridMeshInst != nullptr)
+		LayerBGridMeshInst->ClearInstance();
 }
 
 void AMyGridVisual::AddTileVisual(FTileData data)
@@ -75,7 +102,12 @@ void AMyGridVisual::AddTileVisual(FTileData data)
 	{
 		// UE_LOG(LogTemp,Log,TEXT("AMyGridVisual::UpdateTileVisual add x = %d y = %d"),data.Index.X,data.Index.Y)
 		// myGridMeshInst->UpdateInstance(data.Transform,data.Index,data.States);
-		myGridMeshInst->AddInstance(data.Transform,data.Index,data.States);
+		LayerAGridMeshInst->AddInstance(data.Transform,data.Index,data.States);
+		FTransform Other = data.Transform;
+		FVector Location = Other.GetLocation();
+		Location.Z += 5.0f;
+		Other.SetLocation(Location);
+		LayerBGridMeshInst->AddInstance(Other,data.Index,data.States);
 	}
 }
 
@@ -89,7 +121,8 @@ void AMyGridVisual::UpdateTileVisual(FTileData data,EGriUpdateMode mode)//0 stat
 	// }
 	if(data.TileType == ETileType::None)
 	{
-		myGridMeshInst->RemoveInstance(data.Index);
+		LayerAGridMeshInst->RemoveInstance(data.Index);
+		LayerBGridMeshInst->RemoveInstance(data.Index);
 		return;
 	}
 	if(mode == EGriUpdateMode::UpdateState)
@@ -98,23 +131,27 @@ void AMyGridVisual::UpdateTileVisual(FTileData data,EGriUpdateMode mode)//0 stat
 		{
 			// UE_LOG(LogTemp,Log,TEXT("AMyGridVisual::UpdateTileVisual add x = %d y = %d"),data.Index.X,data.Index.Y)
 			// myGridMeshInst->UpdateInstance(data.Transform,data.Index,data.States);
-			myGridMeshInst->UpdateInstance(data.Index,data.States);
+			LayerAGridMeshInst->UpdateInstance(data.Index,data.States);
+			LayerBGridMeshInst->UpdateInstance(data.Index,data.States);
 		}	
 	}
 
 	if(mode == EGriUpdateMode::UpdateTileType)
 	{
-		myGridMeshInst->UpdateInstance(data.Index,data.States);
+		LayerAGridMeshInst->UpdateInstance(data.Index,data.States);
+		LayerBGridMeshInst->UpdateInstance(data.Index,data.States);
 	}
 
 	if(mode == EGriUpdateMode::UpdateTransform)
 	{
-		myGridMeshInst->UpdateInstanceTransform(data.Index,data.Transform);
+		LayerAGridMeshInst->UpdateInstanceTransform(data.Index,data.Transform);
+		LayerBGridMeshInst->UpdateInstanceTransform(data.Index,data.Transform);
 	}
 	
 }
 
-void AMyGridVisual::RemoveTIle(FIntPoint index)
+void AMyGridVisual::RemoveTile(FIntPoint index)
 {
-	myGridMeshInst->RemoveInstance(index);
+	LayerAGridMeshInst->RemoveInstance(index);
+	LayerBGridMeshInst->RemoveInstance(index);
 }

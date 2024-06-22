@@ -578,7 +578,7 @@ void AGrid::RemoveOneTIle(FIntPoint index)
 	}
 
 	GridTiles.Remove(index);
-	GridVisual->RemoveTIle(index);
+	GridVisual->RemoveTile(index);
 	
 }
 

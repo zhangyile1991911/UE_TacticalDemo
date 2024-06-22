@@ -39,12 +39,17 @@ protected:
 	TObjectPtr<AGrid> myGrid;
 	
 	UPROPERTY()
-	TObjectPtr<AMyGridMeshInst> myGridMeshInst;
+	TObjectPtr<AMyGridMeshInst> LayerAGridMeshInst;
 	
 	UPROPERTY(meta=(AllowPrivateAccess="true"))
-	TObjectPtr<UChildActorComponent> ChildActor_GridInstMesh;
+	TObjectPtr<UChildActorComponent> ChildActor_LayerA;
 
+
+	UPROPERTY()
+	TObjectPtr<AMyGridMeshInst> LayerBGridMeshInst;
 	
+	UPROPERTY(meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UChildActorComponent> ChildActor_LayerB;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -52,7 +57,7 @@ public:
 	// void SetOffsetFromGround(float offset);
 	void DestroyGridVisual();
 	void UpdateTileVisual(FTileData,EGriUpdateMode mode);
-	void RemoveTIle(FIntPoint);
+	void RemoveTile(FIntPoint);
 	void AddTileVisual(FTileData);
 
 };

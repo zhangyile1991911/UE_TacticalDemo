@@ -19,12 +19,10 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UInstancedStaticMeshComponent> InstancedStaticMeshComponent;
 	TArray<FIntPoint> InstancedIndexes;
+	TSet<ETileState> ShowTileTypes;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
-	
-	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -35,4 +33,6 @@ public:
 	void UpdateInstance(FIntPoint,const TSet<ETileState>& states);
 	void UpdateInstanceTransform(const FIntPoint& index,const FTransform& Transform);
 	FLinearColor GetColorFromStates(const TSet<ETileState>& states,float& isFilled);
+	void AddShowTileTypes(ETileState TileState);
+	
 };

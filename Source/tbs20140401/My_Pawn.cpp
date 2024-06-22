@@ -240,14 +240,14 @@ void AMy_Pawn::UpdateTileStatusByIndex(const FIntPoint& index, ETileState state)
 		if(index != SelectedTile)MyGrid->RemoveStateFromTile(SelectedTile,state);
 		SelectedTile = index;
 	}
-	auto pData = MyGrid->GetTileDataByIndex(index);
+	const auto TileDataPtr = MyGrid->GetTileDataByIndex(index);
 
 	if(SelectedUnit)SelectedUnit->SetSelected(false);
-	if(pData == nullptr)return;
-	if(pData->UnitOnTile == nullptr)return;
+	if(TileDataPtr == nullptr)return;
+	if(TileDataPtr->UnitOnTile == nullptr)return;
 
-	pData->UnitOnTile->SetSelected(true);
-	SelectedUnit = pData->UnitOnTile;
+	TileDataPtr->UnitOnTile->SetSelected(true);
+	SelectedUnit = TileDataPtr->UnitOnTile;
 }
 
 void AMy_Pawn::RemoveTileStateByIndex(const FIntPoint& index, ETileState state)

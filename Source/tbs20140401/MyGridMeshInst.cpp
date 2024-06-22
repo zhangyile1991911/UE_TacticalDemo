@@ -4,6 +4,7 @@
 #include "MyGridMeshInst.h"
 
 #include "GridShapeData.h"
+#include "IContentBrowserSingleton.h"
 #include "Components/InstancedStaticMeshComponent.h"
 
 // Sets default values
@@ -30,7 +31,6 @@ void AMyGridMeshInst::BeginPlay()
 void AMyGridMeshInst::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AMyGridMeshInst::AddInstance(FTransform& instancedTransform,FIntPoint index,const TSet<ETileState>& states)
@@ -88,15 +88,17 @@ FLinearColor AMyGridMeshInst::GetColorFromStates(const TSet<ETileState>& states,
 	{
 		return FLinearColor::Black;
 	}
+
+	const auto Result = states.Intersect(ShowTileTypes);
+	if(Result.IsEmpty())return FLinearColor::Black;
 	
-	
-	 if(states.Contains(ETileState::Selected))
+	 if(Result.Contains(ETileState::Selected))
 	 {
 		isFilled = 1.0f;
 		return FLinearColor(0.212f,1.0f,0.098f); 
 	 }
 		
-	if(states.Contains(ETileState::Hovered))
+	if(Result.Contains(ETileState::Hovered))
 	{
 		isFilled = 1.0f;
 		return FLinearColor(0.55f,0.75f,0.351f);
@@ -107,35 +109,41 @@ FLinearColor AMyGridMeshInst::GetColorFromStates(const TSet<ETileState>& states,
 	// 	isFilled = 1.0f;
 	// 	return FLinearColor::Yellow;
 	// }
-	if(states.Contains(ETileState::DangerousRange))
+	if(Result.Contains(ETileState::DangerousRange))
 	{
 		isFilled = 1.0f;
 		return FLinearColor(0.9f,0.07f,1.0f);
 	}
-	if(states.Contains(ETileState::IndicatorRange))
+	if(Result.Contains(ETileState::IndicatorRange))
 	{
 		isFilled = 1.0f;
 		return FLinearColor(1.0f,0.4,0);
 	}
-	if(states.Contains(ETileState::AbilityRange))
+	if(Result.Contains(ETileState::AbilityRange))
 	{
 		isFilled = 1.0f;
 		return FLinearColor::Red;
 	}
 
-	if(states.Contains(ETileState::PathFinding))
+	if(Result.Contains(ETileState::PathFinding))
 	{
-		isFilled = 1.0f;
+		isFilled = 0.5f;
 		return FLinearColor::White;
 	}
 
-	if(states.Contains(ETileState::Reachable))
+	if(Result.Contains(ETileState::Reachable))
 	{
 		isFilled = 1.0f;
 		return FLinearColor(0.019f,0.08f,0.25f);
 	}
 
 	return FLinearColor::Black;
+}
+
+void AMyGridMeshInst::AddShowTileTypes(ETileState TileState)
+{
+	if(ShowTileTypes.Contains(TileState))return;
+	ShowTileTypes.Add(TileState);
 }
 
 void AMyGridMeshInst::ClearInstance()
