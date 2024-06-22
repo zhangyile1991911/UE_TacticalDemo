@@ -109,16 +109,24 @@ FBattleReport AUnitAbilityAnim_Throw::DoCalculation(TObjectPtr<AMyUnit> Target, 
 	//1 头顶位置
 	Report.FirstIndex = OwnerInstance->GetActorLocation();
 	Report.FirstIndex.Z += 250.0f;
-
+	
 	do
 	{
 		if(TileDataPtr == nullptr)
 		{
+			UE_LOG(LogTemp,Log,TEXT("Attack Index = %s Defender Origin Index = %s FinishIndex %s"),
+				*OwnerInstance->GetGridIndex().ToString(),
+				*Target->GetGridIndex().ToString(),
+				*Target->GetGridIndex().ToString())
 			Report.SecondIndex = Target->GetActorLocation();
 			break;
 		}
 		if(TileDataPtr->UnitOnTile != nullptr)
 		{
+			UE_LOG(LogTemp,Log,TEXT("Attack Index = %s Defender Origin Index = %s FinishIndex %s"),
+				*OwnerInstance->GetGridIndex().ToString(),
+				*Target->GetGridIndex().ToString(),
+				*Target->GetGridIndex().ToString())
 			Report.SecondIndex = Target->GetActorLocation();
 			break;
 		}
@@ -128,6 +136,10 @@ FBattleReport AUnitAbilityAnim_Throw::DoCalculation(TObjectPtr<AMyUnit> Target, 
 		MyGrid->AddTileDataUnitByIndex(Target->GetGridIndex(),nullptr);
 		MyGrid->AddTileDataUnitByIndex(StandIndex,Target);
 		Target->SetGridIndex(StandIndex);
+		UE_LOG(LogTemp,Log,TEXT("Attack Index = %s Defender Origin Index = %s FinishIndex %s"),
+				*OwnerInstance->GetGridIndex().ToString(),
+				*Target->GetGridIndex().ToString(),
+				*StandIndex.ToString())
 	}
 	while (false);
 	

@@ -166,7 +166,7 @@ bool UUnitPathComponent::CanDiagonal(const FIntPoint& ParentIndex,const FIntPoin
 				UpCanWalk = UpUnit->IsFriend(UnitSide);
 			if(RightCanWalk && UpCanWalk)return true;
 		}
-		if(deltaX > 0 && deltaY < 0)
+		else if(deltaX > 0 && deltaY < 0)
 		{//左前方
 			const FIntPoint Left(ParentIndex.X,ParentIndex.Y-1);
 			const FIntPoint Up(ParentIndex.X+1,ParentIndex.Y);
@@ -178,7 +178,7 @@ bool UUnitPathComponent::CanDiagonal(const FIntPoint& ParentIndex,const FIntPoin
 			if(UpUnit)UpCanWalk = UpUnit->IsFriend(UnitSide);
 			if(LeftCanWalk && UpCanWalk)return true;
 		}
-		if(deltaX < 0 && deltaY < 0)
+		else if(deltaX < 0 && deltaY < 0)
 		{//左后方
 			const FIntPoint Left(ParentIndex.X,ParentIndex.Y-1);
 			const FIntPoint Down(ParentIndex.X - 1,ParentIndex.Y);
@@ -190,7 +190,7 @@ bool UUnitPathComponent::CanDiagonal(const FIntPoint& ParentIndex,const FIntPoin
 			if(DownUnit)DownCanWalk = DownUnit->IsFriend(UnitSide);
 			if(LeftCanWalk && DownCanWalk)return true;
 		}
-		if(deltaX < 0 && deltaY > 0)
+		else if(deltaX < 0 && deltaY > 0)
 		{//右后方
 			const FIntPoint Right(ParentIndex.X,ParentIndex.Y+1);
 			const FIntPoint Down(ParentIndex.X-1,ParentIndex.Y);
@@ -213,41 +213,41 @@ bool UUnitPathComponent::DiscoverTileByWalkableType(const int UnitSide,const FIn
 	int Count = bIsDiagonal ? 8 : 4;
 	for(int i = 0;i < Count;i++)
 	{
-		FIntPoint index = CenterIndex + Neighbors[i];
+		FIntPoint NextIndex = CenterIndex + Neighbors[i];
 
-		if(AnalysedTileIndexes.Contains(index))continue;
+		if(AnalysedTileIndexes.Contains(NextIndex))continue;
 		
-		auto TileDataPtr = ParentPtr->MyGrid->GetTileDataByIndex(index);
-		if(TileDataPtr == nullptr)continue;
-		if(TileDataPtr->UnitOnTile != nullptr && !TileDataPtr->UnitOnTile->IsFriend(UnitSide))
+		const auto NextTileDataPtr = ParentPtr->MyGrid->GetTileDataByIndex(NextIndex);
+		if(NextTileDataPtr == nullptr)continue;
+		if(NextTileDataPtr->UnitOnTile != nullptr && !NextTileDataPtr->UnitOnTile->IsFriend(UnitSide))
 		{
 			continue;
 		}
-		if(!IsTileTypeWalkable(TileDataPtr->TileType))continue;
-		float z = TileDataPtr->Transform.GetLocation().Z;
+		if(!IsTileTypeWalkable(NextTileDataPtr->TileType))continue;
+		const float z = NextTileDataPtr->Transform.GetLocation().Z;
 		//高低差
-		float center_z = TileDataPtr->Transform.GetLocation().Z;
-		bool isRemove = FMathf::Abs(z - center_z) > ParentPtr->MyGrid->GetGridTileSize().Z;
+		const float center_z = NextTileDataPtr->Transform.GetLocation().Z;
+		const bool isRemove = FMathf::Abs(z - center_z) > ParentPtr->MyGrid->GetGridTileSize().Z;
 		if(isRemove)continue;
 		
-		if(!WalkableType.Contains(TileDataPtr->TileType))continue;;
+		if(!WalkableType.Contains(NextTileDataPtr->TileType))continue;;
 		
 		//是否是斜着走
-		int32 deltaX = TileDataPtr->Index.X - index.X;
-		int32 deltaY = TileDataPtr->Index.Y - index.Y;
+		const int32 deltaX = NextIndex.X - CenterIndex.X;
+		const int32 deltaY = NextIndex.Y - CenterIndex.Y;
 		
 		// 判断是否为斜侧方向移动
 		const bool bMoveDiagonal = FMath::Abs(deltaX) == 1 && FMath::Abs(deltaY) == 1;
 		if(bMoveDiagonal)
 		{
-			if(!CanDiagonal(CenterIndex,index,ParentPtr->GetUnitSide()))
+			if(!CanDiagonal(CenterIndex,NextIndex,ParentPtr->GetUnitSide()))
 				continue;
 		}
 		
 		//将周伟的格子加入分析队列
-		if(!AnalysedTileIndexes.Contains(index))
+		if(!AnalysedTileIndexes.Contains(NextIndex))
 		{
-			FMyPathFindingData nextPoint = TryNextNeighbor(CenterIndex,index);
+			FMyPathFindingData nextPoint = TryNextNeighbor(CenterIndex,NextIndex);
 			if(nextPoint.Index == TargetIndex)return true;
 		}
 	}

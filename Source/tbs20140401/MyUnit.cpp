@@ -224,7 +224,7 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	My_Pawn = Pawn;
 	UnitType = My_Pawn == nullptr ? UnitType : My_Pawn->GetCurrentSelectedUnitType();
 	MyGrid = grid;
-	TempDestinationGridIndex = MoveIndex = GridIndex = index;
+	TempDestinationGridIndex = GridIndex = index;
 	const FUnitData* UnitData = GetUnitData(UnitType);
 	if(UnitData == nullptr)
 	{
@@ -545,7 +545,7 @@ void AMyUnit::StartWalkPath(FPathCompleted Completed)
 	
 	PathCompleted = Completed;
 	WalkPathIndex = 1;
-	
+	MoveIndex = WalkPath[0];
 	auto TileDataPtr = MyGrid->GetTileDataByIndex(WalkPath[WalkPathIndex]);
 	StartRotateAngles = GetActorForwardVector().Rotation();
 	float fAngleDegrees = CalculateRotationAngleToTarget(GetActorLocation(),TileDataPtr->Transform.GetLocation());
@@ -609,7 +609,15 @@ void AMyUnit::HideShadowUnit()
 
 EUnitDirectType AMyUnit::GetUnitDirect()
 {
-	float ZRotation = GetUnitRotation().Yaw;
+	float ZRotation = 0;
+	if(NeedToMove())
+	{
+		ZRotation = GetShadowUnitRotation().Yaw;
+	}
+	else
+	{
+		ZRotation = GetUnitRotation().Yaw;	
+	}
 	if(ZRotation <= 0.01f)
 	{
 		ZRotation += 360.0f;
