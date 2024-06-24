@@ -3,6 +3,8 @@
 
 #include "My_Utilities.h"
 
+#include <ThirdParty/SPIRV-Reflect/SPIRV-Reflect/include/spirv/unified1/spirv.h>
+
 #include "Grid.h"
 #include "UnitData.h"
 #include "Engine/AssetManager.h"
@@ -61,6 +63,15 @@ FUnitData* GetUnitData(const EUnitType unitType)
 	case EUnitType::Ranger:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Ranger")),"");
 		break;
+	case EUnitType::Priest:
+		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Priest")),"");
+		break;
+	case EUnitType::Chicken:
+		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Chicken")),"");
+		break;
+	case EUnitType::Bat:
+		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Bat")),"");
+		break;
 	case EUnitType::EnemyWarrior:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyWarrior")),"");
 		break;
@@ -72,6 +83,15 @@ FUnitData* GetUnitData(const EUnitType unitType)
 		break;
 	case EUnitType::EnemyTank:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyTank")),"");
+		break;
+	case EUnitType::EnemyBat:
+		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyBat")),"");
+		break;
+	case EUnitType::EnemyChicken:
+		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyChicken")),"");
+		break;
+	case EUnitType::EnemyPriest:
+		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyPriest")),"");
 		break;
 	}
 	return row;

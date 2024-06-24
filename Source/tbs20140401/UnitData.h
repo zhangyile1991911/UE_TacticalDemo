@@ -11,13 +11,16 @@ enum class EUnitType:uint8
 	Warrior UMETA(DisplayName="Warrior"),
 	Ranger UMETA(DisplayName="Ranger"),
 	Slime UMETA(DisplayName="Slime"),
+	Priest UMETA(DisplayName="Priest"),
+	Chicken UMETA(DisplayName="Chicken"),
+	Bat UMETA(DisplayName="Bat"),
 	EnemyWarrior UMETA(DisplayName="EnemyWarrior"),
 	EnemyRanger UMETA(DisplayName="EnemyRanger"),
 	EnemySlime UMETA(DisplayName="EnemySlime"),
-	EnemyTank UMETA(DisplayName="EnemyTank")
-	// Priest UMETA(DisplayName="Priest"),
-	// Chicken UMETA(DisplayName="Chicken"),
-	// Bat UMETA(DisplayName="Bat") 
+	EnemyTank UMETA(DisplayName="EnemyTank"),
+	EnemyPriest UMETA(DisplayName="EnemyPriest"),
+	EnemyChicken UMETA(DisplayName="EnemyChicken"),
+	EnemyBat UMETA(DisplayName="EnemyBat"),
 };
 
 USTRUCT(BlueprintType)

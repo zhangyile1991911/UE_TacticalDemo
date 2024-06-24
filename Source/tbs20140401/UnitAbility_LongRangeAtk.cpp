@@ -54,7 +54,7 @@ bool AUnitAbility_LongRangeAtk::IsValidUnit(TObjectPtr<AMyUnit> Unit)
 {
 	if(Unit == nullptr)return false;
 	if(Unit->IsDead())return false;
-	if(Unit->GetRuntimeProperty().UnitSide == OwnerInstance->GetRuntimeProperty().UnitSide)return false;
+	if(Unit->IsFriend(Unit->GetUnitSide()))return false;
 	return true;
 }
 
