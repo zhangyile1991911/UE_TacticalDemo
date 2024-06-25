@@ -35,27 +35,108 @@ bool AUnitAbility_Archery::CanExecute()
 	return true;
 }
 
-TArray<FIntPoint> AUnitAbility_Archery::Range(const FIntPoint& Int32Point)
+TArray<FIntPoint> AUnitAbility_Archery::Range(const FIntPoint& CenterPoint)
 {
-	FIntPoint StandPoint;
-	if(OwnerInstance->NeedToMove())
+	// FIntPoint StandPoint;
+	// if(OwnerInstance->NeedToMove())
+	// {
+	// 	StandPoint = OwnerInstance->GetTempDestinationGridIndex();
+	// }
+	// else
+	// {
+	// 	StandPoint  = OwnerInstance->GetGridIndex();
+	// }
+	// TArray<FIntPoint> IndicatorRange;
+	// IndicatorRange.Reserve(16);
+	// for(int i = SkillData.Range.X;i <= SkillData.Range.Y;i++)
+	// {
+	// 	IndicatorRange.Add(FIntPoint(StandPoint.X+i,StandPoint.Y));
+	// 	IndicatorRange.Add(FIntPoint(StandPoint.X-i,StandPoint.Y));
+	// 	IndicatorRange.Add(FIntPoint(StandPoint.X,StandPoint.Y+i));
+	// 	IndicatorRange.Add(FIntPoint(StandPoint.X,StandPoint.Y-i));
+	// }
+	// return MoveTemp(IndicatorRange);
+	TArray<FIntPoint> Path;
+	TArray<FIntPoint> Result;
+	TSet<FIntPoint> Discovered;
+	Path.Reserve(32);
+	Result.Reserve(32);
+	Discovered.Reserve(32);
+	
+	auto DiscoverAround = [&Path,&Result,&Discovered,this,CenterPoint](const FIntPoint& Index)
 	{
-		StandPoint = OwnerInstance->GetTempDestinationGridIndex();
-	}
-	else
+		int DeltaX = 0;
+		int DeltaY = 0;
+		int Dist = 0;
+		FIntPoint UP(Index.X+1,Index.Y);
+		DeltaX = FMathf::Abs(UP.X - CenterPoint.X);
+		DeltaY = FMathf::Abs(UP.Y - CenterPoint.Y);
+		Dist = DeltaX + DeltaY;
+		if(Dist <= SkillData.Range.Y)
+		{
+			if(!Discovered.Contains(UP))
+			{
+				Path.Add(UP);
+				Discovered.Add(UP);
+				if(Dist >= SkillData.Range.X)
+					Result.Add(UP);
+			}
+		}
+
+		FIntPoint DOWN(Index.X-1,Index.Y);
+		DeltaX = FMathf::Abs(DOWN.X - CenterPoint.X);
+		DeltaY = FMathf::Abs(DOWN.Y - CenterPoint.Y);
+		Dist = DeltaX + DeltaY;
+		if(Dist  <= SkillData.Range.Y)
+		{
+			if(!Discovered.Contains(DOWN))
+			{
+				Path.Add(DOWN);
+				Discovered.Add(DOWN);
+				if(Dist >= SkillData.Range.X)
+					Result.Add(DOWN);
+			}	
+		}
+
+		FIntPoint LEFT(Index.X,Index.Y-1);
+		DeltaX = FMathf::Abs(LEFT.X - CenterPoint.X);
+		DeltaY = FMathf::Abs(LEFT.Y - CenterPoint.Y);
+		Dist = DeltaX + DeltaY;
+		if(Dist  <= SkillData.Range.Y)
+		{
+			if(!Discovered.Contains(LEFT))
+			{
+				Path.Add(LEFT);
+				Discovered.Add(LEFT);
+				if(Dist >= SkillData.Range.X)
+					Result.Add(LEFT);
+			}	
+		}
+
+		FIntPoint RIGHT(Index.X,Index.Y+1);
+		DeltaX = FMathf::Abs(RIGHT.X - CenterPoint.X);
+		DeltaY = FMathf::Abs(RIGHT.Y - CenterPoint.Y);
+		Dist = DeltaX + DeltaY;
+		if(Dist  <= SkillData.Range.Y)
+		{
+			if(!Discovered.Contains(RIGHT))
+			{
+				Discovered.Add(RIGHT);
+				Path.Add(RIGHT);
+				if(Dist >= SkillData.Range.X)
+					Result.Add(RIGHT);
+			}
+		}
+	};
+	int PathIndex = 0;
+	Path.Add(CenterPoint);
+	while(PathIndex < Path.Num())
 	{
-		StandPoint  = OwnerInstance->GetGridIndex();
+		const FIntPoint& CurDiscover = Path[PathIndex];
+		DiscoverAround(CurDiscover);
+		PathIndex++;
 	}
-	TArray<FIntPoint> IndicatorRange;
-	IndicatorRange.Reserve(16);
-	for(int i = SkillData.Range.X;i <= SkillData.Range.Y;i++)
-	{
-		IndicatorRange.Add(FIntPoint(StandPoint.X+i,StandPoint.Y));
-		IndicatorRange.Add(FIntPoint(StandPoint.X-i,StandPoint.Y));
-		IndicatorRange.Add(FIntPoint(StandPoint.X,StandPoint.Y+i));
-		IndicatorRange.Add(FIntPoint(StandPoint.X,StandPoint.Y-i));
-	}
-	return MoveTemp(IndicatorRange);
+	return MoveTemp(Result);
 }
 
 bool AUnitAbility_Archery::IsValidTarget(const FTileData& TileData, AGrid* MyGrid)

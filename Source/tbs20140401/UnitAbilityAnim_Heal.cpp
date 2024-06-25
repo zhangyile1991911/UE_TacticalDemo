@@ -25,34 +25,91 @@ bool AUnitAbilityAnim_Heal::CanExecute()
 	return true;
 }
 
-TArray<FIntPoint> AUnitAbilityAnim_Heal::Range(const FIntPoint& Int32Point)
+
+TArray<FIntPoint> AUnitAbilityAnim_Heal::Range(const FIntPoint& CenterPoint)
 {
 	TArray<FIntPoint> Result;
-	Result.Reserve(16);
-	for(int i = SkillData.Range.X;i <= SkillData.Range.Y;i++)
+	TSet<FIntPoint> Discovered;
+	Result.Reserve(32);
+	Discovered.Reserve(32);
+	
+	auto DiscoverAround = [&Result,&Discovered,this,CenterPoint](const FIntPoint& Index)
 	{
-		Result.Add(FIntPoint(Int32Point.X+i,Int32Point.Y));
-		Result.Add(FIntPoint(Int32Point.X-i,Int32Point.Y));
-		Result.Add(FIntPoint(Int32Point.X,Int32Point.Y+i));
-		Result.Add(FIntPoint(Int32Point.X,Int32Point.Y-i));
+		int DeltaX = 0;
+		int DeltaY = 0;
+
+		FIntPoint UP(Index.X+1,Index.Y);
+		DeltaX = FMathf::Abs(UP.X - CenterPoint.X);
+		DeltaY = FMathf::Abs(UP.Y - CenterPoint.Y);
+		if(DeltaX+DeltaY <= SkillData.Range.Y)
+		{
+			if(!Discovered.Contains(UP))
+			{
+				Result.Add(UP);
+				Discovered.Add(UP);
+			}
+		}
+
+		FIntPoint DOWN(Index.X-1,Index.Y);
+		DeltaX = FMathf::Abs(DOWN.X - CenterPoint.X);
+		DeltaY = FMathf::Abs(DOWN.Y - CenterPoint.Y);
+		if(DeltaX+DeltaY <= SkillData.Range.Y)
+		{
+			if(!Discovered.Contains(DOWN))
+			{
+				Result.Add(DOWN);
+				Discovered.Add(DOWN);
+			}	
+		}
+
+		FIntPoint LEFT(Index.X,Index.Y-1);
+		DeltaX = FMathf::Abs(LEFT.X - CenterPoint.X);
+		DeltaY = FMathf::Abs(LEFT.Y - CenterPoint.Y);
+		if(DeltaX+DeltaY <= SkillData.Range.Y)
+		{
+			if(!Discovered.Contains(LEFT))
+			{
+				Result.Add(LEFT);
+				Discovered.Add(LEFT);
+			}	
+		}
+
+		FIntPoint RIGHT(Index.X,Index.Y+1);
+		DeltaX = FMathf::Abs(RIGHT.X - CenterPoint.X);
+		DeltaY = FMathf::Abs(RIGHT.Y - CenterPoint.Y);
+		if(DeltaX+DeltaY <= SkillData.Range.Y)
+		{
+			if(!Discovered.Contains(RIGHT))
+			{
+				Discovered.Add(RIGHT);
+				Result.Add(RIGHT);
+			}
+		}
+	};
+	int PathIndex = 0;
+	Result.Add(CenterPoint);
+	while(PathIndex < Result.Num())
+	{
+		const FIntPoint& CurDiscover = Result[PathIndex];
+		DiscoverAround(CurDiscover);
+		PathIndex++;
 	}
-	return Result;
+	
+	return MoveTemp(Result);
+}
+
+TArray<FIntPoint> AUnitAbilityAnim_Heal::Indicator(const FIntPoint& Index)
+{
+	TArray<FIntPoint> Result;
+	Result.Add(Index);
+	return MoveTemp(Result);
 }
 
 bool AUnitAbilityAnim_Heal::IsValidTarget(const FTileData& TileData, AGrid* MyGrid)
 {
-	auto IndicatorRange = Indicator(TileData.Index);
-	for(const auto& One : IndicatorRange)
-	{
-		const auto TempPtr = MyGrid->GetTileDataByIndex(One);
-		if(TempPtr == nullptr)continue;
-		if(TempPtr->UnitOnTile == nullptr)continue;
-		if(TempPtr->UnitOnTile->IsDead())continue;
-		if(TempPtr->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))continue;
-
-		return true;
-	}
-	
+	if(TileData.UnitOnTile == nullptr)return false;
+	if(TileData.UnitOnTile->IsDead())return false;
+	if(TileData.UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return true;
 	return false;
 }
 
@@ -80,7 +137,7 @@ TArray<TObjectPtr<AMyUnit>> AUnitAbilityAnim_Heal::TakeTargets(const FIntPoint& 
 FBattleReport AUnitAbilityAnim_Heal::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,
 	bool NeedCooperator)
 {
-	return Super::DoCalculation(Targets, MyGrid, NeedCooperator);
+	return DoCalculation(Targets[0], MyGrid, NeedCooperator);
 }
 
 FBattleReport AUnitAbilityAnim_Heal::DoCalculation(TObjectPtr<AMyUnit> Target, AGrid* MyGrid, bool NeedCooperator)

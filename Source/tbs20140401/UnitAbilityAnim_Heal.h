@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UnitAbilityAnim.h"
+#include "Curve/CurveUtil.h"
 #include "UnitAbilityAnim_Heal.generated.h"
 
 UCLASS()
@@ -24,6 +25,7 @@ public:
 	// virtual void Tick(float DeltaTime) override;
 	virtual bool CanExecute() override;
 	virtual TArray<FIntPoint> Range(const FIntPoint&) override;
+	virtual TArray<FIntPoint> Indicator(const FIntPoint& Index) override;
 	virtual bool IsValidTarget(const FTileData& TileData,AGrid* MyGrid) override;
 	virtual bool IsValidUnit(TObjectPtr<AMyUnit> Unit) override;
 	virtual TArray<TObjectPtr<AMyUnit>> TakeTargets(const FIntPoint& Point, AGrid* MyGrid) override;

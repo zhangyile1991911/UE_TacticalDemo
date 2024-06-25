@@ -19,20 +19,22 @@ void UHitInfoFlow::StartHitNum(FVector2D Start,FVector2D Finish,float Scale,int 
 		MySlotPtr = Cast<UCanvasPanelSlot>(this->Slot);
 		// MySlotPtr = Cast<UCanvasPanelSlot>(this);
 	}
-	// auto DesiredSize = TextBlockBox->GetDesiredSize();
-	// UE_LOG(LogTemp,Log,TEXT("UHitInfoFlow::StartHitNum %f %f"),DesiredSize.X,DesiredSize.Y);
-	
-	// auto TextSize = MySlotPtr->GetSize();
-	// DesiredSize /= 2;
-	// DesiredSize /= Scale;
-	// StartPos.X -= DesiredSize.X;
-	// StartPos.Y -= DesiredSize.Y;
-	// FinishPos.X -= DesiredSize.X;
-	// FinishPos.Y -= DesiredSize.Y;
+
 	MySlotPtr->SetPosition(StartPos);
 	if(bIsHit)
 	{
-		HitNumTextBlock->SetText(FText::Format(NSLOCTEXT("","","-{0}"),Num));	
+		FSlateColor NewColor;
+		if(Num < 0)
+		{
+			HitNumTextBlock->SetText(FText::Format(NSLOCTEXT("","","+{0}"),Num));
+			NewColor = FSlateColor(FLinearColor(0.15f, 0.61f, 0.10f, 1.0f));
+		}
+		else
+		{
+			HitNumTextBlock->SetText(FText::Format(NSLOCTEXT("","","-{0}"),Num));	
+			NewColor = FSlateColor(FLinearColor(1.0f, 0.18f, 0.18f, 1.0f));
+		}
+		HitNumTextBlock->SetColorAndOpacity(NewColor);
 	}
 	else
 	{

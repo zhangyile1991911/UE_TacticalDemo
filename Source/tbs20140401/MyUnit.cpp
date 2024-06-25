@@ -896,6 +896,12 @@ void AMyUnit::DoDeadAnim(FDeathCompleted Completed)
 }
 
 
+void AMyUnit::AddHP(int HP)
+{
+	MyRuntimeProperty.HP -= HP;
+	MyRuntimeProperty.HP = FMathf::Clamp(MyRuntimeProperty.HP,0,MyProperty.HP);
+}
+
 FRotator AMyUnit::GetUnitForward() const
 {
 	if(NeedToMove())

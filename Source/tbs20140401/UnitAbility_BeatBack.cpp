@@ -72,7 +72,9 @@ TArray<TObjectPtr<AMyUnit>> AUnitAbility_BeatBack::TakeTargets(const FIntPoint& 
 	TArray<TObjectPtr<AMyUnit>> Targets;
 	const auto TileDataPtr = MyGrid->GetTileDataByIndex(Point);
 	if(TileDataPtr == nullptr)return Targets;
-	
+	if(TileDataPtr->UnitOnTile == nullptr)return Targets;
+	if(TileDataPtr->UnitOnTile->IsDead())return Targets;
+	if(TileDataPtr->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return Targets;
 	Targets.Add(TileDataPtr->UnitOnTile);
 	return Targets;
 }
@@ -108,14 +110,14 @@ FBattleReport AUnitAbility_BeatBack::DoCalculation(TObjectPtr<AMyUnit> Target, A
 	Target->AddHP(Report.Damage);
 	//先确认方向 攻撃者の向いている方向を取得する
 	auto EDirectType = OwnerInstance->GetUnitDirect();
-	FIntPoint VecIntPoint;
+	FIntPoint VecIntPoint(0,0);
 	switch (EDirectType)
 	{
 	case EUnitDirectType::LEFT:
-		VecIntPoint.Y = 1;
+		VecIntPoint.Y = -1;
 		break;
 	case EUnitDirectType::RIGHT:
-		VecIntPoint.Y = -1;
+		VecIntPoint.Y = 1;
 		break;
 	case EUnitDirectType::FORWARD:
 		VecIntPoint.X = 1;

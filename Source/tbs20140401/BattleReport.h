@@ -43,7 +43,7 @@ struct FBattleReport
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	AMyUnit* Attacker;
+	AMyUnit* Attacker = nullptr;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	AMyUnit* Defender = nullptr;

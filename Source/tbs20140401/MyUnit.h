@@ -288,7 +288,7 @@ public:
 	void DoDeadAnim(FDeathCompleted Completed);
 	
 	bool IsDead()const{return MyRuntimeProperty.HP <= 0;}
-	void AddHP(int HP){MyRuntimeProperty.HP -= HP;}
+	void AddHP(int HP);
 
 	FRotator GetUnitForward()const;
 	bool IsFriend(int Side)const{return MyRuntimeProperty.UnitSide == Side;}

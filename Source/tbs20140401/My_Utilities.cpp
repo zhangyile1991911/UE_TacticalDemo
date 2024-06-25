@@ -118,6 +118,15 @@ FUnitColorDataAsset* GetUnitDataColor(const EUnitType unitType)
 	case EUnitType::Ranger:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("Ranger")),"");
 		break;
+	case EUnitType::Priest:
+		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("Priest")),"");
+		break;
+	case EUnitType::Bat:
+		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("Bat")),"");
+		break;
+	case EUnitType::Chicken:
+		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("Chicken")),"");
+		break;
 	case EUnitType::EnemyWarrior:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyWarrior")),"");
 		break;
@@ -129,6 +138,15 @@ FUnitColorDataAsset* GetUnitDataColor(const EUnitType unitType)
 		break;
 	case EUnitType::EnemyTank:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyTank")),"");
+		break;
+	case EUnitType::EnemyPriest:
+		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyPriest")),"");
+		break;
+	case EUnitType::EnemyChicken:
+		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyChicken")),"");
+		break;
+	case EUnitType::EnemyBat:
+		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyBat")),"");
 		break;
 	}
 	return row;
