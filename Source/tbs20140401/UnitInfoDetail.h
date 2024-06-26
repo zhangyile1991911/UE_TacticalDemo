@@ -136,6 +136,36 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UHorizontalBox> PortraitBox;
 
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UUnitInfoDetailPortrait> P1;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UUnitInfoDetailPortrait> P2;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UUnitInfoDetailPortrait> P3;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UUnitInfoDetailPortrait> P4;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UUnitInfoDetailPortrait> P5;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UUnitInfoDetailPortrait> P6;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UUnitInfoDetailPortrait> P7;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UUnitInfoDetailPortrait> P8;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UUnitInfoDetailPortrait> P9;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UUnitInfoDetailPortrait> P10;
+
 	UPROPERTY()
 	TArray<TObjectPtr<UTextBlock>> ArrayOfSkillName;
 	UPROPERTY()
@@ -145,9 +175,10 @@ protected:
 	
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+	virtual void NativeOnInitialized() override;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	TSoftClassPtr<UUnitInfoDetailPortrait> PortraitClassPtr;
+	// UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	// TSoftClassPtr<UUnitInfoDetailPortrait> PortraitClassPtr;
 	UPROPERTY()
 	TArray<TObjectPtr<UUnitInfoDetailPortrait>> PortraitPool;
 	UPROPERTY()

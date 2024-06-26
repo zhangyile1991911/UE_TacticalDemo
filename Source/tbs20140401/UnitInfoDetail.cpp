@@ -7,9 +7,11 @@
 #include "My_Utilities.h"
 #include "UnitAbilityAnim.h"
 #include "UnitInfoDetailPortrait.h"
+#include "Blueprint/WidgetTree.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
+#include "Components/Spacer.h"
 #include "Components/TextBlock.h"
 
 void UUnitInfoDetail::NativeConstruct()
@@ -34,21 +36,39 @@ void UUnitInfoDetail::NativeConstruct()
 	ArrayOfSkillName.Add(SKillNameF);
 	ArrayOfSkillName.Add(SKillNameG);
 
-	for(int i = 0;i < 5;i++)
+	PortraitPool.Add(P1);
+	PortraitPool.Add(P2);
+	PortraitPool.Add(P3);
+	PortraitPool.Add(P4);
+	PortraitPool.Add(P5);
+	PortraitPool.Add(P6);
+	PortraitPool.Add(P7);
+	PortraitPool.Add(P8);
+	PortraitPool.Add(P9);
+	PortraitPool.Add(P10);
+
+	for(int i = 0;i < PortraitPool.Num();i++)
 	{
-		if(!PortraitClassPtr.IsValid())
-		{
-			PortraitClassPtr.LoadSynchronous();
-		}
-		const auto Widget = CreateWidget(this,PortraitClassPtr.Get());
-		if(i <= 4)
-			Widget->SetPadding(FMargin(0,0,10,0));
-		PortraitBox->InsertChildAt(1+i,Widget);
-		
-		auto Portrait = Cast<UUnitInfoDetailPortrait>(Widget);
-		PortraitPool.Add(Portrait);	
+		PortraitPool[i]->SetVisibility(ESlateVisibility::Collapsed);
 	}
-	// ArrayOfUnitTeam.Reserve(8);
+	// for(int i = 0;i < 5;i++)
+	// {
+	// 	if(!PortraitClassPtr.IsValid())
+	// 	{
+	// 		PortraitClassPtr.LoadSynchronous();
+	// 	}
+	// 	const auto Widget = CreateWidget(this,PortraitClassPtr.Get());
+	//
+	// 	// if(i <= 4)
+	// 	// 	Widget->SetPadding(FMargin(0,0,10,0));
+	// 	
+	// 	// PortraitBox->InsertChildAt(1+i,Widget);
+	// 	// PortraitBox->InsertChildAt(1,Widget);
+	// 	PortraitBox->AddChild(Widget);
+	// 	auto Portrait = Cast<UUnitInfoDetailPortrait>(Widget);
+	// 	PortraitPool.Add(Portrait);	
+	// }
+	
 }
 
 void UUnitInfoDetail::NativeDestruct()
@@ -59,6 +79,11 @@ void UUnitInfoDetail::NativeDestruct()
 		PortraitBox->RemoveChild(PortraitPool[i]);	
 	}
 	PortraitPool.Empty();
+}
+
+void UUnitInfoDetail::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
 }
 
 void UUnitInfoDetail::ShowUnitDetailInfo(AMyUnit* MyUnit)
@@ -75,13 +100,31 @@ void UUnitInfoDetail::ShowUnitDetailInfo(AMyUnit* MyUnit)
 	switch (MyUnit->GetUnitType())
 	{
 	case EUnitType::Warrior:
+	case EUnitType::EnemyWarrior:
 		JobTxt->SetText(NSLOCTEXT("","","战士"));
 		break;
 	case EUnitType::Ranger:
+	case EUnitType::EnemyRanger:
 		JobTxt->SetText(NSLOCTEXT("","","游侠"));
 		break;
 	case EUnitType::Slime:
+	case EUnitType::EnemySlime:
 		JobTxt->SetText(NSLOCTEXT("","","史莱姆"));
+		break;
+	case EUnitType::Priest:
+	case EUnitType::EnemyPriest:
+		JobTxt->SetText(NSLOCTEXT("","","牧师"));
+		break;
+	case EUnitType::Chicken:
+	case EUnitType::EnemyChicken:
+		JobTxt->SetText(NSLOCTEXT("","","鸡"));
+		break;
+	case EUnitType::Bat:
+	case EUnitType::EnemyBat:
+		JobTxt->SetText(NSLOCTEXT("","","蝙蝠"));
+		break;
+	case EUnitType::EnemyTank:
+		JobTxt->SetText(NSLOCTEXT("","","坦克"));
 		break;
 	}
 
@@ -135,20 +178,21 @@ void UUnitInfoDetail::ShowUnitDetailInfo(AMyUnit* MyUnit)
 void UUnitInfoDetail::ShowUnitTeamInfo(TArray<TObjectPtr<AMyUnit>> UnitTeam,TObjectPtr<AMyUnit> FocusUnit)
 {
 	ArrayOfUnitTeam = UnitTeam;
-	if(ArrayOfUnitTeam.Num() > PortraitPool.Num())
-	{
-		int delta = ArrayOfUnitTeam.Num() - PortraitPool.Num();
-		int InsertIndex = PortraitPool.Num();
-		for(int i = 0;i < delta;i++)
-		{
-			auto Widget = CreateWidget(PortraitBox,PortraitClassPtr.Get());
-			if(i <= delta - 1)
-				Widget->SetPadding(FMargin(0,0,10,0));
-        	auto Portrait = Cast<UUnitInfoDetailPortrait>(Widget);
-        	PortraitPool.Add(Portrait);
-			PortraitBox->InsertChildAt(InsertIndex+i,Portrait);
-		}
-	}
+	
+	// if(ArrayOfUnitTeam.Num() > PortraitPool.Num())
+	// {
+	// 	int delta = ArrayOfUnitTeam.Num() - PortraitPool.Num();
+	// 	int InsertIndex = PortraitPool.Num();
+	// 	for(int i = 0;i < delta;i++)
+	// 	{
+	// 		auto Widget = CreateWidget(PortraitBox,PortraitClassPtr.Get());
+	// 		if(i <= delta - 1)
+	// 			Widget->SetPadding(FMargin(0,0,10,0));
+ //        	auto Portrait = Cast<UUnitInfoDetailPortrait>(Widget);
+ //        	PortraitPool.Add(Portrait);
+	// 		PortraitBox->InsertChildAt(InsertIndex+i,Portrait);
+	// 	}
+	// }
 
 	int i = 0;
 	for(;i < ArrayOfUnitTeam.Num();i++)
@@ -165,6 +209,7 @@ void UUnitInfoDetail::ShowUnitTeamInfo(TArray<TObjectPtr<AMyUnit>> UnitTeam,TObj
 		if(UnitTeam[x]->GetUniqueID() == FocusUnit->GetUniqueID())
 		{
 			FocusIndex = x;
+			PortraitPool[x]->DoHighlight();
 			break;
 		}
 	}
@@ -184,8 +229,12 @@ void UUnitInfoDetail::NextUnit()
 	{
 		NewIndex = 0;
 	}
-	FocusIndex = NewIndex;
+	
 	ShowUnitDetailInfo(ArrayOfUnitTeam[NewIndex]);
+
+	PortraitPool[FocusIndex]->DoUnhighlight();
+	FocusIndex = NewIndex;
+	PortraitPool[FocusIndex]->DoHighlight();
 }
 
 void UUnitInfoDetail::PreviousUnit()
@@ -195,6 +244,10 @@ void UUnitInfoDetail::PreviousUnit()
 	{
 		NewIndex = ArrayOfUnitTeam.Num() - 1;
 	}
-	FocusIndex = NewIndex;
+
 	ShowUnitDetailInfo(ArrayOfUnitTeam[NewIndex]);
+
+	PortraitPool[FocusIndex]->DoUnhighlight();
+	FocusIndex = NewIndex;
+	PortraitPool[FocusIndex]->DoHighlight();
 }

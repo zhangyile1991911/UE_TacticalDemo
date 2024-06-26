@@ -18,7 +18,7 @@ void UUnitInfoDetailPortrait::ShowUnitPortrait(EUnitType UnitType)
 	{
 		PortraitImage->SetBrushFromTexture(UnitData->Assets.Icon.Get());
 	}
-	
+	SetVisibility(ESlateVisibility::Visible);
 }
 
 void UUnitInfoDetailPortrait::HideUnitPortrait()

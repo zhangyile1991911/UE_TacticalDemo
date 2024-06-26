@@ -152,10 +152,6 @@ void UUPawnProcess_Normal::HandleLeftInput()
 	{
 		UnitDetailInfoPtr->PreviousUnit();
 	}
-	else
-	{
-		
-	}
 }
 
 void UUPawnProcess_Normal::HandleRightInput()
@@ -163,10 +159,6 @@ void UUPawnProcess_Normal::HandleRightInput()
 	if(bIsTab)
 	{
 		UnitDetailInfoPtr->NextUnit();
-	}
-	else
-	{
-		
 	}
 }
 
@@ -330,8 +322,15 @@ void UUPawnProcess_Normal::ShowOtherUnitRange(const FIntPoint& Point)
 	const auto TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(Point);
 	if(TileDataPtr == nullptr)return;
 	if(TileDataPtr->UnitOnTile == nullptr)return;
-	bool Friend = TileDataPtr->UnitOnTile->IsFriend(UnitInstance->GetUnitSide());
+
+	const TSet<FIntPoint>& Reachable = TileDataPtr->UnitOnTile->GetPathComponent()->GetTurnReachableTiles();
+	for (const auto& One : Reachable)
+	{
+		PawnInstance->GetMyGrid()->AddStateToTile(One,ETileState::OtherUnitWalkRange);
+		OtherUnitRange.Add(One);
+	}
 	
+	bool Friend = TileDataPtr->UnitOnTile->IsFriend(UnitInstance->GetUnitSide());
 	if(Friend == false)
 	{
 		const TSet<FIntPoint>& Assault = TileDataPtr->UnitOnTile->GetPathComponent()->GetTurnAssaultRangeTiles();
@@ -339,12 +338,6 @@ void UUPawnProcess_Normal::ShowOtherUnitRange(const FIntPoint& Point)
 		{
 			PawnInstance->GetMyGrid()->AddStateToTile(One,ETileState::OtherUnitAssaultRange);
 			OtherUnitRange.Add(One);		
-		}
-		const TSet<FIntPoint>& Reachable = TileDataPtr->UnitOnTile->GetPathComponent()->GetTurnReachableTiles();
-		for (const auto& One : Reachable)
-		{
-			PawnInstance->GetMyGrid()->AddStateToTile(One,ETileState::OtherUnitWalkRange);
-			OtherUnitRange.Add(One);
 		}
 	}
 }
