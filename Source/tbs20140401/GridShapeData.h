@@ -36,6 +36,8 @@ enum class ETileState
 	AbilityRange UMETA(DisplayName="AbilityRange"),
 	IndicatorRange UMETA(DisplayName="IndicatorRange"),
 	DangerousRange UMETA(DisplayName="DangerousRange"),
+	OtherUnitWalkRange UMETA(DisplayName="OtherUnitWalkRange"),
+	OtherUnitAssaultRange UMETA(DisplayName="OtherUnitAssaultRange"),
 	Invalid UMETA(DisplayName="Invalid")
 };
 

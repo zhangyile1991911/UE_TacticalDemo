@@ -103,7 +103,17 @@ FLinearColor AMyGridMeshInst::GetColorFromStates(const TSet<ETileState>& states,
 		isFilled = 1.0f;
 		return FLinearColor(0.55f,0.75f,0.351f);
 	}
-	
+
+	if(Result.Contains(ETileState::OtherUnitWalkRange))
+	{//みどり
+		isFilled = 0.6f;
+		return FLinearColor(0.3f,0.75f,0.251f);
+	}
+	if(Result.Contains(ETileState::OtherUnitAssaultRange))
+	{//赤
+		isFilled = 0.6f;
+		return FLinearColor(0.75f,0.19f,0.129f);
+	}
 	// if(states.Contains(ETileState::IsNeighbor))
 	// {
 	// 	isFilled = 1.0f;

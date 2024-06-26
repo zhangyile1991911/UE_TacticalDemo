@@ -74,6 +74,8 @@ void AMyGridVisual::InitializedGridVisual(AGrid* grid)
 		LayerBGridMeshInst->AddShowTileTypes(ETileState::Hovered);
 		LayerBGridMeshInst->AddShowTileTypes(ETileState::IndicatorRange);
 		LayerBGridMeshInst->AddShowTileTypes(ETileState::AbilityRange);
+		LayerBGridMeshInst->AddShowTileTypes(ETileState::OtherUnitWalkRange);
+		LayerBGridMeshInst->AddShowTileTypes(ETileState::OtherUnitAssaultRange);
 	});
 	ChildActor_LayerB->SetRelativeLocation(FVector(0,0,1.0f));
 	SetActorLocation(FVector::Zero());
@@ -102,12 +104,27 @@ void AMyGridVisual::AddTileVisual(FTileData data)
 	{
 		// UE_LOG(LogTemp,Log,TEXT("AMyGridVisual::UpdateTileVisual add x = %d y = %d"),data.Index.X,data.Index.Y)
 		// myGridMeshInst->UpdateInstance(data.Transform,data.Index,data.States);
+		// for(auto OneState : data.States)
+		// {
+		// 	if(LayerAGridMeshInst->ContainShowTileType(OneState))
+		// 	{
+		// 		LayerAGridMeshInst->AddInstance(data.Transform,data.Index,data.States);	
+		// 	}
+		// 	if(LayerBGridMeshInst->ContainShowTileType(OneState))
+		// 	{
+		// 		FTransform Other = data.Transform;
+		// 		FVector Location = Other.GetLocation();
+		// 		Location.Z += 5.0f;
+		// 		Other.SetLocation(Location);
+		// 		LayerBGridMeshInst->AddInstance(Other,data.Index,data.States);	
+		// 	}	
+		// }
 		LayerAGridMeshInst->AddInstance(data.Transform,data.Index,data.States);
 		FTransform Other = data.Transform;
 		FVector Location = Other.GetLocation();
 		Location.Z += 5.0f;
 		Other.SetLocation(Location);
-		LayerBGridMeshInst->AddInstance(Other,data.Index,data.States);
+		LayerBGridMeshInst->AddInstance(Other,data.Index,data.States);	
 	}
 }
 

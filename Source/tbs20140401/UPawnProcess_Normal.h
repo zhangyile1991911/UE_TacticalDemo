@@ -21,7 +21,8 @@ protected:
 	FIntPoint CurrentCursor;
 	//记录寻路的路径
 	TArray<FIntPoint> PreviousPathFinding;
-	
+
+	TArray<FIntPoint> OtherUnitRange;
 
 	TArray<TObjectPtr<AMyUnit>> ThreatenEnemies;
 	// TMap<uint32,TObjectPtr<AMyUnit>> RelatedEnemies;//影響をされた敵
@@ -46,6 +47,8 @@ protected:
 	void CheckMoveToDangerousRange(const FIntPoint& Previous,const FIntPoint& Current);
 	void ShowUnitWalkableRange();
 	void WaitCalculating();
+	void ShowOtherUnitRange(const FIntPoint&);
+	void ClearOtherUnitRange();
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn) override;
 	virtual void TickProcess() override;

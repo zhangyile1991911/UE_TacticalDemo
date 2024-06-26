@@ -19,6 +19,7 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
 	Super::EnterProcess(Pawn);
 
+	OtherUnitRange.Reserve(64);
 	// RelatedEnemies.Empty();
 	auto MyBattleSystem = PawnInstance->GetMyCombatSystem();
 	UnitInstance = MyBattleSystem->GetFirstUnit();
@@ -90,6 +91,8 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 		//更新威胁格子
 		CheckMoveToDangerousRange(Previous,CurrentCursor);
 	}
+
+	ShowOtherUnitRange(Next);
 	
 	ShowTargetUnitBriefInfo(CurrentCursor);
 	
@@ -319,6 +322,41 @@ void UUPawnProcess_Normal::WaitCalculating()
 		CheckDangerousRange();
 		CheckDangerousLine();
 	}
+}
+
+void UUPawnProcess_Normal::ShowOtherUnitRange(const FIntPoint& Point)
+{
+	ClearOtherUnitRange();
+	const auto TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(Point);
+	if(TileDataPtr == nullptr)return;
+	if(TileDataPtr->UnitOnTile == nullptr)return;
+	bool Friend = TileDataPtr->UnitOnTile->IsFriend(UnitInstance->GetUnitSide());
+	
+	if(Friend == false)
+	{
+		const TSet<FIntPoint>& Assault = TileDataPtr->UnitOnTile->GetPathComponent()->GetTurnAssaultRangeTiles();
+		for (const auto& One : Assault)
+		{
+			PawnInstance->GetMyGrid()->AddStateToTile(One,ETileState::OtherUnitAssaultRange);
+			OtherUnitRange.Add(One);		
+		}
+		const TSet<FIntPoint>& Reachable = TileDataPtr->UnitOnTile->GetPathComponent()->GetTurnReachableTiles();
+		for (const auto& One : Reachable)
+		{
+			PawnInstance->GetMyGrid()->AddStateToTile(One,ETileState::OtherUnitWalkRange);
+			OtherUnitRange.Add(One);
+		}
+	}
+}
+
+void UUPawnProcess_Normal::ClearOtherUnitRange()
+{
+	for(const auto& One : OtherUnitRange)
+	{
+		PawnInstance->GetMyGrid()->RemoveStateFromTile(One,ETileState::OtherUnitAssaultRange);
+		PawnInstance->GetMyGrid()->RemoveStateFromTile(One,ETileState::OtherUnitWalkRange);
+	}
+	OtherUnitRange.Empty();
 }
 
 void UUPawnProcess_Normal::ClearDangerousTiles()

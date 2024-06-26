@@ -34,5 +34,6 @@ public:
 	void UpdateInstanceTransform(const FIntPoint& index,const FTransform& Transform);
 	FLinearColor GetColorFromStates(const TSet<ETileState>& states,float& isFilled);
 	void AddShowTileTypes(ETileState TileState);
+	bool ContainShowTileType(ETileState TileState)const{return ShowTileTypes.Contains(TileState);}
 	
 };
