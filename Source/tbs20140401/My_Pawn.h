@@ -31,6 +31,7 @@ class USpringArmComponent;
 class UCameraComponent;
 struct FInputActionValue;
 class UInputAction;
+class APathPointInst;
 
 // DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTileTypeChanged,ETileType,newTipe);
 
@@ -88,6 +89,9 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AMyGridPathfinding> MyGridPathfinding;
 
+	UPROPERTY()
+	TObjectPtr<APathPointInst> MyPathPointInst;
+	
 	UPROPERTY()
 	TObjectPtr<AMyHUD> MyHUDInstance;
 	
@@ -201,6 +205,7 @@ public:
 	TObjectPtr<AMyUnit> GetUnitUnderCursor();
 
 	TObjectPtr<AMyUnit> GetSelectedUnit()const{return SelectedUnit;}
+	TObjectPtr<APathPointInst> GetMyPathPointInst()const{return MyPathPointInst;}
 
 	void LookAtGrid(const FIntPoint&);
 	void LookAtUnit(TObjectPtr<AMyUnit>);

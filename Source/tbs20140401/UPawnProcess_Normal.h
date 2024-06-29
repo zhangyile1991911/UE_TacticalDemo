@@ -20,7 +20,7 @@ protected:
 	//当前光标
 	FIntPoint CurrentCursor;
 	//记录寻路的路径
-	TArray<FIntPoint> PreviousPathFinding;
+	// TArray<FIntPoint> PreviousPathFinding;
 
 	TArray<FIntPoint> OtherUnitRange;
 
@@ -35,6 +35,7 @@ protected:
 
 	int Calucating = 0;
 	bool bIsTab = false;
+	bool bIsRestore = false;
 protected:
 	void ClearPathFinding();
 	void ClearWalkableTiles();

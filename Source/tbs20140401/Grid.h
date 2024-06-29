@@ -63,7 +63,7 @@ protected:
 	virtual void BeginPlay() override;
 	
 	FQuat GetTileRotationFromGridIndex(FIntPoint GridIndex);
-	FVector GetTileLocationFromGridIndex(FIntPoint GridIndex);
+	
 	ETileType TraceForGround(FTransform& location);
 	void SpawnGrid();
 public:
@@ -86,6 +86,7 @@ public:
 	FVector GetCursorLocationOnGrid(TObjectPtr<APlayerController> playerIndex,bool traceForGround,bool traceForEmptySpace);
 	FIntPoint GetTileIndexUnderCursor(TObjectPtr<APlayerController> playerIndex,bool traceForGround,bool traceForEmptySpace);
 	FIntPoint GetTileIndexFromWorldLocation(FVector location);
+	FVector GetTileLocationFromGridIndex(FIntPoint GridIndex);
 	
 	void SetUseEnvironment(bool bis);
 	void SetOffsetFromGround(float offset);

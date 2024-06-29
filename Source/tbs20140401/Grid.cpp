@@ -484,7 +484,7 @@ void AGrid::AddStateToTile(FIntPoint index, ETileState stat)
 		{
 			result->States.Add(stat);
 			// UE_LOG(LogTemp,Log,TEXT("result->States.AddUnique(stat) >= 0"))
-			GridVisual->UpdateTileVisual(*result,EGriUpdateMode::UpdateState);
+			GridVisual->UpdateTileVisual(result,EGriUpdateMode::UpdateState);
 		}
 	}
 }
@@ -496,7 +496,7 @@ void AGrid::RemoveStateFromTile(FIntPoint index, ETileState stat)
 	{
 		if(result->States.Remove(stat) > 0)
 		{
-			GridVisual->UpdateTileVisual(*result,EGriUpdateMode::UpdateState);
+			GridVisual->UpdateTileVisual(result,EGriUpdateMode::UpdateState);
 		}
 	}
 }
@@ -508,7 +508,7 @@ void AGrid::RemoveStateAllTile(ETileState stat)
 		bool b = pair.Value.States.Contains(stat);
 		if(!b)continue;
 		pair.Value.States.Remove(stat);
-		GridVisual->UpdateTileVisual(pair.Value,EGriUpdateMode::UpdateState);
+		GridVisual->UpdateTileVisual(&pair.Value,EGriUpdateMode::UpdateState);
 	}
 }
 
@@ -594,7 +594,7 @@ void AGrid::SetTileTypeByIndex(FIntPoint index, ETileType tileType)
 	else
 	{
 		pData->TileType = tileType;
-		GridVisual->UpdateTileVisual(*pData,EGriUpdateMode::UpdateTileType);
+		GridVisual->UpdateTileVisual(pData,EGriUpdateMode::UpdateTileType);
 		UE_LOG(LogTemp,Log,TEXT("index = %s set tile type = %d"),*index.ToString(),tileType)
 	}
 }
@@ -625,7 +625,7 @@ void AGrid::IncreaseDecreaseTileHeight(const FIntPoint& index,bool increase)
 	curLocation.Z += GridTileSize.Z * (increase? 1.0f : -1.0f);
 	
 	data->Transform.SetLocation(curLocation);
-	GridVisual->UpdateTileVisual(*data,EGriUpdateMode::UpdateTransform);
+	GridVisual->UpdateTileVisual(data,EGriUpdateMode::UpdateTransform);
 
 	if(data->UnitOnTile)
 	{

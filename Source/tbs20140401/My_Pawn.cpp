@@ -18,6 +18,7 @@
 #include "UPawnProcess_Normal.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyHUD.h"
+#include "PathPointInst.h"
 #include "PawnProcess_BeforeTurn.h"
 #include "PawnProcess_CalcAnim.h"
 #include "PawnProcess_Idle.h"
@@ -140,6 +141,9 @@ void AMy_Pawn::BeginPlay()
 
 	actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyGridPathfinding::StaticClass());
 	MyGridPathfinding = Cast<AMyGridPathfinding>(actor);
+
+	actor = UGameplayStatics::GetActorOfClass(GetWorld(),APathPointInst::StaticClass());
+	MyPathPointInst = Cast<APathPointInst>(actor);
 	// OnTileTYpeChanged.AddDynamic(this,&AMy_Pawn::SetCurrentTileType);
 
 	NormalProcess = NewObject<UUPawnProcess_Normal>(this);

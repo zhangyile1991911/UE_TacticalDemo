@@ -28,7 +28,7 @@ void AShadowUnit::BeginPlay()
 	
 }
 
-void AShadowUnit::RefreshUnit(TObjectPtr<AMyUnit> Master,UClass* AnimBP)
+void AShadowUnit::RefreshUnit(TObjectPtr<AMyUnit> Master,UClass* AnimBP,FUnitColorDataAsset* DataAssetPtr)
 {
 	MyMaster = Master;
 	EUnitType UnitType = MyMaster->GetUnitType();
@@ -49,6 +49,58 @@ void AShadowUnit::RefreshUnit(TObjectPtr<AMyUnit> Master,UClass* AnimBP)
 		SkeletalMeshComponent->SetSkeletalMesh(skeletalMesh);
 	}
 	SkeletalMeshComponent->SetAnimInstanceClass(AnimBP);
+
+	if(DataAssetPtr == nullptr)return;
+	
+	if(!DataAssetPtr->Slot1.IsValid())
+	{
+		auto m1 = DataAssetPtr->Slot1.LoadSynchronous();
+		SkeletalMeshComponent->SetMaterial(0,m1);
+	}
+	else
+	{
+		SkeletalMeshComponent->SetMaterial(0,DataAssetPtr->Slot1.Get());
+	}
+	
+	if(!DataAssetPtr->Slot2.IsValid())
+	{
+		auto m1 = DataAssetPtr->Slot2.LoadSynchronous();
+		SkeletalMeshComponent->SetMaterial(1,m1);
+	}
+	else
+	{
+		SkeletalMeshComponent->SetMaterial(1,DataAssetPtr->Slot2.Get());
+	}
+	
+	if(!DataAssetPtr->Slot3.IsValid())
+	{
+		auto m1 = DataAssetPtr->Slot3.LoadSynchronous();
+		SkeletalMeshComponent->SetMaterial(2,m1);
+	}
+	else
+	{
+		SkeletalMeshComponent->SetMaterial(2,DataAssetPtr->Slot3.Get());
+	}
+	
+	if(!DataAssetPtr->Slot4.IsValid())
+	{
+		auto m1 = DataAssetPtr->Slot4.LoadSynchronous();
+		SkeletalMeshComponent->SetMaterial(3,m1);
+	}
+	else
+	{
+		SkeletalMeshComponent->SetMaterial(3,DataAssetPtr->Slot4.Get());
+	}
+	
+	if(!DataAssetPtr->Slot5.IsValid())
+	{
+		auto m1 = DataAssetPtr->Slot5.LoadSynchronous();
+		SkeletalMeshComponent->SetMaterial(4,m1);
+	}
+	else
+	{
+		SkeletalMeshComponent->SetMaterial(4,DataAssetPtr->Slot5.Get());
+	}
 	// SetActorRotation(FRotator(0,360-90,0));
 
 	SkeletalMeshComponent->SetVectorParameterValueOnMaterials(TEXT("ColorMultiply"),FVector(1.0f,1.0f,1.0f));

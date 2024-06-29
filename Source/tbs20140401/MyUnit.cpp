@@ -87,7 +87,7 @@ void AMyUnit::OnConstruction(const FTransform& Transform)
 	MyChildActor->CreateChildActor([this](AActor* Actor)
 	{
 		MyShadowUnit = Cast<AShadowUnit>(Actor);	
-		MyShadowUnit->RefreshUnit(this,nullptr);
+		MyShadowUnit->RefreshUnit(this,nullptr,nullptr);
 		MyShadowUnit->SetHidden(true);
 	});
 
@@ -287,7 +287,7 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	
 	// SetActorRotation(FRotator(0,360-90,0));
 
-	if(MyShadowUnit)MyShadowUnit->RefreshUnit(this,bp);
+	
 	
 	UpdateHoveredAndSelected();
 
@@ -309,94 +309,6 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 		});
 				
 		OwnAbilityActorComponents.Add(AAbilityActor);
-		// switch (AbilityData.SkillId)
-		// {
-		// case 10001:
-		// 	{
-		// 		// auto Ability = NewObject<UUnitAbility_Idle>(this,TEXT("Idle"));
-		// 		// Ability->SetSkillData(AbilityData,this);
-		// 		// OwnAbilityList.Add(Ability);
-		// 		
-		// 	}
-		// 	break;
-		// case 10002:
-		// case 20001:
-		// case 30001:
-		// 	{
-		// 		// auto Ability = NewObject<UUnitAbility_NormalAtk>(this,TEXT("NormalAttack"));
-		// 		// Ability->SetSkillData(AbilityData,this);
-		// 		// OwnAbilityList.Add(Ability);
-		// 		
-		// 		UChildActorComponent* AbilityActor = NewObject<UChildActorComponent>(this,UChildActorComponent::StaticClass(),TEXT("NormalAttackActorAnim"));
-		// 		AbilityActor->SetupAttachment(RootComponent);
-		// 		AbilityActor->SetChildActorClass(AbilityData.SkillAnim.Get());
-		// 		AbilityActor->RegisterComponent();
-		// 		AbilityActor->CreateChildActor([this,AbilityData](AActor* Actor)
-		// 		{
-		// 			AUnitAbilityAnim* Ability = Cast<AUnitAbilityAnim>(Actor);
-		// 			Ability->SetSkillData(AbilityData,this);
-		// 			OwnAbilityAnimList.Add(Ability);
-		// 		});
-		// 		OwnAbilityActorComponents.Add(AbilityActor);
-		// 	}
-		// 	break;
-		// case 30002:
-		// 	{
-		// 		UChildActorComponent* AbilityActor = NewObject<UChildActorComponent>(this,UChildActorComponent::StaticClass(),TEXT("AreaAttackActorAnim"));
-		// 		AbilityActor->SetupAttachment(RootComponent);
-		// 		AbilityActor->SetChildActorClass(AbilityData.SkillAnim.Get());
-		// 		AbilityActor->RegisterComponent();
-		// 		AbilityActor->CreateChildActor([this,AbilityData](AActor* Actor)
-		// 		{
-		// 			AUnitAbilityAnim* Ability = Cast<AUnitAbilityAnim>(Actor);
-		// 			Ability->SetSkillData(AbilityData,this);
-		// 			OwnAbilityAnimList.Add(Ability);
-		// 		});
-		// 		OwnAbilityActorComponents.Add(AbilityActor);
-		// 	}
-		// 	break;
-		// case 10003:
-		// 	{
-		// 		// auto Ability = NewObject<UUnitAbility_NormalAtk>(this,TEXT("NormalAttack"));
-		// 		// Ability->SetSkillData(AbilityData,this);
-		// 		// OwnAbilityList.Add(Ability);
-		// 		
-		// 		UChildActorComponent* AbilityActor = NewObject<UChildActorComponent>(this,UChildActorComponent::StaticClass(),TEXT("CooperateActorAnim"));
-		// 		AbilityActor->SetupAttachment(RootComponent);
-		// 		AbilityActor->SetChildActorClass(AbilityData.SkillAnim.Get());
-		// 		AbilityActor->RegisterComponent();
-		// 		AbilityActor->CreateChildActor([this,AbilityData](AActor* Actor)
-		// 		{
-		// 			AUnitAbilityAnim* Ability = Cast<AUnitAbilityAnim>(Actor);
-		// 			Ability->SetSkillData(AbilityData,this);
-		// 			OwnAbilityAnimList.Add(Ability);
-		// 		});
-		// 		OwnAbilityActorComponents.Add(AbilityActor);
-		// 	}
-		// 	break;
-		// case 10005:
-		// 	{
-		// 		UChildActorComponent* AbilityActor = NewObject<UChildActorComponent>(this,UChildActorComponent::StaticClass(),TEXT("ThrowActorAnim"));
-		// 		AbilityActor->SetupAttachment(RootComponent);
-		// 		AbilityActor->SetChildActorClass(AbilityData.SkillAnim.Get());
-		// 		AbilityActor->RegisterComponent();
-		// 		AbilityActor->CreateChildActor([this,AbilityData](AActor* Actor)
-		// 		{
-		// 			AUnitAbilityAnim* Ability = Cast<AUnitAbilityAnim>(Actor);
-		// 			Ability->SetSkillData(AbilityData,this);
-		// 			OwnAbilityAnimList.Add(Ability);
-		// 		});
-		// 		OwnAbilityActorComponents.Add(AbilityActor);
-		// 	}
-		// 	break;
-		// default:
-		// 	{
-		// 		UE_LOG(LogTemp,Log,TEXT("error skillid %d"),UnitData->Ability[i].SkillId)
-		// 		// auto OneAbility = NewObject<UUnitAbility>(this);
-		// 		// OwnAbilityList.Add(OneAbility);	
-		// 	}
-		// 	break;
-		// }
 	}
 
 	// int MaxRange = 0;
@@ -461,6 +373,7 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 		MySkeletalMeshComponent->SetMaterial(4,Color->Slot5.Get());
 	}
 	
+	if(MyShadowUnit)MyShadowUnit->RefreshUnit(this,bp,Color);
 
 }
 
@@ -797,11 +710,11 @@ void AMyUnit::FinishTurn(bool bAsync)
 	if(bAsync)
 	{
 		FUnitWalkRangeCompleted xxx;
-		PathComponent->UnitWalkablePathAsync(xxx);	
+		PathComponent->UnitWalkablePathAsync(0,xxx);	
 	}
 	else
 	{
-		PathComponent->UnitWalkablePath();
+		PathComponent->UnitWalkablePath(0);
 	}
 }
 

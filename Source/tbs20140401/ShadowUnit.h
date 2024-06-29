@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "ShadowUnit.generated.h"
 
+struct FUnitColorDataAsset;
 class AMyUnit;
 
 UCLASS()
@@ -29,7 +30,7 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void RefreshUnit(TObjectPtr<AMyUnit> Master,UClass* AnimBP);
+	void RefreshUnit(TObjectPtr<AMyUnit> Master,UClass* AnimBP,FUnitColorDataAsset* DataAssetPtr);
 	void TurnLeft();
 	void TurnRight();
 	void TurnForward();

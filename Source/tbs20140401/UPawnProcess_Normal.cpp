@@ -9,6 +9,7 @@
 #include "MyCombatSystem.h"
 #include "My_Pawn.h"
 #include "MyHUD.h"
+#include "PathPointInst.h"
 #include "UGameUI_UnitBreifInfo.h"
 #include "UnitInfoDetail.h"
 #include "UnitPathComponent.h"
@@ -87,10 +88,13 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 		FUnitPathFindingCompleted Completed;
 		Completed.BindUObject(this,&UUPawnProcess_Normal::ShowWalkPath);
 		UnitInstance->GetPathComponent()->UnitFindPathAsync(CurrentCursor,Completed);
-
-		//更新威胁格子
-		CheckMoveToDangerousRange(Previous,CurrentCursor);
 	}
+	else
+	{
+		PawnInstance->GetMyPathPointInst()->HidePathPoint();
+	}
+	//更新威胁格子
+	CheckMoveToDangerousRange(Previous,CurrentCursor);
 
 	ShowOtherUnitRange(Next);
 	
@@ -189,15 +193,16 @@ void UUPawnProcess_Normal::ExitProcess()
 	// UnitInstance->HideShadowUnit();
 	PawnInstance->GetMyCombatSystem()->HideUnitThreaten();
 	UnitDetailInfoPtr->HideUnitTeamInfo();
+	PawnInstance->GetMyPathPointInst()->HidePathPoint();
 }
 
 void UUPawnProcess_Normal::ClearPathFinding()
 {
-	for(const FIntPoint& one : PreviousPathFinding)
-	{
-		PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::PathFinding);
-	}
-	PreviousPathFinding.Empty();
+	// for(const FIntPoint& one : PreviousPathFinding)
+	// {
+	// 	PawnInstance->GetMyGrid()->RemoveStateFromTile(one,ETileState::PathFinding);
+	// }
+	// PreviousPathFinding.Empty();
 }
 
 void UUPawnProcess_Normal::ClearWalkableTiles()
@@ -211,12 +216,13 @@ void UUPawnProcess_Normal::ClearWalkableTiles()
 void UUPawnProcess_Normal::ShowWalkPath(TArray<FIntPoint> Path)
 {
 	ClearPathFinding();
-	PreviousPathFinding = MoveTemp(Path);
-	for(const FIntPoint& one : PreviousPathFinding)
-	{
-		PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::PathFinding);
-	}
-	UnitInstance->SaveWalkPath(PreviousPathFinding);
+	// PreviousPathFinding = MoveTemp(Path);
+	// for(const FIntPoint& one : PreviousPathFinding)
+	// {
+	// 	PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::PathFinding);
+	// }
+	UnitInstance->SaveWalkPath(Path);
+	PawnInstance->GetMyPathPointInst()->ShowPathPoint(Path,PawnInstance->GetMyGrid());
 }
 
 void UUPawnProcess_Normal::ShowTargetUnitBriefInfo(FIntPoint Index)
@@ -282,28 +288,50 @@ void UUPawnProcess_Normal::HideTargetUnitBriefInfo()
 void UUPawnProcess_Normal::CheckMoveToDangerousRange(const FIntPoint& Previous,const FIntPoint& Current)
 {
 	if(Previous == Current)return;
-	//今回の移動は敵の移動範囲を踏むと　敵の移動範囲をやり直す
-	for(int i = 0;i < ThreatenEnemies.Num();i++)
+	if(UnitInstance->GetPathComponent()->IsMoveInReachableTiles(Current))
 	{
-		const auto EnemyPtr = ThreatenEnemies[i];
-		const bool bIsMoveIn = EnemyPtr->GetPathComponent()->IsMoveInReachableTiles(Current);
-		const bool bIsPrevMoveIn = EnemyPtr->GetPathComponent()->IsMoveInReachableTiles(Previous);
-		if(bIsMoveIn)
+		//今回の移動は敵の移動範囲を踏むと　敵の移動範囲をやり直す
+		for(int i = 0;i < ThreatenEnemies.Num();i++)
 		{
-			Calucating++;
-			FUnitWalkRangeCompleted Cal;
-			Cal.BindUObject(this,&UUPawnProcess_Normal::WaitCalculating);
-			EnemyPtr->GetPathComponent()->UnitWalkablePathAsync(Cal);
+			const auto EnemyPtr = ThreatenEnemies[i];
+			const bool bIsMoveIn = EnemyPtr->GetPathComponent()->IsMoveInReachableTiles(Current);
+			const bool bIsPrevMoveIn = EnemyPtr->GetPathComponent()->IsMoveInReachableTiles(Previous);
+			if(bIsMoveIn || bIsPrevMoveIn)
+			{
+				Calucating++;
+				FUnitWalkRangeCompleted Cal;
+				Cal.BindUObject(this,&UUPawnProcess_Normal::WaitCalculating);
+				EnemyPtr->GetPathComponent()->UnitWalkablePathAsync(UnitInstance->GetUniqueID(),Cal);
+			}
 		}
-		else if(bIsPrevMoveIn)
-		{
-			Calucating++;
-			FUnitWalkRangeCompleted Cal;
-			Cal.BindUObject(this,&UUPawnProcess_Normal::WaitCalculating);
-			EnemyPtr->GetPathComponent()->UnitWalkablePathAsync(Cal);
-		}
+		bIsRestore = false;
 	}
-	if(Calucating <= 0)CheckDangerousLine();
+	else
+	{
+		if(bIsRestore)return;
+		//当选择的格子走出了 可移动范围，那么威胁格子就还原成最初的范围
+		ThreatenEnemies = PawnInstance->GetMyCombatSystem()->GetThreatenEnemies(UnitInstance);
+	
+		for(int i = 0;i < ThreatenEnemies.Num();i++)
+		{
+			const auto Enemy = ThreatenEnemies[i];
+		
+			const auto& r = Enemy->GetPathComponent()->GetTurnReachableTiles();
+			DangerousTiles.Append(r.Intersect(UnitInstance->GetPathComponent()->GetReachableTiles()));	
+		
+			const auto& a = Enemy->GetPathComponent()->GetTurnAssaultRangeTiles();
+			DangerousTiles.Append(a.Intersect(UnitInstance->GetPathComponent()->GetReachableTiles()));	
+		}
+
+		for(const auto& one : DangerousTiles)
+		{
+			PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::DangerousRange);
+		}
+		bIsRestore = true;
+	}
+	
+	if(Calucating <= 0)
+		CheckDangerousLine();
 }
 
 void UUPawnProcess_Normal::WaitCalculating()
@@ -322,6 +350,7 @@ void UUPawnProcess_Normal::ShowOtherUnitRange(const FIntPoint& Point)
 	const auto TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(Point);
 	if(TileDataPtr == nullptr)return;
 	if(TileDataPtr->UnitOnTile == nullptr)return;
+	if(TileDataPtr->UnitOnTile == UnitInstance)return;
 
 	const TSet<FIntPoint>& Reachable = TileDataPtr->UnitOnTile->GetPathComponent()->GetTurnReachableTiles();
 	for (const auto& One : Reachable)
@@ -362,7 +391,7 @@ void UUPawnProcess_Normal::ClearDangerousTiles()
 }
 
 void UUPawnProcess_Normal::CheckDangerousRange()
-{
+{//展示受到威胁的格子
 	ClearDangerousTiles();
 	
 	PawnInstance->GetMyCombatSystem()->HideUnitThreaten();
@@ -388,20 +417,25 @@ void UUPawnProcess_Normal::CheckDangerousRange()
 
 void UUPawnProcess_Normal::CheckDangerousLine()
 {
+	if(!UnitInstance->GetPathComponent()->IsMoveInReachableTiles(CurrentCursor))
+	{
+		PawnInstance->GetMyCombatSystem()->HideUnitThreaten();
+		return;
+	}
 	auto TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
 	TArray<FThreatenInfo> Infos;
 	for(int i = 0;i < ThreatenEnemies.Num();i++)
 	{
 		const auto Enemy = ThreatenEnemies[i];
 		
-		const auto& r = Enemy->GetPathComponent()->GetReachableTiles();
+		const auto& r = Enemy->GetPathComponent()->GetTurnReachableTiles();
 		if(r.Contains(CurrentCursor))
 		{
 			Infos.Add(FThreatenInfo{Enemy->GetActorLocation(),TileDataPtr->Transform.GetLocation()});
 			continue;
 		}
 		
-		const auto& a = Enemy->GetPathComponent()->GetAssaultRangeTiles();
+		const auto& a = Enemy->GetPathComponent()->GetTurnAssaultRangeTiles();
 		if(a.Contains(CurrentCursor))
 		{
 			Infos.Add(FThreatenInfo{Enemy->GetActorLocation(),TileDataPtr->Transform.GetLocation()});
@@ -415,7 +449,7 @@ void UUPawnProcess_Normal::CheckDangerousLine()
 
 void UUPawnProcess_Normal::ShowUnitWalkableRange()
 {
-	UnitInstance->GetPathComponent()->UnitWalkablePath();
+	UnitInstance->GetPathComponent()->UnitWalkablePath(UnitInstance->GetUniqueID());
 	const auto& UnitWalkableTiles = UnitInstance->GetPathComponent()->GetTurnReachableTiles();
 	for(const FIntPoint& one : UnitWalkableTiles)
 	{

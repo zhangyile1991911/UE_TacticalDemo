@@ -16,7 +16,7 @@ UUnitPathComponent::UUnitPathComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 }
@@ -355,7 +355,7 @@ bool UUnitPathComponent::CheckIsBorder(const FIntPoint& Index,const TSet<FIntPoi
 	return bIsBorder;
 }
 
-void UUnitPathComponent::UnitWalkablePath(bool bIsTemp)
+void UUnitPathComponent::UnitWalkablePath(uint32 CurrentTurnUnitUniqueId,bool bIsTemp)
 {
 	PathFindingMap.Empty();
 
@@ -381,8 +381,17 @@ void UUnitPathComponent::UnitWalkablePath(bool bIsTemp)
 			if(TileDataPtr == nullptr)continue;
 			if(!IsTileTypeWalkable(TileDataPtr->TileType))continue;
 			if(TileDataPtr->States.Contains(ETileState::Selected))continue;
-			if(TileDataPtr->UnitOnTile != nullptr &&
-				TileDataPtr->UnitOnTile->IsFriend(ParentPtr->GetUnitSide())==false)continue;
+			if(TileDataPtr->UnitOnTile != nullptr)
+			{
+				if(TileDataPtr->UnitOnTile->IsFriend(ParentPtr->GetUnitSide())==false)
+				{//是敌人
+					if(TileDataPtr->UnitOnTile->GetUniqueID() != CurrentTurnUnitUniqueId)
+					{//但不是当前行动回合的敌人，只能跳过
+						continue;
+					}	
+				}
+			}
+				
 			//高低差
 			float z = TileDataPtr->Transform.GetLocation().Z;
 			const auto CenterTileDataPtr = ParentPtr->MyGrid->GetTileDataByIndex(center);
@@ -435,11 +444,11 @@ void UUnitPathComponent::UnitWalkablePath(bool bIsTemp)
 	UnitAssaultRange(bIsTemp);
 }
 
-void UUnitPathComponent::UnitWalkablePathAsync(FUnitWalkRangeCompleted Completed)
+void UUnitPathComponent::UnitWalkablePathAsync(uint32 CurrentTurnUnitUniqueId,FUnitWalkRangeCompleted Completed)
 {
-	Async(EAsyncExecution::TaskGraphMainThread,[this,Completed]()
+	Async(EAsyncExecution::TaskGraphMainThread,[this,CurrentTurnUnitUniqueId,Completed]()
 	{
-		UnitWalkablePath(true);
+		UnitWalkablePath(CurrentTurnUnitUniqueId,true);
 		if(Completed.IsBound())
 		{
 			// TSet<FIntPoint> Result;
@@ -461,12 +470,15 @@ bool UUnitPathComponent::IsMoveInReachableTiles(const FIntPoint& one) const
 
 bool UUnitPathComponent::IsAssaultRangeTiles(const FIntPoint& one) const
 {
-	return AssaultRangeTiles.Contains(one);
+	if(AssaultRangeTiles.Contains(one))
+		return true;
+	if(TurnAssaultRangeTiles.Contains(one))
+		return true;
+	return false;
 }
 
 void UUnitPathComponent::AddAssaultRange(const FIntPoint& Point,bool bIsTemp)
 {
-	
 	// UE_LOG(LogTemp,Log,TEXT("AddAssaultRange %d %d"),Point.X,Point.Y)
 	if(bIsTemp)
 	{
@@ -511,56 +523,63 @@ void UUnitPathComponent::UnitAssaultRange(bool bIsTemp)
 	{
 		for (const auto& BorderIndex : BorderTileIndexes)
 		{
-			FIntPoint Direction = BorderIndex - ParentPtr->GridIndex;
+			// FIntPoint Direction = BorderIndex - ParentPtr->GridIndex;
 			//如果是上下 左右 就往前扩一格
-			
-			if( FMathf::Abs(Direction.X) > 0 && FMathf::Abs(Direction.Y) >0)
-			{//说明是斜着走
-				if(Direction.X > 0 && Direction.Y > 0)
-				{//右上
-					FIntPoint Up(BorderIndex.X +i,BorderIndex.Y);
-					FIntPoint Right(BorderIndex.X ,BorderIndex.Y+i);
-					AddAssaultRange(Up,bIsTemp);
-					AddAssaultRange(Right,bIsTemp);
-				}
-				else if(Direction.X > 0 && Direction.Y < 0)
-				{//左上
-					FIntPoint Up(BorderIndex.X +i,BorderIndex.Y);
-					FIntPoint Left(BorderIndex.X ,BorderIndex.Y-i);
-					AddAssaultRange(Up,bIsTemp);
-					AddAssaultRange(Left,bIsTemp);
-				}
-				else if(Direction.X < 0 && Direction.Y < 0)
-				{//左下
-					FIntPoint Down(BorderIndex.X - i,BorderIndex.Y);
-					FIntPoint Left(BorderIndex.X ,BorderIndex.Y-i);
-					AddAssaultRange(Down,bIsTemp);
-					AddAssaultRange(Left,bIsTemp);
-				}
-				else
-				{//右下
-					FIntPoint Down(BorderIndex.X - i,BorderIndex.Y);
-					FIntPoint Right(BorderIndex.X ,BorderIndex.Y-i);
-					AddAssaultRange(Down,bIsTemp);
-					AddAssaultRange(Right,bIsTemp);
-				}
-			}
-			else if(Direction.X > 0)
-			{//上
-				AddAssaultRange(FIntPoint(BorderIndex.X+i,BorderIndex.Y),bIsTemp);
-			}
-			else if(Direction.X < 0)
-			{//下
-				AddAssaultRange(FIntPoint(BorderIndex.X-i,BorderIndex.Y),bIsTemp);
-			}
-			else if(Direction.Y > 0)
-			{//右
-				AddAssaultRange(FIntPoint(BorderIndex.X,BorderIndex.Y+i),bIsTemp);
-			}
-			else if(Direction.Y < 0)
-			{//左
-				AddAssaultRange(FIntPoint(BorderIndex.X,BorderIndex.Y-i),bIsTemp);
-			}
+			FIntPoint Up(BorderIndex.X +i,BorderIndex.Y);
+			FIntPoint Right(BorderIndex.X ,BorderIndex.Y+i);
+			FIntPoint Left(BorderIndex.X ,BorderIndex.Y-i);
+			FIntPoint Down(BorderIndex.X - i,BorderIndex.Y);
+			AddAssaultRange(Up,bIsTemp);
+			AddAssaultRange(Right,bIsTemp);
+			AddAssaultRange(Down,bIsTemp);
+			AddAssaultRange(Left,bIsTemp);
+			// if( FMathf::Abs(Direction.X) > 0 && FMathf::Abs(Direction.Y) >0)
+			// {//说明是斜着走
+			// 	if(Direction.X > 0 && Direction.Y > 0)
+			// 	{//右上
+			// 		FIntPoint Up(BorderIndex.X +i,BorderIndex.Y);
+			// 		FIntPoint Right(BorderIndex.X ,BorderIndex.Y+i);
+			// 		AddAssaultRange(Up,bIsTemp);
+			// 		AddAssaultRange(Right,bIsTemp);
+			// 	}
+			// 	else if(Direction.X > 0 && Direction.Y < 0)
+			// 	{//左上
+			// 		FIntPoint Up(BorderIndex.X +i,BorderIndex.Y);
+			// 		FIntPoint Left(BorderIndex.X ,BorderIndex.Y-i);
+			// 		AddAssaultRange(Up,bIsTemp);
+			// 		AddAssaultRange(Left,bIsTemp);
+			// 	}
+			// 	else if(Direction.X < 0 && Direction.Y < 0)
+			// 	{//左下
+			// 		FIntPoint Down(BorderIndex.X - i,BorderIndex.Y);
+			// 		FIntPoint Left(BorderIndex.X ,BorderIndex.Y-i);
+			// 		AddAssaultRange(Down,bIsTemp);
+			// 		AddAssaultRange(Left,bIsTemp);
+			// 	}
+			// 	else
+			// 	{//右下
+			// 		FIntPoint Down(BorderIndex.X - i,BorderIndex.Y);
+			// 		FIntPoint Right(BorderIndex.X ,BorderIndex.Y-i);
+			// 		AddAssaultRange(Down,bIsTemp);
+			// 		AddAssaultRange(Right,bIsTemp);
+			// 	}
+			// }
+			// else if(Direction.X > 0)
+			// {//上
+			// 	AddAssaultRange(FIntPoint(BorderIndex.X+i,BorderIndex.Y),bIsTemp);
+			// }
+			// else if(Direction.X < 0)
+			// {//下
+			// 	AddAssaultRange(FIntPoint(BorderIndex.X-i,BorderIndex.Y),bIsTemp);
+			// }
+			// else if(Direction.Y > 0)
+			// {//右
+			// 	AddAssaultRange(FIntPoint(BorderIndex.X,BorderIndex.Y+i),bIsTemp);
+			// }
+			// else if(Direction.Y < 0)
+			// {//左
+			// 	AddAssaultRange(FIntPoint(BorderIndex.X,BorderIndex.Y-i),bIsTemp);
+			// }
 		}
 	}
 	if(!bIsTemp)

@@ -129,40 +129,40 @@ void AMyGridVisual::AddTileVisual(FTileData data)
 }
 
 
-void AMyGridVisual::UpdateTileVisual(FTileData data,EGriUpdateMode mode)//0 state 1 tiletype 2 transform
+void AMyGridVisual::UpdateTileVisual(const FTileData* data,EGriUpdateMode mode)//0 state 1 tiletype 2 transform
 {
 	// if(myGridMeshInst != nullptr)
 	// {
 	// 	// UE_LOG(LogTemp,Log,TEXT("AMyGridVisual::UpdateTileVisual remove x = %d y = %d"),data.Index.X,data.Index.Y)
 	// 	myGridMeshInst->RemoveInstance(data.Index);	
 	// }
-	if(data.TileType == ETileType::None)
+	if(data->TileType == ETileType::None)
 	{
-		LayerAGridMeshInst->RemoveInstance(data.Index);
-		LayerBGridMeshInst->RemoveInstance(data.Index);
+		LayerAGridMeshInst->RemoveInstance(data->Index);
+		LayerBGridMeshInst->RemoveInstance(data->Index);
 		return;
 	}
 	if(mode == EGriUpdateMode::UpdateState)
 	{
-		if(IsTileTypeWalkable(data.TileType))
+		if(IsTileTypeWalkable(data->TileType))
 		{
 			// UE_LOG(LogTemp,Log,TEXT("AMyGridVisual::UpdateTileVisual add x = %d y = %d"),data.Index.X,data.Index.Y)
 			// myGridMeshInst->UpdateInstance(data.Transform,data.Index,data.States);
-			LayerAGridMeshInst->UpdateInstance(data.Index,data.States);
-			LayerBGridMeshInst->UpdateInstance(data.Index,data.States);
+			LayerAGridMeshInst->UpdateInstance(data->Index,data->States);
+			LayerBGridMeshInst->UpdateInstance(data->Index,data->States);
 		}	
 	}
 
 	if(mode == EGriUpdateMode::UpdateTileType)
 	{
-		LayerAGridMeshInst->UpdateInstance(data.Index,data.States);
-		LayerBGridMeshInst->UpdateInstance(data.Index,data.States);
+		LayerAGridMeshInst->UpdateInstance(data->Index,data->States);
+		LayerBGridMeshInst->UpdateInstance(data->Index,data->States);
 	}
 
 	if(mode == EGriUpdateMode::UpdateTransform)
 	{
-		LayerAGridMeshInst->UpdateInstanceTransform(data.Index,data.Transform);
-		LayerBGridMeshInst->UpdateInstanceTransform(data.Index,data.Transform);
+		LayerAGridMeshInst->UpdateInstanceTransform(data->Index,data->Transform);
+		LayerBGridMeshInst->UpdateInstanceTransform(data->Index,data->Transform);
 	}
 	
 }

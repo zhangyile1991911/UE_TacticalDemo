@@ -59,8 +59,8 @@ public:
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 	
 	void UnitFindPathAsync(const FIntPoint& Target,FUnitPathFindingCompleted Completed,bool bDiagonal=true);
-	void UnitWalkablePath(bool bIsTemp = false);
-	void UnitWalkablePathAsync(FUnitWalkRangeCompleted Completed);
+	void UnitWalkablePath(uint32 CurrentTurnUnitUniqueId,bool bIsTemp = false);
+	void UnitWalkablePathAsync(uint32 CurrentTurnUnitUniqueId,FUnitWalkRangeCompleted Completed);
 	
 	const TSet<FIntPoint>& GetAssaultRangeTiles()const{return AssaultRangeTiles;}
 	const TSet<FIntPoint>& GetReachableTiles()const{return ReachableMap;}

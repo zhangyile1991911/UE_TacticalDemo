@@ -63,7 +63,6 @@ void AMyGridMeshInst::UpdateInstance(FIntPoint index,const TSet<ETileState>& sta
 	auto result = InstancedIndexes.Find(index);
 	if(result != INDEX_NONE)
 	{
-		
 		float filled = 0;
 		FLinearColor color = GetColorFromStates(states,filled);
 		// UE_LOG(LogTemp,Log,TEXT("AMyGridMeshInst::UpdateInstance local = (%d,%d) result = %d 1"),index.X,index.Y,result);
@@ -90,7 +89,12 @@ FLinearColor AMyGridMeshInst::GetColorFromStates(const TSet<ETileState>& states,
 	}
 
 	const auto Result = states.Intersect(ShowTileTypes);
-	if(Result.IsEmpty())return FLinearColor::Black;
+	if(Result.IsEmpty())
+	{
+		isFilled = 0.0f;
+		return FLinearColor::Black;
+	}
+		
 	
 	 if(Result.Contains(ETileState::Selected))
 	 {

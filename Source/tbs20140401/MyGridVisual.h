@@ -56,7 +56,7 @@ public:
 	void InitializedGridVisual(AGrid* grid);
 	// void SetOffsetFromGround(float offset);
 	void DestroyGridVisual();
-	void UpdateTileVisual(FTileData,EGriUpdateMode mode);
+	void UpdateTileVisual(const FTileData*,EGriUpdateMode mode);
 	void RemoveTile(FIntPoint);
 	void AddTileVisual(FTileData);
 
