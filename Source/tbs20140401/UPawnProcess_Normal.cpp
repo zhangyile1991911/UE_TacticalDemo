@@ -70,8 +70,29 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 
 	FIntPoint  Previous = CurrentCursor;
 	FIntPoint Next;
-	Next.X = CurrentCursor.X + Input.Y;
-	Next.Y = CurrentCursor.Y + Input.X;
+	
+	ECameraDirectType CameraDirect = PawnInstance->GetCurrentCameraDirect();
+	switch (CameraDirect)
+	{
+	case ECameraDirectType::FORWARD:
+		Next.X = CurrentCursor.X + Input.Y;
+		Next.Y = CurrentCursor.Y + Input.X;
+		break;
+	case ECameraDirectType::BACKWARD:
+		Next.X = CurrentCursor.X - Input.Y;
+		Next.Y = CurrentCursor.Y - Input.X;
+		break;
+	case ECameraDirectType::LEFT:
+		Next.X = CurrentCursor.X - Input.X;
+		Next.Y = CurrentCursor.Y + Input.Y;
+		break;
+	case ECameraDirectType::RIGHT:
+		Next.X = CurrentCursor.X + Input.X;
+		Next.Y = CurrentCursor.Y - Input.Y;
+		break;
+	}
+
+	PawnInstance->LookAtGrid(CurrentCursor);
 	
 	if(PawnInstance->GetMyGrid()->IsValidGridIndex(Next))
 	{

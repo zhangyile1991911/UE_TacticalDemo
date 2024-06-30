@@ -124,8 +124,29 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 	// Super::HandleDirectionInput(Input);
 
 	FIntPoint next;
-	next.X = CurrentCursor.X + Input.Y;
-	next.Y = CurrentCursor.Y + Input.X;
+	// next.X = CurrentCursor.X + Input.Y;
+	// next.Y = CurrentCursor.Y + Input.X;
+
+	ECameraDirectType CameraDirect = PawnInstance->GetCurrentCameraDirect();
+	switch (CameraDirect)
+	{
+	case ECameraDirectType::FORWARD:
+		next.X = CurrentCursor.X + Input.Y;
+		next.Y = CurrentCursor.Y + Input.X;
+		break;
+	case ECameraDirectType::BACKWARD:
+		next.X = CurrentCursor.X - Input.Y;
+		next.Y = CurrentCursor.Y - Input.X;
+		break;
+	case ECameraDirectType::LEFT:
+		next.X = CurrentCursor.X - Input.X;
+		next.Y = CurrentCursor.Y + Input.Y;
+		break;
+	case ECameraDirectType::RIGHT:
+		next.X = CurrentCursor.X + Input.X;
+		next.Y = CurrentCursor.Y - Input.Y;
+		break;
+	}
 
 	if(!PawnInstance->GetMyGrid()->IsValidGridIndex(next))
 	{

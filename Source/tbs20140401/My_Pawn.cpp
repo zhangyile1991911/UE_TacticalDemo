@@ -305,24 +305,57 @@ void AMy_Pawn::MouseZooming(const FInputActionValue& val)
 
 void AMy_Pawn::CamClockWise(const FInputActionValue& val)
 {
-	if(IsStartGame)return;
-	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::CamClockWise"))
+	UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::CamClockWise %f "),m_rotationDesired.Yaw)
 	float b1 = val.Get<FInputActionValue::Axis1D>();
 	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::CamClockWise %f"),b1)
 	if(b1 > 0.0f)
 	{
 		m_rotationDesired.Add(0.0f,Rotation_Speed,0.0f);
+		if(CurrentProcess)CurrentProcess->HandleRightInput();
 	}
 	else
 	{
 		m_rotationDesired.Add(0.0f,-Rotation_Speed,0.0f);
+		if(CurrentProcess)CurrentProcess->HandleLeftInput();
 	}
-		
+
+	float Yaw = m_rotationDesired.Yaw;
+	if(Yaw < 0)
+	{
+		Yaw = static_cast<int>(m_rotationDesired.Yaw)%360 + 360.0f;	
+	}
+	if(Yaw > 360)
+	{
+		Yaw = static_cast<int>(m_rotationDesired.Yaw)%360;
+	}
+	
+	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::CamClockWise static_cast<int> %f "),Yaw)
+	if(FMath::IsNearlyEqual(Yaw,270,1.0f))
+	{
+		CameraDirect = ECameraDirectType::RIGHT;
+		// UE_LOG(LogTemp,Log,TEXT("ECameraDirectType::RIGHT %f"),Yaw)
+	}
+	else if(FMath::IsNearlyEqual(Yaw,180,1.0f))
+	{
+		CameraDirect = ECameraDirectType::BACKWARD;
+		// UE_LOG(LogTemp,Log,TEXT("ECameraDirectType::BACKWARD %f"),Yaw)
+	}
+	else if(FMath::IsNearlyEqual(Yaw,90,1.0f))
+	{
+		CameraDirect = ECameraDirectType::LEFT;
+		// UE_LOG(LogTemp,Log,TEXT("ECameraDirectType::LEFT %f"),Yaw)
+	}
+	else if(FMath::IsNearlyEqual(Yaw,360,1.0f) || FMath::IsNearlyEqual(Yaw,0,1.0f))
+	{
+		CameraDirect = ECameraDirectType::FORWARD;
+		// UE_LOG(LogTemp,Log,TEXT("ECameraDirectType::FORWARD %f"),Yaw)
+	}
 }
 
 
 void AMy_Pawn::CamMove(const FInputActionValue& val)
 {
+	if(IsStartGame)return;
 	FVector2D tmp = val.Get<FInputActionValue::Axis2D>();
 	//UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::CamMove Location_Speed = %f"),Location_Speed);
 	float forward = tmp.Y * Location_Speed;

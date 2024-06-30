@@ -33,37 +33,7 @@ void UPawnProcess_Idle::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 		break;
 	}
 	UnitInstance->SetTempIdleDirection(Direction);
-	// float ZRotation = 0;
-	// if(RotateShadow)
-	// {
-	// 	UnitInstance->ShowShadowUnit();
-	// 	ZRotation = UnitInstance->GetShadowUnitRotation().Yaw;
-	// }
-	// else
-	// {
-	// 	UnitInstance->HideShadowUnit();
-	// 	ZRotation = UnitInstance->GetUnitRotation().Yaw;
-	// }
-	// if(ZRotation <= 0.01f)
-	// {
-	// 	ZRotation += 360.0f;
-	// }
-	// if(ZRotation >= 359.0f && ZRotation <= 361.0f)
-	// {
-	// 	UnitInstance->GetMyDirection()->DoRightArrowAnimation();
-	// }
-	// else if(ZRotation >= 89.0f && ZRotation <= 91.0f)
-	// {
-	// 	UnitInstance->GetMyDirection()->DoDownArrowAnimation();
-	// }
-	// else if(ZRotation >= 179.0f && ZRotation <= 181.0f)
-	// {
-	// 	UnitInstance->GetMyDirection()->DoLeftArrowAnimation();
-	// }
-	// else if(ZRotation >= 269.0f && ZRotation <= 271.0f)
-	// {
-	// 	UnitInstance->GetMyDirection()->DoUpArrowAnimation();
-	// }
+	
 }
 
 void UPawnProcess_Idle::TickProcess()
@@ -74,8 +44,29 @@ void UPawnProcess_Idle::TickProcess()
 void UPawnProcess_Idle::HandleDirectionInput(const FVector2D& Input)
 {
 	Super::HandleDirectionInput(Input);
+
+	FVector2D Direction(0,0);
+	ECameraDirectType CameraDirect = PawnInstance->GetCurrentCameraDirect();
+	switch (CameraDirect)
+	{
+	case ECameraDirectType::FORWARD:
+		Direction = Input;
+		break;
+	case ECameraDirectType::BACKWARD:
+		Direction = Input * -1;
+		break;
+	case ECameraDirectType::LEFT:
+		Direction.X = Input.Y;
+		Direction.Y = Input.X * -1;
+		break;
+	case ECameraDirectType::RIGHT:
+		Direction.X = Input.Y * -1;
+		Direction.Y = Input.X;
+		break;
+	}
+	
 	UE_LOG(LogTemp,Log,TEXT("Input %s"),*Input.ToString())
-	if (Input.Y > 0)
+	if (Direction.Y > 0)
 	{
 		UnitInstance->GetMyDirection()->DoUpArrowAnimation();
 		if(RotateShadow)
@@ -88,7 +79,7 @@ void UPawnProcess_Idle::HandleDirectionInput(const FVector2D& Input)
 		}
 		UnitInstance->SetTempIdleDirection(EUnitDirectType::FORWARD);
 	}
-	else if(Input.Y < 0)
+	else if(Direction.Y < 0)
 	{
 		UnitInstance->GetMyDirection()->DoDownArrowAnimation();
 		if(RotateShadow)
@@ -101,7 +92,7 @@ void UPawnProcess_Idle::HandleDirectionInput(const FVector2D& Input)
 		}
 		UnitInstance->SetTempIdleDirection(EUnitDirectType::BACKWARD);
 	}
-	else if(Input.X > 0)
+	else if(Direction.X > 0)
 	{
 		UnitInstance->GetMyDirection()->DoRightArrowAnimation();
 		if(RotateShadow)
@@ -114,7 +105,7 @@ void UPawnProcess_Idle::HandleDirectionInput(const FVector2D& Input)
 		}
 		UnitInstance->SetTempIdleDirection(EUnitDirectType::RIGHT);
 	}
-	else if(Input.X < 0)
+	else if(Direction.X < 0)
 	{
 		UnitInstance->GetMyDirection()->DoLeftArrowAnimation();
 		if(RotateShadow)
@@ -132,11 +123,7 @@ void UPawnProcess_Idle::HandleDirectionInput(const FVector2D& Input)
 void UPawnProcess_Idle::HandleCancelInput()
 {
 	Super::HandleCancelInput();
-	// if(UnitInstance->CanWalk())
-	// {
-	// 	PawnInstance->SwitchToNormal();
-	// }
-	// else
+
 	if(UnitInstance->CanAttack() || UnitInstance->CanWalk())
 	{
 		PawnInstance->SwitchToNormal();

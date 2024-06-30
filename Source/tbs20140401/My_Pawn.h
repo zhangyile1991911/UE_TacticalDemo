@@ -33,9 +33,18 @@ struct FInputActionValue;
 class UInputAction;
 class APathPointInst;
 
+
+UENUM(BlueprintType)
+enum class ECameraDirectType:uint8
+{
+	RIGHT UMETA(DisplayName="Right"),
+	LEFT UMETA(DisplayName="Left"),
+	FORWARD UMETA(DisplayName="Forward"),
+	BACKWARD UMETA(DisplayName="Backward")
+};
 // DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTileTypeChanged,ETileType,newTipe);
 
-UCLASS()
+UCLASS(Blueprintable)
 class TBS20140401_API AMy_Pawn : public APawn
 {
 	GENERATED_BODY()
@@ -121,7 +130,7 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UPawnProcess> CurrentProcess;
 
-	
+	ECameraDirectType CameraDirect = ECameraDirectType::FORWARD;
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	float Location_Speed = 20.0f;
@@ -143,6 +152,8 @@ public:
 
 	UPROPERTY()
 	AMyAction* MouseRightAction = nullptr;
+
+	ECameraDirectType GetCurrentCameraDirect()const{return CameraDirect;}	
 
 	UFUNCTION()
 	void SetCurrentTileType(ETileType ttype){CurSetTileType = ttype;}
