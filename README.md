@@ -16,7 +16,7 @@
 
 参考GIF
 1. マップ編集
-<img src="gif/EditGrid.gif" alt="マップ編集" width="640" height="360">
+<img src="gif/EditGrid.gif" alt="マップ編集" width="320" height="180">
 2. パス検索と移動範囲表示
 <img src="gif/FindPath&ShowRange.gif" alt="パス検索と移動範囲表示" width="640" height="360">
 3. 敵の移動範囲と攻撃範囲表示
