@@ -23,6 +23,18 @@
 <img src="gif/FindPath&ShowRangeEnemy.gif" alt="敵の移動範囲と攻撃範囲表示" width="640" height="360">
 4. 命令を入力したり取り消したり
 <img src="gif/Input&CancelCommand.gif" alt="命令を入力したり取り消したり" width="640" height="360">
+5. 普通攻撃
+<img src="gif/NormalAtk.gif" alt="命令を入力したり取り消したり" width="640" height="360">
+6. アーチャー攻撃
+<img src="gif/ArcherAtk.gif" alt="命令を入力したり取り消したり" width="640" height="360">
+7. 魔法範囲攻撃
+<img src="gif/AreaAtk.gif" alt="命令を入力したり取り消したり" width="640" height="360">
+8. 投げ出す
+<img src="gif/ThrowAtk.gif" alt="命令を入力したり取り消したり" width="640" height="360">
+9. 撃退
+<img src="gif/PushBackAtk.gif" alt="命令を入力したり取り消したり" width="640" height="360">
+10. 連携攻撃
+<img src="gif/CooperateAtk.gif" alt="命令を入力したり取り消したり" width="640" height="360">
 
 
 
