@@ -15,5 +15,14 @@
 
 
 参考GIF
-![マップ編集](gif/EditGrid.gif)
+1. マップ編集
+<img src="gif/EditGrid.gif" alt="マップ編集" width="640" height="360">
+2. パス検索と移動範囲表示
+<img src="gif/FindPath&ShowRange.gif" alt="パス検索と移動範囲表示" width="640" height="360">
+3. 敵の移動範囲と攻撃範囲表示
+<img src="gif/FindPath&ShowRangeEnemy.gif" alt="敵の移動範囲と攻撃範囲表示" width="640" height="360">
+4. 命令を入力したり取り消したり
+<img src="gif/Input&CancelCommand.gif" alt="命令を入力したり取り消したり" width="640" height="360">
+
+
 
