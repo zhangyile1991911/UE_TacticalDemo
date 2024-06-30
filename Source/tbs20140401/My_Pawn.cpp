@@ -171,14 +171,40 @@ void AMy_Pawn::BeginPlay()
 	
 }
 
+bool FVectorIsNearly(const FVector& V1,const FVector& V2,float ErrorTolerance)
+{
+	bool bX = FMath::IsNearlyEqual(V1.X,V2.X,ErrorTolerance);
 
+	bool bY = FMath::IsNearlyEqual(V1.Y,V2.Y,ErrorTolerance);
+
+	bool bZ = FMath::IsNearlyEqual(V1.Y,V2.Y,ErrorTolerance);
+	return bX&&bY&&bZ;
+}
 // Called every frame
 void AMy_Pawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	m_springArm->TargetArmLength = FMath::FInterpTo(m_springArm->TargetArmLength,m_curArmLength,DeltaTime,Zoom_Interp);
-	SetActorLocation(FMath::VInterpTo(GetActorLocation(),m_locationDesired,DeltaTime,Location_Interp));
-	SetActorRotation(FMath::RInterpTo(GetActorRotation(),m_rotationDesired,DeltaTime,Rotation_Interp));
+	if(!FMath::IsNearlyEqual(m_curArmLength,m_springArm->TargetArmLength,0.05f))
+	{
+		m_springArm->TargetArmLength = FMath::FInterpTo(m_springArm->TargetArmLength,m_curArmLength,DeltaTime,Zoom_Interp);	
+		OnCameraActing.Broadcast();
+	}
+
+	const auto ActorLocation = GetActorLocation();
+	if(!FVectorIsNearly(ActorLocation,m_locationDesired,0.05f))
+	{
+		SetActorLocation(FMath::VInterpTo(ActorLocation,m_locationDesired,DeltaTime,Location_Interp));
+		OnCameraActing.Broadcast();
+	}
+	
+
+	const auto ActorRotation = GetActorRotation().Yaw;
+	if(!FMath::IsNearlyEqual(ActorRotation,m_rotationDesired.Yaw,0.05f))
+	{
+		SetActorRotation(FMath::RInterpTo(GetActorRotation(),m_rotationDesired,DeltaTime,Rotation_Interp));
+		OnCameraActing.Broadcast();
+	}
+	
 
 	if(!IsStartGame)UpdateTileUnderCursor();
 	if(CurrentProcess)CurrentProcess->TickProcess();
@@ -296,27 +322,48 @@ void AMy_Pawn::RemoveTileUnderCursor(const FIntPoint& index)
 void AMy_Pawn::MouseZooming(const FInputActionValue& val)
 {
 	float tmp = val.Get<FInputActionValue::Axis1D>();
+	if(IsStartGame)
+	{
+		if(CurrentProcess)CurrentProcess->HandleZooming(tmp);
+	}
+	else
+	{
+		CameraControlZooming(tmp);
+	}
 	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::MouseZooming %f"),tmp)
-	tmp *= Zoom_Speed;
-	tmp += m_curArmLength;
-	m_curArmLength = FMathf::Clamp(tmp,MaxMin_ArmLength.X,MaxMin_ArmLength.Y);
+	// tmp *= Zoom_Speed;
+	// tmp += m_curArmLength;
+	// m_curArmLength = FMathf::Clamp(tmp,MaxMin_ArmLength.X,MaxMin_ArmLength.Y);
+	//需要有个通知 UI去更新自己位置
 	
 }
 
 void AMy_Pawn::CamClockWise(const FInputActionValue& val)
 {
-	UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::CamClockWise %f "),m_rotationDesired.Yaw)
+	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::CamClockWise %f "),m_rotationDesired.Yaw)
 	float b1 = val.Get<FInputActionValue::Axis1D>();
 	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::CamClockWise %f"),b1)
 	if(b1 > 0.0f)
 	{
-		m_rotationDesired.Add(0.0f,Rotation_Speed,0.0f);
-		if(CurrentProcess)CurrentProcess->HandleRightInput();
+		if(IsStartGame)
+		{
+			if(CurrentProcess)CurrentProcess->HandleLeftInput();
+		}
+		else
+		{
+			CameraControlLeft();
+		}
 	}
 	else
 	{
-		m_rotationDesired.Add(0.0f,-Rotation_Speed,0.0f);
-		if(CurrentProcess)CurrentProcess->HandleLeftInput();
+		if(IsStartGame)
+		{
+			if(CurrentProcess)CurrentProcess->HandleRightInput();	
+		}
+		else
+		{
+			CameraControlRight();
+		}
 	}
 
 	float Yaw = m_rotationDesired.Yaw;
@@ -350,6 +397,7 @@ void AMy_Pawn::CamClockWise(const FInputActionValue& val)
 		CameraDirect = ECameraDirectType::FORWARD;
 		// UE_LOG(LogTemp,Log,TEXT("ECameraDirectType::FORWARD %f"),Yaw)
 	}
+	//需要有个通知 UI去更新自己位置
 }
 
 
@@ -428,13 +476,13 @@ void AMy_Pawn::TabClick(const FInputActionValue& value)
 
 void AMy_Pawn::LeftClick(const FInputActionValue& value)
 {
-	if(!IsStartGame)return;
+	if(IsStartGame)return;
 	CurrentProcess->HandleLeftInput();
 }
 
 void AMy_Pawn::RightClick(const FInputActionValue& value)
 {
-	if(!IsStartGame)return;
+	if(IsStartGame)return;
 	CurrentProcess->HandleRightInput();
 }
 

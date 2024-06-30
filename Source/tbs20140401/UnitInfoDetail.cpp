@@ -128,7 +128,8 @@ void UUnitInfoDetail::ShowUnitDetailInfo(AMyUnit* MyUnit)
 		break;
 	}
 
-	HPProgress->SetPercent(float(TableProperty.HP)/float(RuntimeProperty.HP));
+	HPProgress->SetPercent(float(RuntimeProperty.HP)/float(TableProperty.HP));
+	HPTxt->SetText(FText::Format(NSLOCTEXT("","","{0}/{1}"),RuntimeProperty.HP,TableProperty.HP));
 
 	//武器
 	const auto WeaponDataPtr = GetWeaponData(TableProperty.WeaponId);
@@ -173,6 +174,7 @@ void UUnitInfoDetail::ShowUnitDetailInfo(AMyUnit* MyUnit)
 
 	const FUnitData* UnitData = GetUnitData(MyUnit->GetUnitType());
 	HalfPortrait->SetBrushFromTexture(UnitData->Assets.Icon.Get());
+	
 }
 
 void UUnitInfoDetail::ShowUnitTeamInfo(TArray<TObjectPtr<AMyUnit>> UnitTeam,TObjectPtr<AMyUnit> FocusUnit)

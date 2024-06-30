@@ -7,6 +7,8 @@
 #include "MyButtonList_Units.h"
 #include "Components/TextBlock.h"
 #include "MyUnit.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
 #include "Components/Overlay.h"
 #include "Components/ProgressBar.h"
@@ -134,6 +136,33 @@ void UUGameUI_UnitBriefInfo::ShowTargetInfoAndConfirmAndTab(TObjectPtr<AMyUnit> 
 	TabText->SetText(TabTxt);
 	
 	RefreshUnitBriefInfo(nullptr,Defender,0);
+}
+
+TObjectPtr<UCanvasPanelSlot> UUGameUI_UnitBriefInfo::GetCanvasPanelSlot()
+{
+	if(CanvasPanelSlot == nullptr)
+	{
+		CanvasPanelSlot = Cast<UCanvasPanelSlot>(this->Slot);	
+	}
+	return CanvasPanelSlot;
+}
+
+void UUGameUI_UnitBriefInfo::UpdateWidgetPosition(const FVector& Location)
+{
+	if(PlayerControllerPtr == nullptr)
+	{
+		PlayerControllerPtr = GetWorld()->GetFirstPlayerController();	
+	}
+	
+	FVector2D ScreenLocation;
+	const bool Result = PlayerControllerPtr->ProjectWorldLocationToScreen(Location,ScreenLocation,true);
+	if(Result)
+	{
+		const float Scale = UWidgetLayoutLibrary::GetViewportScale(PlayerControllerPtr);
+		ScreenLocation /= Scale;
+		UCanvasPanelSlot* CanvasSlot = GetCanvasPanelSlot();
+		CanvasSlot->SetPosition(ScreenLocation);
+	}
 }
 
 

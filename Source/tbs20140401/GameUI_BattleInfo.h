@@ -13,10 +13,11 @@ class UHitInfoFlow;
 class UVerticalBox;
 class UCanvasPanelSlot;
 class UTextBlock;
+class AMy_Pawn;
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class TBS20140401_API UGameUI_BattleInfo : public UUserWidget
 {
 	GENERATED_BODY()
@@ -51,10 +52,13 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UCanvasPanel> CanvasPanel;
 
+	UPROPERTY()
+	TObjectPtr<APlayerController> PlayerControllerPtr;
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	bool LocationToScreenPosition(FVector UnitLocation,FVector2D& ScreenLocation,float& Scale);
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void StartHitNumFlowAnim(AMyUnit* Unit,int Num,bool bIsHit = false,bool bIsCritical = false,bool bIsBackAtk = false);
@@ -69,7 +73,6 @@ public:
 	void ShowCooperatorTips(AMyUnit* Unit);
 	void HideCooperatorTips();
 
-	void ShowUnitInfoDetailPanel();
-	void HideUnitInfoDetailPanel();
+	bool UpdateWidgetPosition(FVector WorldLocation);
 };
 

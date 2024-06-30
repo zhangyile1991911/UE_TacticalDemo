@@ -82,6 +82,25 @@ void UPawnProcess_ChooseTarget::ClearIndicatorRange()
 	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::IndicatorRange);
 }
 
+void UPawnProcess_ChooseTarget::SubscribeCameraActing()
+{
+	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
+	if(BattleInfoInstance->IsVisible())
+	{
+		if(TileDataPtr->UnitOnTile)
+		{
+			BattleInfoInstance->UpdateWidgetPosition(TileDataPtr->UnitOnTile->GetActorLocation());	
+		}
+	}
+	
+	if(UnitBriefInfoInstance->IsVisible())
+	{
+		const FVector WorldPosition = TileDataPtr->UnitOnTile ? TileDataPtr->UnitOnTile->GetActorLocation() : TileDataPtr->Transform.GetLocation();
+		UnitBriefInfoInstance->UpdateWidgetPosition(WorldPosition);
+	}
+	
+}
+
 void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
 	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_ChooseTarget::EnterProcess"))
@@ -111,6 +130,8 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	auto Tmp = PawnInstance->GetMyHUD()->GetGameUI();
 	UnitBriefInfoInstance = Tmp->GetUnitBriefInfo();
 	BattleInfoInstance = PawnInstance->GetMyHUD()->GetBattleInfoUI();
+	BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
+	PawnInstance->OnCameraActing.AddDynamic(this,&UPawnProcess_ChooseTarget::SubscribeCameraActing);
 	
 }
 
@@ -209,7 +230,6 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		bool IsValid = ChosenAbilityPtr->IsValidUnit(TempTarget);
 		if(IsValid)
 		{
-			// BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
 			BattleInfoInstance->ShowBackAtkTips(TempTarget);
 		}
 	}
@@ -231,7 +251,6 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 			BattleInfoInstance->HideCooperatorTips();
 			break;
 		}
-		// BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
 		BattleInfoInstance->ShowCooperatorTips(Cooperator);
 	}
 	while (false);
@@ -294,9 +313,29 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 	if(BattleInfoInstance != nullptr)
 	{
 		BattleInfoInstance->HideBackAtkTips();
+		BattleInfoInstance->HideCooperatorTips();
 		BattleInfoInstance->SetVisibility(ESlateVisibility::Hidden);
 		BattleInfoInstance = nullptr;
 	}
-		
-	// PawnInstance->UpdateTileStatusByIndex(CurrentCursor,ETileState::Selected);
+	PawnInstance->OnCameraActing.RemoveDynamic(this,&UPawnProcess_ChooseTarget::SubscribeCameraActing);
+}
+
+void UPawnProcess_ChooseTarget::HandleLeftInput()
+{
+	PawnInstance->CameraControlLeft();
+}
+
+void UPawnProcess_ChooseTarget::HandleRightInput()
+{
+	PawnInstance->CameraControlRight();
+}
+
+void UPawnProcess_ChooseTarget::HandleZooming(float Val)
+{
+	PawnInstance->CameraControlZooming(Val);
+}
+
+void UPawnProcess_ChooseTarget::HandleTabInput()
+{
+	
 }

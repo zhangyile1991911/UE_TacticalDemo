@@ -24,4 +24,8 @@ public:
 	virtual void HandleCancelInput()override;
 	virtual void HandleConfirmInput()override;
 	virtual void ExitProcess()override;
+
+	virtual void HandleLeftInput()override;
+	virtual void HandleRightInput()override;
+	virtual void HandleZooming(float Val)override;
 };

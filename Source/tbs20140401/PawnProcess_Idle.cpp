@@ -150,3 +150,18 @@ void UPawnProcess_Idle::ExitProcess()
 	Super::ExitProcess();
 	UnitInstance->HideDirectionArrow();
 }
+
+void UPawnProcess_Idle::HandleLeftInput()
+{
+	PawnInstance->CameraControlLeft();
+}
+
+void UPawnProcess_Idle::HandleRightInput()
+{
+	PawnInstance->CameraControlRight();
+}
+
+void UPawnProcess_Idle::HandleZooming(float Val)
+{
+	PawnInstance->CameraControlZooming(Val);
+}

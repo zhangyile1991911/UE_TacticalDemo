@@ -33,6 +33,7 @@ struct FInputActionValue;
 class UInputAction;
 class APathPointInst;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FCameraEvent);
 
 UENUM(BlueprintType)
 enum class ECameraDirectType:uint8
@@ -145,7 +146,7 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	float Zoom_Interp = 2.0f;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	FVector2f MaxMin_ArmLength = FVector2f(500.0f,5000.0f);
+	FVector2f MaxMin_ArmLength = FVector2f(1000.0f,3000.0f);
 
 	UPROPERTY()
 	AMyAction* MouseLeftAction = nullptr;
@@ -218,6 +219,21 @@ public:
 	TObjectPtr<AMyUnit> GetSelectedUnit()const{return SelectedUnit;}
 	TObjectPtr<APathPointInst> GetMyPathPointInst()const{return MyPathPointInst;}
 
+	void CameraControlLeft()
+	{
+		m_rotationDesired.Add(0.0f,Rotation_Speed,0.0f);
+	}
+	void CameraControlRight()
+	{
+		m_rotationDesired.Add(0.0f,-Rotation_Speed,0.0f);
+	}
+	void CameraControlZooming(float val)
+	{
+		val *= Zoom_Speed;
+		val += m_curArmLength;
+		m_curArmLength = FMathf::Clamp(val,MaxMin_ArmLength.X,MaxMin_ArmLength.Y);
+	}
+	
 	void LookAtGrid(const FIntPoint&);
 	void LookAtUnit(TObjectPtr<AMyUnit>);
 	void StartGame();
@@ -229,5 +245,5 @@ public:
 	void SwitchToMove();
 	void SwitchToCalcAnim();
 	
-	// FTileTypeChanged OnTileTYpeChanged;
+	FCameraEvent OnCameraActing;
 };

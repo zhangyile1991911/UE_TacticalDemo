@@ -11,10 +11,11 @@ class AMyUnit;
 class UProgressBar;
 class UImage;
 class UTextBlock;
+class UCanvasPanelSlot;
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class TBS20140401_API UUGameUI_UnitBriefInfo : public UUserWidget
 {
 	GENERATED_BODY()
@@ -74,6 +75,11 @@ protected:
 	TObjectPtr<UOverlay> TabNode;
 	
 	TArray<TObjectPtr<UImage>> APList;
+	UPROPERTY()
+	TObjectPtr<UCanvasPanelSlot> CanvasPanelSlot;
+
+	UPROPERTY()
+	TObjectPtr<APlayerController> PlayerControllerPtr;
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -87,5 +93,7 @@ public:
 	void ShowTarget(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,float HitPercent,FText ConfirmTxt,FText DetailTxt);
 	void ShowTargetInfoAndTab(TObjectPtr<AMyUnit> Defender,float HitPercent);
 	void ShowTargetInfoAndConfirmAndTab(TObjectPtr<AMyUnit> Defender,FText ConfirmTxt,FText TabTxt);
+	TObjectPtr<UCanvasPanelSlot> GetCanvasPanelSlot();
+	void UpdateWidgetPosition(const FVector& Location);
 };
 

@@ -34,6 +34,8 @@ protected:
 	// void AbilityCompletedEvent(TObjectPtr<AUnitAbilityAnim> Ability);
 	void ShowTargetUnitBriefInfo(const FIntPoint& Index);
 	void ClearIndicatorRange();
+	UFUNCTION()
+	void SubscribeCameraActing();
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn)override;
 	virtual void TickProcess()override;
@@ -41,4 +43,9 @@ public:
 	virtual void HandleCancelInput()override;
 	virtual void HandleConfirmInput()override;
 	virtual void ExitProcess()override;
+
+	virtual void HandleLeftInput()override;
+	virtual void HandleRightInput()override;
+	virtual void HandleZooming(float Val)override;
+	virtual void HandleTabInput()override;
 };

@@ -47,7 +47,7 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	UnitBriefInfoPtr = Tmp->GetUnitBriefInfo();
 	ShowTargetUnitBriefInfo(CurrentCursor);
 	UnitDetailInfoPtr = Tmp->GetUnitDetailInfo();
-	
+	PawnInstance->OnCameraActing.AddDynamic(this,&UUPawnProcess_Normal::SubscribeCamera);
 
 	UnitInstance->HideShadowUnit();
 	//将 摄像机 移动到 当前单位
@@ -57,6 +57,7 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	Calucating = 0;
 	CheckDangerousRange();
 	CheckDangerousLine();
+	
 }
 
 void UUPawnProcess_Normal::TickProcess()
@@ -177,6 +178,10 @@ void UUPawnProcess_Normal::HandleLeftInput()
 	{
 		UnitDetailInfoPtr->PreviousUnit();
 	}
+	else
+	{
+		PawnInstance->CameraControlLeft();
+	}
 }
 
 void UUPawnProcess_Normal::HandleRightInput()
@@ -184,6 +189,18 @@ void UUPawnProcess_Normal::HandleRightInput()
 	if(bIsTab)
 	{
 		UnitDetailInfoPtr->NextUnit();
+	}
+	else
+	{
+		PawnInstance->CameraControlRight();
+	}
+}
+
+void UUPawnProcess_Normal::HandleZooming(float Val)
+{
+	if(!bIsTab)
+	{
+		PawnInstance->CameraControlZooming(Val);
 	}
 }
 
@@ -215,6 +232,7 @@ void UUPawnProcess_Normal::ExitProcess()
 	PawnInstance->GetMyCombatSystem()->HideUnitThreaten();
 	UnitDetailInfoPtr->HideUnitTeamInfo();
 	PawnInstance->GetMyPathPointInst()->HidePathPoint();
+	PawnInstance->OnCameraActing.RemoveDynamic(this,&UUPawnProcess_Normal::SubscribeCamera);
 }
 
 void UUPawnProcess_Normal::ClearPathFinding()
@@ -278,20 +296,8 @@ void UUPawnProcess_Normal::ShowTargetUnitBriefInfo(FIntPoint Index)
 
 	if(bShow)
 	{
-		FVector2D ScreenLocation;
-    	const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-
-		const FVector WorldPosition = StandingUnit ? StandingUnit->GetActorLocation() : TileData->Transform.GetLocation();
-    	const bool Result = PlayerController->ProjectWorldLocationToScreen(WorldPosition,ScreenLocation,true);
-    	if(Result)
-    	{
-    		const float Scale = UWidgetLayoutLibrary::GetViewportScale(PlayerController);
-    		ScreenLocation /= Scale;
-    		UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(UnitBriefInfoPtr->Slot);
-    		CanvasSlot->SetPosition(ScreenLocation);
-    	}
-    	// UE_LOG(LogTemp,Log,TEXT("Target Location = %s Result = %hhd ScreenLocation = %s"),*WorldPosition.ToString(),Result,*ScreenLocation.ToString())
-		UnitBriefInfoPtr->SetVisibility(ESlateVisibility::Visible);	
+		UnitBriefInfoPtr->SetVisibility(ESlateVisibility::Visible);
+		UpdateUnitDetailInfoPosition(Index);
 	}
 	else
 	{
@@ -400,6 +406,22 @@ void UUPawnProcess_Normal::ClearOtherUnitRange()
 		PawnInstance->GetMyGrid()->RemoveStateFromTile(One,ETileState::OtherUnitWalkRange);
 	}
 	OtherUnitRange.Empty();
+}
+
+void UUPawnProcess_Normal::SubscribeCamera()
+{
+	UpdateUnitDetailInfoPosition(CurrentCursor);
+}
+
+void UUPawnProcess_Normal::UpdateUnitDetailInfoPosition(const FIntPoint& Point)
+{
+	
+	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(Point);
+	if(TileDataPtr == nullptr)return;
+	if(!UnitBriefInfoPtr->IsVisible())return;
+	
+	const FVector WorldPosition = TileDataPtr->UnitOnTile ? TileDataPtr->UnitOnTile->GetActorLocation() : TileDataPtr->Transform.GetLocation();
+	UnitBriefInfoPtr->UpdateWidgetPosition(WorldPosition);
 }
 
 void UUPawnProcess_Normal::ClearDangerousTiles()

@@ -39,5 +39,6 @@ public:
 	virtual void HandleSpaceInput(){}
 	virtual void HandleLeftInput(){}
 	virtual void HandleRightInput(){}
+	virtual void HandleZooming(float){}
 	virtual void ExitProcess(){}
 };

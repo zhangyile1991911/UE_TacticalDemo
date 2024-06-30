@@ -31,7 +31,6 @@ protected:
 	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoPtr;
 	UPROPERTY()
 	TObjectPtr<UUnitInfoDetail> UnitDetailInfoPtr;
-	
 
 	int Calucating = 0;
 	bool bIsTab = false;
@@ -50,6 +49,9 @@ protected:
 	void WaitCalculating();
 	void ShowOtherUnitRange(const FIntPoint&);
 	void ClearOtherUnitRange();
+	UFUNCTION()
+	void SubscribeCamera();
+	void UpdateUnitDetailInfoPosition(const FIntPoint& Point);
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn) override;
 	virtual void TickProcess() override;
@@ -58,6 +60,7 @@ public:
 	virtual void HandleConfirmInput() override;
 	virtual void HandleLeftInput()override;
 	virtual void HandleRightInput()override;
+	virtual void HandleZooming(float Val)override;
 	virtual void HandleTabInput()override;
 	virtual void ExitProcess()override;
 	

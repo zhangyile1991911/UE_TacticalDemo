@@ -5,7 +5,6 @@
 
 #include "HitInfoFlow.h"
 #include "MyUnit.h"
-#include "UnitInfoDetail.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/Border.h"
 #include "Components/CanvasPanelSlot.h"
@@ -14,6 +13,7 @@
 #include "Components/CanvasPanel.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
+#include "My_Pawn.h"
 
 
 void UGameUI_BattleInfo::NativeConstruct()
@@ -50,15 +50,20 @@ void UGameUI_BattleInfo::NativeDestruct()
 
 bool UGameUI_BattleInfo::LocationToScreenPosition(FVector UnitLocation,FVector2D& ScreenLocation,float& Scale)
 {
-	const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	const bool Result = PlayerController->ProjectWorldLocationToScreen(UnitLocation,ScreenLocation,true);
+	if(PlayerControllerPtr == nullptr)
+	{
+		PlayerControllerPtr = GetWorld()->GetFirstPlayerController();
+	}
+	
+	const bool Result = PlayerControllerPtr->ProjectWorldLocationToScreen(UnitLocation,ScreenLocation,true);
 	if(Result)
 	{
-		Scale = UWidgetLayoutLibrary::GetViewportScale(PlayerController);
+		Scale = UWidgetLayoutLibrary::GetViewportScale(PlayerControllerPtr);
 		ScreenLocation /= Scale;
 	}
 	return Result;
 }
+
 
 void UGameUI_BattleInfo::StartHitNumFlowAnim(AMyUnit* Unit,int Num,bool bIsHit,bool bIsCritical,bool bIsBackAtk)
 {
@@ -109,20 +114,26 @@ void UGameUI_BattleInfo::FinishHitNumFlowAnim()
 
 void UGameUI_BattleInfo::ShowBackAtkTips(AMyUnit* Unit)
 {
-	FVector2D ScreenPosition;
-	float Scale;
-	const bool bShow = LocationToScreenPosition(Unit->GetActorLocation(),ScreenPosition,Scale);
+	const bool bShow = UpdateWidgetPosition(Unit->GetActorLocation());
 	if(bShow)
 	{
-		auto TextSize = TipsGroupSlot->GetSize();
-		TextSize /= 2;
-		TextSize /= Scale;
-		ScreenPosition.X -= TextSize.X;
-		ScreenPosition.Y -= TextSize.Y;
-		TipsGroupSlot->SetPosition(ScreenPosition);
 		BackAtkTips->SetVisibility(ESlateVisibility::Visible);
 		BackAtkBorder->SetVisibility(ESlateVisibility::Visible);
 	}
+	// FVector2D ScreenPosition;
+	// float Scale;
+	// const bool bShow = LocationToScreenPosition(Unit->GetActorLocation(),ScreenPosition,Scale);
+	// if(bShow)
+	// {
+	// 	auto TextSize = TipsGroupSlot->GetSize();
+	// 	TextSize /= 2;
+	// 	TextSize /= Scale;
+	// 	ScreenPosition.X -= TextSize.X;
+	// 	ScreenPosition.Y -= TextSize.Y;
+	// 	TipsGroupSlot->SetPosition(ScreenPosition);
+	// 	BackAtkTips->SetVisibility(ESlateVisibility::Visible);
+	// 	BackAtkBorder->SetVisibility(ESlateVisibility::Visible);
+	// }
 }
 
 void UGameUI_BattleInfo::HideBackAtkTips()
@@ -133,9 +144,39 @@ void UGameUI_BattleInfo::HideBackAtkTips()
 
 void UGameUI_BattleInfo::ShowCooperatorTips(AMyUnit* Unit)
 {
+	const bool bShow = UpdateWidgetPosition(Unit->GetActorLocation());
+	if(bShow)
+	{
+		CooperationTips->SetVisibility(ESlateVisibility::Visible);	
+		CooperationBorder->SetVisibility(ESlateVisibility::Visible);
+	}
+	// FVector2D ScreenPosition;
+	// float Scale;
+	// const bool bShow = LocationToScreenPosition(Unit->GetActorLocation(),ScreenPosition,Scale);
+	// if(bShow)
+	// {
+	// 	auto TextSize = TipsGroupSlot->GetSize();
+	// 	TextSize /= 2;
+	// 	TextSize /= Scale;
+	// 	ScreenPosition.X -= TextSize.X;
+	// 	ScreenPosition.Y -= TextSize.Y;
+	// 	TipsGroupSlot->SetPosition(ScreenPosition);
+	// 	CooperationTips->SetVisibility(ESlateVisibility::Visible);	
+	// 	CooperationBorder->SetVisibility(ESlateVisibility::Visible);
+	// }
+}
+
+void UGameUI_BattleInfo::HideCooperatorTips()
+{
+	CooperationTips->SetVisibility(ESlateVisibility::Hidden);
+	CooperationBorder->SetVisibility(ESlateVisibility::Hidden);
+}
+
+bool UGameUI_BattleInfo::UpdateWidgetPosition(FVector WorldLocation)
+{
 	FVector2D ScreenPosition;
 	float Scale;
-	const bool bShow = LocationToScreenPosition(Unit->GetActorLocation(),ScreenPosition,Scale);
+	const bool bShow = LocationToScreenPosition(WorldLocation,ScreenPosition,Scale);
 	if(bShow)
 	{
 		auto TextSize = TipsGroupSlot->GetSize();
@@ -144,15 +185,8 @@ void UGameUI_BattleInfo::ShowCooperatorTips(AMyUnit* Unit)
 		ScreenPosition.X -= TextSize.X;
 		ScreenPosition.Y -= TextSize.Y;
 		TipsGroupSlot->SetPosition(ScreenPosition);
-		CooperationTips->SetVisibility(ESlateVisibility::Visible);	
-		CooperationBorder->SetVisibility(ESlateVisibility::Visible);
 	}
-}
-
-void UGameUI_BattleInfo::HideCooperatorTips()
-{
-	CooperationTips->SetVisibility(ESlateVisibility::Hidden);
-	CooperationBorder->SetVisibility(ESlateVisibility::Hidden);
+	return bShow;
 }
 
 
