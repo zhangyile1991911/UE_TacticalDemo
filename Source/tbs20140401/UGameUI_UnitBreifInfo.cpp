@@ -17,10 +17,14 @@ void UUGameUI_UnitBriefInfo::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	EnterNode->SetVisibility(ESlateVisibility::Collapsed);
 	TabMoveNode->SetVisibility(ESlateVisibility::Collapsed);
+	
 	APList.Add(AP1);
 	APList.Add(AP2);
 	APList.Add(AP3);
+
+	
 }
 
 void UUGameUI_UnitBriefInfo::NativeDestruct()
@@ -79,7 +83,7 @@ void UUGameUI_UnitBriefInfo::RefreshUnitBaseBriefInfo(TObjectPtr<AMyUnit> Unit)
 }
 
 
-void UUGameUI_UnitBriefInfo::RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,float HitPercent)
+void UUGameUI_UnitBriefInfo::RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Defender,float HitPercent)
 {
 	FText TmpLevel = FText::Format(FText::FromString("LV.{0}"), FText::AsNumber(1));
 	LevelText->SetText(TmpLevel);
@@ -121,18 +125,11 @@ void UUGameUI_UnitBriefInfo::RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Attacker,T
 		APList[i]->SetVisibility(ESlateVisibility::Visible);
 	}
 
-	if(Attacker == nullptr)
-	{
-		HitPerText->SetVisibility(ESlateVisibility::Hidden);	
-	}
-	else
-	{
-		HitPerText->SetVisibility(ESlateVisibility::Visible);
-		FText TmpHit = FText::Format(FText::FromString("{0}%"), FText::AsNumber(HitPercent));
-		HitPerText->SetText(TmpHit);
-		
-	}
 
+	HitPerText->SetVisibility(ESlateVisibility::Visible);
+	FText TmpHit = FText::Format(FText::FromString("{0}%"), FText::AsNumber(HitPercent));
+	HitPerText->SetText(TmpHit);
+	
 	const float fHP = Defender->GetRuntimeProperty().HP;
 	const float fHPConfig = Defender->GetProperty().HP;
 	HPBar->SetPercent(fHP/fHPConfig);
@@ -143,8 +140,8 @@ void UUGameUI_UnitBriefInfo::RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Attacker,T
 
 void UUGameUI_UnitBriefInfo::ShowDetailTabOnly(const FVector& Location)
 {
-	InfoNode->SetVisibility(ESlateVisibility::Hidden);
-	ConfirmNode->SetVisibility(ESlateVisibility::Hidden);
+	InfoNode->SetVisibility(ESlateVisibility::Collapsed);
+	ConfirmNode->SetVisibility(ESlateVisibility::Collapsed);
 	TabNode->SetVisibility(ESlateVisibility::Visible);
 
 	UpdateWidgetPosition(Location);
@@ -159,6 +156,7 @@ void UUGameUI_UnitBriefInfo::ShowSelfCmd(TObjectPtr<AMyUnit> Attacker)
 	ConfirmNode->SetVisibility(ESlateVisibility::Collapsed);
 	InfoNode->SetVisibility(ESlateVisibility::Collapsed);
 	TabMoveNode->SetVisibility(ESlateVisibility::Collapsed);
+	EnterNode->SetVisibility(ESlateVisibility::Collapsed);
 	UpdateWidgetPosition(Attacker->GetActorLocation());
 	// ConfirmText->SetText(FText::FromName(TEXT("コマンド選択")));
 	// TabText->SetText(FText::FromName(TEXT("詳細")));
@@ -166,27 +164,29 @@ void UUGameUI_UnitBriefInfo::ShowSelfCmd(TObjectPtr<AMyUnit> Attacker)
 
 void UUGameUI_UnitBriefInfo::ShowConfirmCmd(const FVector& Location)
 {
-	InfoNode->SetVisibility(ESlateVisibility::Hidden);
-	TabNode->SetVisibility(ESlateVisibility::Hidden);
+	InfoNode->SetVisibility(ESlateVisibility::Collapsed);
+	TabNode->SetVisibility(ESlateVisibility::Collapsed);
+	EnterNode->SetVisibility(ESlateVisibility::Collapsed);
 	ConfirmNode->SetVisibility(ESlateVisibility::Visible);
 	// UpdateWidgetPosition(Defender->GetActorLocation());
 	// ConfirmText->SetText(ConfirmTxt);
 	UpdateWidgetPosition(Location);
 }
 
-void UUGameUI_UnitBriefInfo::ShowTarget(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,float HitPercent)
+void UUGameUI_UnitBriefInfo::ShowTarget(TObjectPtr<AMyUnit> Defender,float HitPercent)
 {
 	InfoNode->SetVisibility(ESlateVisibility::Visible);
 	TabNode->SetVisibility(ESlateVisibility::Visible);
-	ConfirmNode->SetVisibility(ESlateVisibility::Visible);
+	EnterNode->SetVisibility(ESlateVisibility::Visible);
 
 	TabMoveNode->SetVisibility(ESlateVisibility::Collapsed);
 	CmdNode->SetVisibility(ESlateVisibility::Collapsed);
+	ConfirmNode->SetVisibility(ESlateVisibility::Collapsed);
 	
 	// ConfirmText->SetText(ConfirmTxt);
 	//
 	// TabText->SetText(DetailTxt);
-	RefreshUnitBriefInfo(Attacker,Defender,HitPercent);
+	RefreshUnitBriefInfo(Defender,HitPercent);
 	UpdateWidgetPosition(Defender->GetActorLocation());
 }
 
@@ -195,13 +195,27 @@ void UUGameUI_UnitBriefInfo::ShowTargetInfoAndTab(TObjectPtr<AMyUnit> Defender,f
 {
 	InfoNode->SetVisibility(ESlateVisibility::Visible);
 	TabNode->SetVisibility(ESlateVisibility::Visible);
-	ConfirmNode->SetVisibility(ESlateVisibility::Visible);
+	
+	ConfirmNode->SetVisibility(ESlateVisibility::Collapsed);
 
 	CmdNode->SetVisibility(ESlateVisibility::Collapsed);
 	TabMoveNode->SetVisibility(ESlateVisibility::Collapsed);
+	EnterNode->SetVisibility(ESlateVisibility::Collapsed);
 	// TabText->SetText(FText::FromName(TEXT("詳細")));
-	RefreshUnitBriefInfo(nullptr,Defender,HitPercent);
+	RefreshUnitBriefInfo(Defender,HitPercent);
 	UpdateWidgetPosition(Defender->GetActorLocation());
+
+	if(HitPercent < 0)
+	{
+		HitIcon->SetVisibility(ESlateVisibility::Collapsed);
+		HitPerText->SetVisibility(ESlateVisibility::Collapsed);	
+	}
+	else
+	{
+		HitIcon->SetVisibility(ESlateVisibility::Visible);
+		HitPerText->SetVisibility(ESlateVisibility::Visible);
+	}
+	
 }
 
 void UUGameUI_UnitBriefInfo::ShowTargetInfoAndConfirmAndTab(TObjectPtr<AMyUnit> Defender)
@@ -212,10 +226,11 @@ void UUGameUI_UnitBriefInfo::ShowTargetInfoAndConfirmAndTab(TObjectPtr<AMyUnit> 
 
 	TabMoveNode->SetVisibility(ESlateVisibility::Collapsed);
 	CmdNode->SetVisibility(ESlateVisibility::Collapsed);
+	EnterNode->SetVisibility(ESlateVisibility::Collapsed);
 	// ConfirmText->SetText(ConfirmTxt);
 	// TabText->SetText(TabTxt);
 	
-	RefreshUnitBriefInfo(nullptr,Defender,0);
+	RefreshUnitBriefInfo(Defender,0);
 	UpdateWidgetPosition(Defender->GetActorLocation());
 }
 
@@ -254,6 +269,7 @@ void UUGameUI_UnitBriefInfo::ShowMoveOnly(const FVector& Location)
 	InfoNode->SetVisibility(ESlateVisibility::Collapsed);
 	TabNode->SetVisibility(ESlateVisibility::Collapsed);
 	CmdNode->SetVisibility(ESlateVisibility::Collapsed);
+	EnterNode->SetVisibility(ESlateVisibility::Collapsed);
 
 	UpdateWidgetPosition(Location);
 }
@@ -266,12 +282,32 @@ void UUGameUI_UnitBriefInfo::ShowDetailInfoOnly(TObjectPtr<AMyUnit> Unit)
 	ConfirmNode->SetVisibility(ESlateVisibility::Collapsed);
 	TabNode->SetVisibility(ESlateVisibility::Collapsed);
 	CmdNode->SetVisibility(ESlateVisibility::Collapsed);
+	EnterNode->SetVisibility(ESlateVisibility::Collapsed);
 
 	RefreshUnitBaseBriefInfo(Unit);
 	HitIcon->SetVisibility(ESlateVisibility::Collapsed);
 	HitPerText->SetVisibility(ESlateVisibility::Collapsed);
 	UpdateWidgetPosition(Unit->GetActorLocation());
 }
+
+void UUGameUI_UnitBriefInfo::ShowTargetBriefInfoOnly(TObjectPtr<AMyUnit> Unit,float HitPercent)
+{
+	InfoNode->SetVisibility(ESlateVisibility::Visible);
+	TabNode->SetVisibility(ESlateVisibility::Collapsed);
+	EnterNode->SetVisibility(ESlateVisibility::Collapsed);
+
+	TabMoveNode->SetVisibility(ESlateVisibility::Collapsed);
+	CmdNode->SetVisibility(ESlateVisibility::Collapsed);
+	ConfirmNode->SetVisibility(ESlateVisibility::Collapsed);
+	
+	// ConfirmText->SetText(ConfirmTxt);
+	//
+	// TabText->SetText(DetailTxt);
+	RefreshUnitBriefInfo(Unit,HitPercent);
+	UpdateWidgetPosition(Unit->GetActorLocation());
+}
+
+
 
 
 

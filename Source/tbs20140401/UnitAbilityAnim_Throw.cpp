@@ -27,11 +27,12 @@ TArray<FIntPoint> AUnitAbilityAnim_Throw::Range(const FIntPoint& Int32Point)
 	return MoveTemp(Result);
 }
 
-bool AUnitAbilityAnim_Throw::IsValidTarget(const FTileData& TileData, AGrid* MyGrid)
+bool AUnitAbilityAnim_Throw::IsValidTarget(const FTileData* TileData, AGrid* MyGrid)
 {
-	if(TileData.UnitOnTile == nullptr)return false;
-	if(TileData.UnitOnTile->IsDead())return false;
-	if(TileData.UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return false;
+	if(TileData == nullptr)return false;
+	if(TileData->UnitOnTile == nullptr)return false;
+	if(TileData->UnitOnTile->IsDead())return false;
+	if(TileData->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return false;
 
 	return true;
 }

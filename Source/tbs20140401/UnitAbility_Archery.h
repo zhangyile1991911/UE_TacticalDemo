@@ -26,7 +26,7 @@ public:
 	virtual bool IsArea()override{return false;}
 	virtual bool CanExecute() override;
 	virtual TArray<FIntPoint> Range(const FIntPoint&) override;
-	virtual bool IsValidTarget(const FTileData& TileData,AGrid* MyGrid) override;
+	virtual bool IsValidTarget(const FTileData* TileData,AGrid* MyGrid) override;
 	virtual bool IsValidUnit(TObjectPtr<AMyUnit> Unit) override;
 	virtual TArray<FIntPoint> Indicator(const FIntPoint& Index)override;
 	virtual TArray<TObjectPtr<AMyUnit>> TakeTargets(const FIntPoint& Point, AGrid* MyGrid) override;

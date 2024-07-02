@@ -139,7 +139,7 @@ TArray<FIntPoint> AUnitAbility_Archery::Range(const FIntPoint& CenterPoint)
 	return MoveTemp(Result);
 }
 
-bool AUnitAbility_Archery::IsValidTarget(const FTileData& TileData, AGrid* MyGrid)
+bool AUnitAbility_Archery::IsValidTarget(const FTileData* TileData, AGrid* MyGrid)
 {
 	return true;
 }

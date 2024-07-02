@@ -17,6 +17,7 @@
 #include "EventCenter.h"
 #include "GameUI_BattleInfo.h"
 #include "UnitAbilityAnim.h"
+#include "UnitInfoDetail.h"
 
 void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 {
@@ -27,26 +28,43 @@ void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 		return;
 	}
 	
-	TObjectPtr<AMyUnit> StandingUnit = TileData->UnitOnTile;
+	const TObjectPtr<AMyUnit> StandingUnit = TileData->UnitOnTile;
 	bool bShow = true;
-	bool IsValid = ChosenAbilityPtr->IsValidTarget(*TileData,PawnInstance->GetMyGrid());
+	
 	if(StandingUnit == nullptr)
 	{
-		bShow = false;
+		bool bIsSelf = Index == UnitInstance->GetTempDestinationGridIndex();
+		bool bNeedToMove = UnitInstance->NeedToMove();
+		if(bIsSelf && bNeedToMove)
+		{
+			UnitBriefInfoInstance->ShowTargetInfoAndTab(UnitInstance,-1);
+		}
+		else
+		{
+			bShow = false;	
+		}
 	}
 	else
 	{
+		const bool IsValid = ChosenAbilityPtr->IsValidTarget(TileData,PawnInstance->GetMyGrid());
 		if(IsValid)
 		{
 			// const bool bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,StandingUnit);
 			float HitPer = UBattleFunc::CalculateHitRate(UnitInstance,StandingUnit,PawnInstance->GetMyGrid(),bIsWrapAttack,bIsBackAttack);
 			HitPer = FMath::Clamp(HitPer,0,100);
 			//有效目标 确定 详情
-			UnitBriefInfoInstance->ShowTarget(UnitInstance,StandingUnit,HitPer);
+			UnitBriefInfoInstance->ShowTarget(StandingUnit,HitPer);
 		}
 		else
 		{//无效 详情
-			UnitBriefInfoInstance->ShowTargetInfoAndTab(StandingUnit,0);
+			if(TileData->UnitOnTile == UnitInstance)
+			{
+				bShow = false;
+			}
+			else
+			{
+				UnitBriefInfoInstance->ShowTargetInfoAndTab(StandingUnit,-1);	
+			}
 		}
 	}
 	if(bShow)
@@ -69,6 +87,15 @@ void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 	else
 	{
 		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);	
+	}
+}
+
+void UPawnProcess_ChooseTarget::HideTargetUnitBriefInfo()
+{
+	if(UnitBriefInfoInstance != nullptr)
+	{
+		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);
+		UnitBriefInfoInstance = nullptr;
 	}
 }
 
@@ -121,7 +148,15 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 
 	CurrentCursor = PawnInstance->GetSelectedTile();
 	//显示攻击范围
-	ArrayOfAbilityRange = ChosenAbilityPtr->Range(CurrentCursor);
+	if(UnitInstance->NeedToMove())
+	{
+		ArrayOfAbilityRange = ChosenAbilityPtr->Range(UnitInstance->GetTempDestinationGridIndex());
+	}
+	else
+	{
+		ArrayOfAbilityRange = ChosenAbilityPtr->Range(UnitInstance->GetGridIndex());	
+	}
+	
 	for(const FIntPoint& one : ArrayOfAbilityRange)
 	{
 		PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::AbilityRange);
@@ -131,8 +166,14 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	UnitBriefInfoInstance = Tmp->GetUnitBriefInfo();
 	BattleInfoInstance = PawnInstance->GetMyHUD()->GetBattleInfoUI();
 	BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
+	UnitDetailInfoPtr = Tmp->GetUnitDetailInfo();
 	PawnInstance->OnCameraActing.AddDynamic(this,&UPawnProcess_ChooseTarget::SubscribeCameraActing);
 
+	ShowTargetUnitBriefInfo(CurrentCursor);
+
+	UnitDetailInfoPtr->SetVisibility(ESlateVisibility::Hidden);
+	bIsTab = false;
+	
 	PawnInstance->GetEventCenter()->EventOfProcessChanged.Broadcast(FText::FromName(TEXT("ターゲットを選択")));
 }
 
@@ -170,11 +211,24 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		break;
 	}
 
-	if(!PawnInstance->GetMyGrid()->IsValidGridIndex(next))
+	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(next);
+	if(TileDataPtr == nullptr)
 	{
-		ShowTargetUnitBriefInfo(next);
+		HideTargetUnitBriefInfo();
 		return;
 	}
+	
+	if(TileDataPtr->UnitOnTile == UnitInstance)
+	{
+		HideTargetUnitBriefInfo();
+		return;
+	}
+	
+	// if(!PawnInstance->GetMyGrid()->IsValidGridIndex(next))
+	// {
+	// 	ShowTargetUnitBriefInfo(next);
+	// 	return;
+	// }
 	//先清理掉上一次 指示器范围
 	//前回のインジケーターをクリアする
 	ClearIndicatorRange();
@@ -188,6 +242,10 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		// PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
 		PawnInstance->GetMyGrid()->AddStateToTile(next,ETileState::Selected);
 		CurrentCursor = next;
+		
+		BattleInfoInstance->HideBackAtkTips();
+		BattleInfoInstance->HideCooperatorTips();
+		
 		return;
 	}
 	
@@ -262,17 +320,26 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 void UPawnProcess_ChooseTarget::HandleCancelInput()
 {
 	Super::HandleCancelInput();
-	PawnInstance->SwitchToCmdInput();
+	if(bIsTab)
+	{
+		UnitDetailInfoPtr->SetVisibility(ESlateVisibility::Hidden);
+		bIsTab = false;
+	}
+	else
+	{
+		PawnInstance->SwitchToCmdInput();	
+	}
+	
 }
 
 void UPawnProcess_ChooseTarget::HandleConfirmInput()
 {
 	Super::HandleConfirmInput();
-	auto TileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
+	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
 	
 	if(!ArrayOfAbilityRange.Contains(CurrentCursor))return;
 
-	if(!ChosenAbilityPtr->IsValidTarget(*TileData,PawnInstance->GetMyGrid()))
+	if(!ChosenAbilityPtr->IsValidTarget(TileDataPtr,PawnInstance->GetMyGrid()))
 	{
 		return;	
 	}
@@ -304,11 +371,7 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
 	
 	// PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
-	if(UnitBriefInfoInstance != nullptr)
-	{
-		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);
-		UnitBriefInfoInstance = nullptr;
-	}
+	HideTargetUnitBriefInfo();
 		
 
 	if(BattleInfoInstance != nullptr)
@@ -318,6 +381,10 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 		BattleInfoInstance->SetVisibility(ESlateVisibility::Hidden);
 		BattleInfoInstance = nullptr;
 	}
+
+	UnitDetailInfoPtr->SetVisibility(ESlateVisibility::Hidden);
+	bIsTab = false;
+	
 	PawnInstance->OnCameraActing.RemoveDynamic(this,&UPawnProcess_ChooseTarget::SubscribeCameraActing);
 }
 
@@ -338,5 +405,25 @@ void UPawnProcess_ChooseTarget::HandleZooming(float Val)
 
 void UPawnProcess_ChooseTarget::HandleTabInput()
 {
-	
+	if(!bIsTab)
+	{
+		const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
+		if(TileDataPtr == nullptr)return;
+
+		if(TileDataPtr == nullptr)return;
+		if(TileDataPtr->UnitOnTile == nullptr)return;
+		if(TileDataPtr->UnitOnTile == UnitInstance)return;
+		if(TileDataPtr->Index == UnitInstance->GetTempDestinationGridIndex())
+		{
+			auto Team = PawnInstance->GetMyCombatSystem()->GetOneSideTeam(UnitInstance->GetUnitSide());
+			UnitDetailInfoPtr->ShowUnitTeamInfo(Team,UnitInstance);
+		}
+		else
+		{
+			auto Team = PawnInstance->GetMyCombatSystem()->GetOneSideTeam(TileDataPtr->UnitOnTile->GetUnitSide());
+			UnitDetailInfoPtr->ShowUnitTeamInfo(Team,TileDataPtr->UnitOnTile);	
+		}
+		
+		bIsTab = true;
+	}
 }

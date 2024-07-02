@@ -22,7 +22,7 @@ public:
 	virtual TArray<FIntPoint> Range(const FIntPoint&) override;
 	virtual TArray<FIntPoint> Indicator(const FIntPoint& Index)override;
 	virtual bool IsArea()override{return true;}
-	virtual bool IsValidTarget(const FTileData& TileData,AGrid* MyGrid) override;
+	virtual bool IsValidTarget(const FTileData* TileData,AGrid* MyGrid) override;
 	virtual bool IsValidUnit(TObjectPtr<AMyUnit> Unit) override;
 	virtual TArray<TObjectPtr<AMyUnit>> TakeTargets(const FIntPoint& Point, AGrid* MyGrid) override;
 	virtual FBattleReport DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets,AGrid* MyGrid,bool NeedCooperator) override;

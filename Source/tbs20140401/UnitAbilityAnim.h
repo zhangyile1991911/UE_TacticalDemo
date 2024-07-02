@@ -52,7 +52,7 @@ public:
 	int GetCost()const{return SkillData.SpendPoint;}
 
 	virtual bool CanExecute(){return false;}
-	virtual bool IsValidTarget(const FTileData& TileData,AGrid* MyGrid){return false;}
+	virtual bool IsValidTarget(const FTileData* TileData,AGrid* MyGrid){return false;}
 	virtual bool IsValidUnit(TObjectPtr<AMyUnit> Unit);
 
 	virtual FBattleReport DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets,AGrid* MyGrid,bool NeedCooperator);

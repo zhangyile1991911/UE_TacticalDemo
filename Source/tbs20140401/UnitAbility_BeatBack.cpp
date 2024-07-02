@@ -44,11 +44,12 @@ TArray<FIntPoint> AUnitAbility_BeatBack::Range(const FIntPoint& Int32Point)
 	return MoveTemp(RangeTiles);
 }
 
-bool AUnitAbility_BeatBack::IsValidTarget(const FTileData& TileData, AGrid* MyGrid)
+bool AUnitAbility_BeatBack::IsValidTarget(const FTileData* TileData, AGrid* MyGrid)
 {
-	if(TileData.UnitOnTile == nullptr)return false;
-	if(TileData.UnitOnTile->IsDead())return false;
-	if(TileData.UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return false;
+	if(TileData == nullptr)return false;
+	if(TileData->UnitOnTile == nullptr)return false;
+	if(TileData->UnitOnTile->IsDead())return false;
+	if(TileData->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return false;
 	return true;
 }
 

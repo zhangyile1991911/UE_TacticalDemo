@@ -3,6 +3,7 @@
 
 #include "PawnProcess_Idle.h"
 
+#include "EventCenter.h"
 #include "IdleDirection.h"
 #include "MyCombatSystem.h"
 #include "MyUnit.h"
@@ -33,7 +34,7 @@ void UPawnProcess_Idle::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 		break;
 	}
 	UnitInstance->SetTempIdleDirection(Direction);
-	
+	PawnInstance->GetEventCenter()->EventOfProcessChanged.Broadcast(FText::FromName(TEXT("待機方向を選択")));
 }
 
 void UPawnProcess_Idle::TickProcess()

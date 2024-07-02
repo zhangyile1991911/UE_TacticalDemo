@@ -72,8 +72,15 @@ void UPawnProcess_CMD::ShowBriefInfo()
 	const bool bHasWrap = UBattleFunc::HasWrapAttackUnit(UnitInstance,TargetUnit,PawnInstance->GetMyGrid()) != nullptr;
 	const bool bIsBack = UBattleFunc::IsBackAttack(UnitInstance,TargetUnit);
 	const float HitPercent = UBattleFunc::CalculateHitRate(UnitInstance,TargetUnit,PawnInstance->GetMyGrid(),bIsBack,bHasWrap);
-	UnitBriefInfoPtr->ShowTargetInfoAndTab(TargetUnit,HitPercent);
-	
+	UnitBriefInfoPtr->ShowTargetBriefInfoOnly(TargetUnit,HitPercent);
+
+	//将单位转向目标
+	const FIntPoint TargetGridIndex = TargetUnit->GetGridIndex();
+	// UnitInstance->RotateSelfByDestination(UnitInstance->GetTempDestinationGridIndex(),TargetGridIndex);
+
+	PawnInstance->UpdateTileStatusByIndex(TargetGridIndex,ETileState::Selected);
+	// PawnInstance->GetMyGrid()->RemoveStateFromTile(PawnInstance->GetSelectedTile(),ETileState::Selected);
+	// PawnInstance->GetMyGrid()->AddStateToTile(TargetGridIndex,ETileState::Selected);
 }
 
 void UPawnProcess_CMD::ClearAbilityRange()
@@ -107,7 +114,11 @@ void UPawnProcess_CMD::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	{
 		PawnInstance->GetEventCenter()->EventOfProcessChanged.Broadcast(FText::FromName(TEXT("コマンドを選択")));
 	}
-	
+
+	CmdWidgetInstance->SelectCmd(0);
+	UnitInstance->SetChosenAbility(0);
+	CmdIndex = 0;
+	ShowBriefInfo();
 	// CmdWidgetInstance = BottomActionBarInstance->GetCmdPanel();
 	// CmdWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 	// CmdWidgetInstance->RefreshUnitCmd(UnitInstance);
@@ -127,10 +138,15 @@ void UPawnProcess_CMD::HandleDirectionInput(const FVector2D& Index)
 	int NextCmdIndex = CmdIndex - Index.Y;
 	NextCmdIndex = FMath::Clamp(NextCmdIndex,0,UnitInstance->GetSelectableAbilityNum());
 	// UE_LOG(LogTemp,Log,TEXT("after CmdIndex = %d"),CmdIndex);
+
+	if(NextCmdIndex == CmdIndex)
+	{
+		return;
+	}
 	CmdWidgetInstance->SelectCmd(NextCmdIndex);
 	UnitInstance->SetChosenAbility(NextCmdIndex);
 	CmdIndex = NextCmdIndex;
-
+	
 	ShowBriefInfo();
 }
 
@@ -158,15 +174,7 @@ void UPawnProcess_CMD::HandleConfirmInput()
 	UnitInstance->SetChosenAbility(CmdIndex);
 	
 	PawnInstance->SwitchToChooseTarget();
-	// if(ChosenAbility->GetSkillData().SkillId == 10001)
-	// {
-	// 	PawnInstance->SwitchToIdle();
-	// }
-	// else
-	// {
-	// 	PawnInstance->SwitchToChooseTarget();
-	// }
-	
+
 }
 
 void UPawnProcess_CMD::HandleSpaceInput()

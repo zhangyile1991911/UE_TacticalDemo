@@ -79,6 +79,9 @@ protected:
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UOverlay> CmdNode;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UOverlay> EnterNode;
 	
 	TArray<TObjectPtr<UImage>> APList;
 	UPROPERTY()
@@ -91,17 +94,18 @@ protected:
 	virtual void NativeDestruct() override;
 
 	void RefreshUnitBaseBriefInfo(TObjectPtr<AMyUnit> Unit);
-	void RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,float HitPercent);
+	void RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Defender,float HitPercent);
 public:
 	void ShowDetailTabOnly(const FVector& Location);
 	void ShowSelfCmd(TObjectPtr<AMyUnit> Attacker);
 	void ShowConfirmCmd(const FVector& Location);
-	void ShowTarget(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,float HitPercent);
+	void ShowTarget(TObjectPtr<AMyUnit> Defender,float HitPercent);
 	void ShowTargetInfoAndTab(TObjectPtr<AMyUnit> Defender,float HitPercent);
 	void ShowTargetInfoAndConfirmAndTab(TObjectPtr<AMyUnit> Defender);
 	TObjectPtr<UCanvasPanelSlot> GetCanvasPanelSlot();
 	void UpdateWidgetPosition(const FVector& Location);
 	void ShowMoveOnly(const FVector& Location);
 	void ShowDetailInfoOnly(TObjectPtr<AMyUnit> Unit);
+	void ShowTargetBriefInfoOnly(TObjectPtr<AMyUnit> Unit,float HitPercent);
 };
 

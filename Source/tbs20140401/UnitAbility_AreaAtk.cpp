@@ -54,10 +54,11 @@ TArray<FIntPoint> AUnitAbility_AreaAtk::Indicator(const FIntPoint& Index)
 	return Area;
 }
 
-bool AUnitAbility_AreaAtk::IsValidTarget(const FTileData& TileData,AGrid* MyGrid)
+bool AUnitAbility_AreaAtk::IsValidTarget(const FTileData* TileData,AGrid* MyGrid)
 {
+	if(TileData == nullptr)return false;
 	//スキルの範囲ないで、敵がなかったら　実行できない
-	FIntPoint Index = TileData.Index;
+	FIntPoint Index = TileData->Index;
 	TArray<FIntPoint> Area;
 	Area.Reserve(5);
 	Area.Add(FIntPoint(Index.X,Index.Y));

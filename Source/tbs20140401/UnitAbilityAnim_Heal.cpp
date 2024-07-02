@@ -6,6 +6,7 @@
 #include "BattleReport.h"
 #include "MyUnit.h"
 #include "Grid.h"
+#include "IContentBrowserSingleton.h"
 
 // Sets default values
 AUnitAbilityAnim_Heal::AUnitAbilityAnim_Heal()
@@ -105,11 +106,12 @@ TArray<FIntPoint> AUnitAbilityAnim_Heal::Indicator(const FIntPoint& Index)
 	return MoveTemp(Result);
 }
 
-bool AUnitAbilityAnim_Heal::IsValidTarget(const FTileData& TileData, AGrid* MyGrid)
+bool AUnitAbilityAnim_Heal::IsValidTarget(const FTileData* TileData, AGrid* MyGrid)
 {
-	if(TileData.UnitOnTile == nullptr)return false;
-	if(TileData.UnitOnTile->IsDead())return false;
-	if(TileData.UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return true;
+	if(TileData == nullptr)return false;
+	if(TileData->UnitOnTile == nullptr)return false;
+	if(TileData->UnitOnTile->IsDead())return false;
+	if(TileData->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return true;
 	return false;
 }
 

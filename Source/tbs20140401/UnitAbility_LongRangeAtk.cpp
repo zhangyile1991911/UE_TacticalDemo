@@ -33,9 +33,10 @@ TArray<FIntPoint> AUnitAbility_LongRangeAtk::Range(const FIntPoint& Int32Point)
 	return Result;
 }
 
-bool AUnitAbility_LongRangeAtk::IsValidTarget(const FTileData& TileData,AGrid* MyGrid)
+bool AUnitAbility_LongRangeAtk::IsValidTarget(const FTileData* TileData,AGrid* MyGrid)
 {
-	auto IndicatorRange = Indicator(TileData.Index);
+	if(TileData == nullptr)return false;
+	auto IndicatorRange = Indicator(TileData->Index);
 	for(const auto& One : IndicatorRange)
 	{
 		const auto TempPtr = MyGrid->GetTileDataByIndex(One);

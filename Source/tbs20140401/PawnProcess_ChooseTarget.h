@@ -9,6 +9,7 @@
 class UGameUI_BattleInfo;
 class AUnitAbilityAnim;
 class UUGameUI_UnitBriefInfo;
+class UUnitInfoDetail;
 /**
  * 
  */
@@ -25,14 +26,18 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoInstance;
 	UPROPERTY()
+	TObjectPtr<UUnitInfoDetail> UnitDetailInfoPtr;
+	UPROPERTY()
 	TObjectPtr<UGameUI_BattleInfo> BattleInfoInstance;
 
+	bool bIsTab = false;
 	bool bIsBackAttack;
 	bool bIsWrapAttack;
 protected:
 	// void AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Ability);
 	// void AbilityCompletedEvent(TObjectPtr<AUnitAbilityAnim> Ability);
 	void ShowTargetUnitBriefInfo(const FIntPoint& Index);
+	void HideTargetUnitBriefInfo();
 	void ClearIndicatorRange();
 	UFUNCTION()
 	void SubscribeCameraActing();

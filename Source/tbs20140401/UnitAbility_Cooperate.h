@@ -21,7 +21,7 @@ public:
 	virtual bool IsCooperate()override{return true;}
 	virtual bool CanExecute() override;
 	virtual TArray<FIntPoint> Range(const FIntPoint&) override;
-	virtual bool IsValidTarget(const FTileData& TileData,AGrid* MyGrid) override;
+	virtual bool IsValidTarget(const FTileData* TileData,AGrid* MyGrid) override;
 	virtual TArray<TObjectPtr<AMyUnit>> TakeTargets(const FIntPoint& Point, AGrid* MyGrid) override;
 	virtual FBattleReport DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets,AGrid* MyGrid,bool NeedCooperator) override;
 	virtual FBattleReport DoCalculation(TObjectPtr<AMyUnit> Target, AGrid* MyGrid,bool NeedCooperator) override;
