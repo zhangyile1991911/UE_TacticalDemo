@@ -14,6 +14,7 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
 #include "BattleFunc.h"
+#include "EventCenter.h"
 #include "GameUI_BattleInfo.h"
 #include "UnitAbilityAnim.h"
 
@@ -41,8 +42,7 @@ void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 			float HitPer = UBattleFunc::CalculateHitRate(UnitInstance,StandingUnit,PawnInstance->GetMyGrid(),bIsWrapAttack,bIsBackAttack);
 			HitPer = FMath::Clamp(HitPer,0,100);
 			//有效目标 确定 详情
-			UnitBriefInfoInstance->ShowTarget(UnitInstance,StandingUnit,HitPer,
-				FText::FromName(TEXT("确定")),FText::FromName(TEXT("详情")));
+			UnitBriefInfoInstance->ShowTarget(UnitInstance,StandingUnit,HitPer);
 		}
 		else
 		{//无效 详情
@@ -132,7 +132,8 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	BattleInfoInstance = PawnInstance->GetMyHUD()->GetBattleInfoUI();
 	BattleInfoInstance->SetVisibility(ESlateVisibility::Visible);
 	PawnInstance->OnCameraActing.AddDynamic(this,&UPawnProcess_ChooseTarget::SubscribeCameraActing);
-	
+
+	PawnInstance->GetEventCenter()->EventOfProcessChanged.Broadcast(FText::FromName(TEXT("ターゲットを選択")));
 }
 
 void UPawnProcess_ChooseTarget::TickProcess()

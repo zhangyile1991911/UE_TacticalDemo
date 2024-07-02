@@ -53,17 +53,17 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> MaxHPText;
 
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UImage> ConfirmIcon;
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UTextBlock> ConfirmText;
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UImage> TabIcon;
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UTextBlock> TabText;
+	// UPROPERTY(meta=(BindWidget))
+	// TObjectPtr<UImage> ConfirmIcon;
+	//
+	// UPROPERTY(meta=(BindWidget))
+	// TObjectPtr<UTextBlock> ConfirmText;
+	//
+	// UPROPERTY(meta=(BindWidget))
+	// TObjectPtr<UImage> TabIcon;
+	//
+	// UPROPERTY(meta=(BindWidget))
+	// TObjectPtr<UTextBlock> TabText;
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UOverlay> InfoNode;
@@ -73,6 +73,12 @@ protected:
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UOverlay> TabNode;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UOverlay> TabMoveNode;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UOverlay> CmdNode;
 	
 	TArray<TObjectPtr<UImage>> APList;
 	UPROPERTY()
@@ -83,17 +89,19 @@ protected:
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
-	
+
+	void RefreshUnitBaseBriefInfo(TObjectPtr<AMyUnit> Unit);
 	void RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,float HitPercent);
 public:
-	void ShowMoveOnly();
-	void ShowDetailOnly();
+	void ShowDetailTabOnly(const FVector& Location);
 	void ShowSelfCmd(TObjectPtr<AMyUnit> Attacker);
-	void ShowConfirmCmd(const FText& ConfirmTxt);
-	void ShowTarget(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,float HitPercent,FText ConfirmTxt,FText DetailTxt);
+	void ShowConfirmCmd(const FVector& Location);
+	void ShowTarget(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,float HitPercent);
 	void ShowTargetInfoAndTab(TObjectPtr<AMyUnit> Defender,float HitPercent);
-	void ShowTargetInfoAndConfirmAndTab(TObjectPtr<AMyUnit> Defender,FText ConfirmTxt,FText TabTxt);
+	void ShowTargetInfoAndConfirmAndTab(TObjectPtr<AMyUnit> Defender);
 	TObjectPtr<UCanvasPanelSlot> GetCanvasPanelSlot();
 	void UpdateWidgetPosition(const FVector& Location);
+	void ShowMoveOnly(const FVector& Location);
+	void ShowDetailInfoOnly(TObjectPtr<AMyUnit> Unit);
 };
 

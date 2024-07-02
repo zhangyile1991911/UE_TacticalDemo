@@ -52,6 +52,7 @@ protected:
 	UFUNCTION()
 	void SubscribeCamera();
 	void UpdateUnitDetailInfoPosition(const FIntPoint& Point);
+	void NotifyCurrentSelected();
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn) override;
 	virtual void TickProcess() override;

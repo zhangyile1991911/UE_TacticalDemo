@@ -4,10 +4,14 @@
 #include "BottomActionBar.h"
 
 #include "CmdWidget.h"
+#include "EventCenter.h"
 #include "FirstRolePortrait.h"
 #include "MyCombatSystem.h"
+#include "My_Pawn.h"
+#include "TileData.h"
 #include "UnitInfoDetail.h"
 #include "UnitPortrait.h"
+#include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 
 void UBottomActionBar::NativeConstruct()
@@ -33,11 +37,36 @@ void UBottomActionBar::NativeConstruct()
 	CmdList->SetVisibility(ESlateVisibility::Hidden);
 
 	UnitDetailInfoPanel->SetVisibility(ESlateVisibility::Hidden);
+
+	if(GetWorld() != nullptr && GetWorld()->GetFirstPlayerController() != nullptr)
+	{
+		APawn* CurPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
+		if(CurPawn == nullptr)return;
+		AMy_Pawn* MyPawn = Cast<AMy_Pawn>(CurPawn);
+		EventHandlerGrid = MyPawn->GetEventCenter()->EventOfChoseGrid.AddUObject(this,&UBottomActionBar::OnEventGrid);	
+		EventHandlerProcess = MyPawn->GetEventCenter()->EventOfProcessChanged.AddUObject(this,&UBottomActionBar::OnEventProcess);
+	}
+	
 }
 
 void UBottomActionBar::NativeDestruct()
 {
 	Super::NativeDestruct();
+
+	
+}
+
+void UBottomActionBar::BeginDestroy()
+{
+	Super::BeginDestroy();
+
+	if(GetWorld() != nullptr && GetWorld()->GetFirstPlayerController() != nullptr)
+    {
+    	APawn* CurPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
+    	if(CurPawn == nullptr)return;
+    	AMy_Pawn* MyPawn = Cast<AMy_Pawn>(CurPawn);
+		MyPawn->GetEventCenter()->EventOfChoseGrid.Remove(EventHandlerGrid);	
+    }
 }
 
 void UBottomActionBar::OnActionBarChanged(const TArray<TObjectPtr<AMyUnit>>& array)
@@ -82,8 +111,36 @@ void UBottomActionBar::OnActionBarChanged(const TArray<TObjectPtr<AMyUnit>>& arr
 			Portraits[i-1]->RefreshUnitIcon(array[i]);
 		}
 	}
-
 	
+}
+
+void UBottomActionBar::OnEventGrid(const FTileData* TileDataPtr)
+{
+	const int Height = TileDataPtr->Transform.GetLocation().Z/100;
+	GridHeight->SetText(FText::Format(NSLOCTEXT("","","{0}"),Height));
+	switch (TileDataPtr->TileType)
+	{
+	case ETileType::Normal:
+		GridType->SetText(FText::FromName(TEXT("普通")));
+		break;
+	case ETileType::DoubleCost:
+		GridType->SetText(FText::FromName(TEXT("二倍")));
+		break;
+	case ETileType::TripleCost:
+		GridType->SetText(FText::FromName(TEXT("三倍")));
+		break;
+	case ETileType::Obstacle:
+		GridType->SetText(FText::FromName(TEXT("障害物")));
+		break;
+	case ETileType::FlyingUnitsOnly:
+		GridType->SetText(FText::FromName(TEXT("飛ぶのみ")));
+		break;
+	}
+}
+
+void UBottomActionBar::OnEventProcess(FText ProcessText)
+{
+	ProcessTxt->SetText(ProcessText);
 }
 
 TObjectPtr<UCmdWidget> UBottomActionBar::ShowCmdPanel(TObjectPtr<AMyUnit> UnitInstance,int CmdIndex) const

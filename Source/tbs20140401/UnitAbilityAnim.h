@@ -16,7 +16,7 @@ struct FTileData;
 
 DECLARE_EVENT_OneParam(AUnitAbilityAnim,EAbilityComplete,TObjectPtr<AUnitAbilityAnim>)
 DECLARE_DELEGATE_OneParam(FAbilityComplete,TObjectPtr<AUnitAbilityAnim>)
-UCLASS(Abstract)
+UCLASS(Abstract,Blueprintable)
 class TBS20140401_API AUnitAbilityAnim : public AActor
 {
 	GENERATED_BODY()
@@ -72,6 +72,7 @@ public:
 	virtual bool IsIdle(){return false;}
 	virtual bool IsCooperate(){return false;}
 	virtual bool IsArea(){return false;}
+	virtual bool IsHeal(){return false;}
 	
 	EAbilityComplete CompletedEvent;
 	FAbilityComplete CompletedCallback;

@@ -17,6 +17,7 @@ void UUGameUI_UnitBriefInfo::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	TabMoveNode->SetVisibility(ESlateVisibility::Collapsed);
 	APList.Add(AP1);
 	APList.Add(AP2);
 	APList.Add(AP3);
@@ -27,23 +28,92 @@ void UUGameUI_UnitBriefInfo::NativeDestruct()
 	Super::NativeDestruct();
 }
 
+void UUGameUI_UnitBriefInfo::RefreshUnitBaseBriefInfo(TObjectPtr<AMyUnit> Unit)
+{
+	//Level
+	FText TmpLevel = FText::Format(FText::FromString("LV.{0}"), FText::AsNumber(1));
+	LevelText->SetText(TmpLevel);
+	//Job
+	switch (Unit->GetUnitType())
+	{
+	case EUnitType::Warrior:
+	case EUnitType::EnemyWarrior:
+		UnitNameText->SetText(FText::FromName(TEXT("戦士")));
+		break;
+	case EUnitType::Slime:
+	case EUnitType::EnemySlime:
+		UnitNameText->SetText(FText::FromName(TEXT("スライム")));
+		break;
+	case EUnitType::Ranger:
+	case EUnitType::EnemyRanger:
+		UnitNameText->SetText(FText::FromName(TEXT("レンジャー")));
+		break;
+	case EUnitType::Bat:
+	case EUnitType::EnemyBat:
+		UnitNameText->SetText(FText::FromName(TEXT("バット")));
+		break;
+	case EUnitType::Chicken:
+	case EUnitType::EnemyChicken:
+		UnitNameText->SetText(FText::FromName(TEXT("鳥")));
+		break;
+	case EUnitType::Priest:
+	case EUnitType::EnemyPriest:
+		UnitNameText->SetText(FText::FromName(TEXT("司祭")));
+		break;
+	case EUnitType::EnemyTank:
+		UnitNameText->SetText(FText::FromName(TEXT("タンク")));
+		break;
+	}
+	//AP
+	for(int  i = 0;i < 3;i++)
+	{
+		APList[i]->SetVisibility(ESlateVisibility::Visible);
+	}
+	//HP
+	const float fHP = Unit->GetRuntimeProperty().HP;
+	const float fHPConfig = Unit->GetProperty().HP;
+	HPBar->SetPercent(fHP/fHPConfig);
+	
+	CurHPText->SetText(FText::FromString(FString::FormatAsNumber(fHP)));
+	MaxHPText->SetText(FText::FromString(FString::FormatAsNumber(fHPConfig)));
+}
+
 
 void UUGameUI_UnitBriefInfo::RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,float HitPercent)
 {
-	FText TmpLevel = FText::Format(FText::FromString("等级 {0}"), FText::AsNumber(1));
+	FText TmpLevel = FText::Format(FText::FromString("LV.{0}"), FText::AsNumber(1));
 	LevelText->SetText(TmpLevel);
 
 	switch (Defender->GetUnitType())
 	{
 	case EUnitType::Warrior:
-		UnitNameText->SetText(FText::FromName(TEXT("战士")));
+	case EUnitType::EnemyWarrior:
+		UnitNameText->SetText(FText::FromName(TEXT("戦士")));
 		break;
 	case EUnitType::Slime:
-		UnitNameText->SetText(FText::FromName(TEXT("史莱姆")));
+	case EUnitType::EnemySlime:
+		UnitNameText->SetText(FText::FromName(TEXT("スライム")));
 		break;
 	case EUnitType::Ranger:
-		UnitNameText->SetText(FText::FromName(TEXT("游侠")));
+	case EUnitType::EnemyRanger:
+		UnitNameText->SetText(FText::FromName(TEXT("レンジャー")));
 		break;
+	case EUnitType::Bat:
+	case EUnitType::EnemyBat:
+		UnitNameText->SetText(FText::FromName(TEXT("バット")));
+		break;
+	case EUnitType::Chicken:
+	case EUnitType::EnemyChicken:
+		UnitNameText->SetText(FText::FromName(TEXT("鳥")));
+		break;
+	case EUnitType::Priest:
+	case EUnitType::EnemyPriest:
+		UnitNameText->SetText(FText::FromName(TEXT("司祭")));
+		break;
+	case EUnitType::EnemyTank:
+		UnitNameText->SetText(FText::FromName(TEXT("タンク")));
+		break;
+		
 	}
 	
 	for(int  i = 0;i < 3;i++)
@@ -71,48 +141,53 @@ void UUGameUI_UnitBriefInfo::RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Attacker,T
 	MaxHPText->SetText(FText::FromString(FString::FormatAsNumber(fHPConfig)));
 }
 
-void UUGameUI_UnitBriefInfo::ShowMoveOnly()
-{
-	InfoNode->SetVisibility(ESlateVisibility::Hidden);
-	TabNode->SetVisibility(ESlateVisibility::Hidden);
-	ConfirmNode->SetVisibility(ESlateVisibility::Visible);
-}
-
-void UUGameUI_UnitBriefInfo::ShowDetailOnly()
+void UUGameUI_UnitBriefInfo::ShowDetailTabOnly(const FVector& Location)
 {
 	InfoNode->SetVisibility(ESlateVisibility::Hidden);
 	ConfirmNode->SetVisibility(ESlateVisibility::Hidden);
 	TabNode->SetVisibility(ESlateVisibility::Visible);
-	TabText->SetText(FText::FromName(TEXT("详情")));
+
+	UpdateWidgetPosition(Location);
+	// TabText->SetText(FText::FromName(TEXT("詳細")));
 }
 
 void UUGameUI_UnitBriefInfo::ShowSelfCmd(TObjectPtr<AMyUnit> Attacker)
 {
-	InfoNode->SetVisibility(ESlateVisibility::Hidden);
 	TabNode->SetVisibility(ESlateVisibility::Visible);
-	ConfirmNode->SetVisibility(ESlateVisibility::Visible);
-	ConfirmText->SetText(FText::FromName(TEXT("选择指令")));
-	TabText->SetText(FText::FromName(TEXT("详情")));
+	CmdNode->SetVisibility(ESlateVisibility::Visible);
+	
+	ConfirmNode->SetVisibility(ESlateVisibility::Collapsed);
+	InfoNode->SetVisibility(ESlateVisibility::Collapsed);
+	TabMoveNode->SetVisibility(ESlateVisibility::Collapsed);
+	UpdateWidgetPosition(Attacker->GetActorLocation());
+	// ConfirmText->SetText(FText::FromName(TEXT("コマンド選択")));
+	// TabText->SetText(FText::FromName(TEXT("詳細")));
 }
 
-void UUGameUI_UnitBriefInfo::ShowConfirmCmd(const FText& ConfirmTxt)
+void UUGameUI_UnitBriefInfo::ShowConfirmCmd(const FVector& Location)
 {
 	InfoNode->SetVisibility(ESlateVisibility::Hidden);
 	TabNode->SetVisibility(ESlateVisibility::Hidden);
 	ConfirmNode->SetVisibility(ESlateVisibility::Visible);
-	ConfirmText->SetText(ConfirmTxt);
+	// UpdateWidgetPosition(Defender->GetActorLocation());
+	// ConfirmText->SetText(ConfirmTxt);
+	UpdateWidgetPosition(Location);
 }
 
-void UUGameUI_UnitBriefInfo::ShowTarget(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,float HitPercent,FText ConfirmTxt,FText DetailTxt)
+void UUGameUI_UnitBriefInfo::ShowTarget(TObjectPtr<AMyUnit> Attacker,TObjectPtr<AMyUnit> Defender,float HitPercent)
 {
 	InfoNode->SetVisibility(ESlateVisibility::Visible);
 	TabNode->SetVisibility(ESlateVisibility::Visible);
 	ConfirmNode->SetVisibility(ESlateVisibility::Visible);
+
+	TabMoveNode->SetVisibility(ESlateVisibility::Collapsed);
+	CmdNode->SetVisibility(ESlateVisibility::Collapsed);
 	
-	ConfirmText->SetText(ConfirmTxt);
-	
-	TabText->SetText(DetailTxt);
+	// ConfirmText->SetText(ConfirmTxt);
+	//
+	// TabText->SetText(DetailTxt);
 	RefreshUnitBriefInfo(Attacker,Defender,HitPercent);
+	UpdateWidgetPosition(Defender->GetActorLocation());
 }
 
 
@@ -120,22 +195,28 @@ void UUGameUI_UnitBriefInfo::ShowTargetInfoAndTab(TObjectPtr<AMyUnit> Defender,f
 {
 	InfoNode->SetVisibility(ESlateVisibility::Visible);
 	TabNode->SetVisibility(ESlateVisibility::Visible);
-	ConfirmNode->SetVisibility(ESlateVisibility::Hidden);
+	ConfirmNode->SetVisibility(ESlateVisibility::Visible);
 
-	TabText->SetText(FText::FromName(TEXT("详情")));
+	CmdNode->SetVisibility(ESlateVisibility::Collapsed);
+	TabMoveNode->SetVisibility(ESlateVisibility::Collapsed);
+	// TabText->SetText(FText::FromName(TEXT("詳細")));
 	RefreshUnitBriefInfo(nullptr,Defender,HitPercent);
+	UpdateWidgetPosition(Defender->GetActorLocation());
 }
 
-void UUGameUI_UnitBriefInfo::ShowTargetInfoAndConfirmAndTab(TObjectPtr<AMyUnit> Defender,FText ConfirmTxt,FText TabTxt)
+void UUGameUI_UnitBriefInfo::ShowTargetInfoAndConfirmAndTab(TObjectPtr<AMyUnit> Defender)
 {
 	InfoNode->SetVisibility(ESlateVisibility::Visible);
 	TabNode->SetVisibility(ESlateVisibility::Visible);
 	ConfirmNode->SetVisibility(ESlateVisibility::Visible);
 
-	ConfirmText->SetText(ConfirmTxt);
-	TabText->SetText(TabTxt);
+	TabMoveNode->SetVisibility(ESlateVisibility::Collapsed);
+	CmdNode->SetVisibility(ESlateVisibility::Collapsed);
+	// ConfirmText->SetText(ConfirmTxt);
+	// TabText->SetText(TabTxt);
 	
 	RefreshUnitBriefInfo(nullptr,Defender,0);
+	UpdateWidgetPosition(Defender->GetActorLocation());
 }
 
 TObjectPtr<UCanvasPanelSlot> UUGameUI_UnitBriefInfo::GetCanvasPanelSlot()
@@ -155,7 +236,7 @@ void UUGameUI_UnitBriefInfo::UpdateWidgetPosition(const FVector& Location)
 	}
 	
 	FVector2D ScreenLocation;
-	const bool Result = PlayerControllerPtr->ProjectWorldLocationToScreen(Location,ScreenLocation,true);
+	const bool Result = PlayerControllerPtr->ProjectWorldLocationToScreen(Location,ScreenLocation,false);
 	if(Result)
 	{
 		const float Scale = UWidgetLayoutLibrary::GetViewportScale(PlayerControllerPtr);
@@ -163,6 +244,33 @@ void UUGameUI_UnitBriefInfo::UpdateWidgetPosition(const FVector& Location)
 		UCanvasPanelSlot* CanvasSlot = GetCanvasPanelSlot();
 		CanvasSlot->SetPosition(ScreenLocation);
 	}
+}
+
+void UUGameUI_UnitBriefInfo::ShowMoveOnly(const FVector& Location)
+{
+	TabMoveNode->SetVisibility(ESlateVisibility::Visible);
+
+	ConfirmNode->SetVisibility(ESlateVisibility::Collapsed);
+	InfoNode->SetVisibility(ESlateVisibility::Collapsed);
+	TabNode->SetVisibility(ESlateVisibility::Collapsed);
+	CmdNode->SetVisibility(ESlateVisibility::Collapsed);
+
+	UpdateWidgetPosition(Location);
+}
+
+void UUGameUI_UnitBriefInfo::ShowDetailInfoOnly(TObjectPtr<AMyUnit> Unit)
+{
+	InfoNode->SetVisibility(ESlateVisibility::Visible);
+	
+	TabMoveNode->SetVisibility(ESlateVisibility::Collapsed);
+	ConfirmNode->SetVisibility(ESlateVisibility::Collapsed);
+	TabNode->SetVisibility(ESlateVisibility::Collapsed);
+	CmdNode->SetVisibility(ESlateVisibility::Collapsed);
+
+	RefreshUnitBaseBriefInfo(Unit);
+	HitIcon->SetVisibility(ESlateVisibility::Collapsed);
+	HitPerText->SetVisibility(ESlateVisibility::Collapsed);
+	UpdateWidgetPosition(Unit->GetActorLocation());
 }
 
 

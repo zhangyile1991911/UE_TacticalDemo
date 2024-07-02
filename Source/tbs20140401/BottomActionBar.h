@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "BottomActionBar.generated.h"
 
+struct FTileData;
+class UTextBlock;
 class UUGameUI_UnitBriefInfo;
 class UCmdWidget;
 class AMyUnit;
@@ -15,7 +17,7 @@ class UUnitInfoDetail;
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class TBS20140401_API UBottomActionBar : public UUserWidget
 {
 	GENERATED_BODY()
@@ -59,12 +61,29 @@ class TBS20140401_API UBottomActionBar : public UUserWidget
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UUnitInfoDetail> UnitDetailInfoPanel;
 
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UTextBlock> ProcessTxt;
+	
 	TArray<TObjectPtr<UUnitPortrait>> Portraits;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UTextBlock> GridType;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UTextBlock> GridStatus;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UTextBlock> GridHeight;
+
+	FDelegateHandle EventHandlerGrid;
+	FDelegateHandle EventHandlerProcess;
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+	virtual void BeginDestroy() override;
 	
 	void OnActionBarChanged(const TArray<TObjectPtr<AMyUnit>>& array);
+	void OnEventGrid(const FTileData* TileDataPtr);
+	void OnEventProcess(FText ProcessText);
 public:
 	// TObjectPtr<UCmdWidget> GetCmdPanel()const{return CmdList;}
 	TObjectPtr<UCmdWidget> ShowCmdPanel(TObjectPtr<AMyUnit> UnitInstance,int CmdIndex)const;

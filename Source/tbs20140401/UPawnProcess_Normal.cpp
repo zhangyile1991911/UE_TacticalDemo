@@ -4,6 +4,7 @@
 #include "UPawnProcess_Normal.h"
 
 #include "BottomActionBar.h"
+#include "EventCenter.h"
 #include "MyUnit.h"
 #include "Grid.h"
 #include "MyCombatSystem.h"
@@ -13,8 +14,6 @@
 #include "UGameUI_UnitBreifInfo.h"
 #include "UnitInfoDetail.h"
 #include "UnitPathComponent.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
-#include "Components/CanvasPanelSlot.h"
 
 void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
@@ -57,6 +56,10 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	Calucating = 0;
 	CheckDangerousRange();
 	CheckDangerousLine();
+
+	NotifyCurrentSelected();
+
+	PawnInstance->GetEventCenter()->EventOfProcessChanged.Broadcast(FText::FromName(TEXT("移動先を選択")));
 	
 }
 
@@ -121,7 +124,8 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 	ShowOtherUnitRange(Next);
 	
 	ShowTargetUnitBriefInfo(CurrentCursor);
-	
+
+	NotifyCurrentSelected();
 }
 
 void UUPawnProcess_Normal::HandleCancelInput()
@@ -278,15 +282,15 @@ void UUPawnProcess_Normal::ShowTargetUnitBriefInfo(FIntPoint Index)
 		}
 		else
 		{//友军 敌人
-			UnitBriefInfoPtr->ShowTargetInfoAndConfirmAndTab(StandingUnit,FText::FromName(TEXT("演习")),FText::FromName(TEXT("详情")));
+			UnitBriefInfoPtr->ShowTargetInfoAndConfirmAndTab(StandingUnit);
 		}
 	}
 	else
 	{
-		bool IsContain = UnitInstance->GetWalkableTiles().Contains(Index);
+		bool IsContain = UnitInstance->GetPathComponent()->IsMoveInReachableTiles(Index);
 		if(IsContain)
 		{
-			UnitBriefInfoPtr->ShowConfirmCmd(FText::FromName(TEXT("移动")));
+			UnitBriefInfoPtr->ShowMoveOnly(TileData->Transform.GetLocation());
 		}
 		else
 		{
@@ -422,6 +426,15 @@ void UUPawnProcess_Normal::UpdateUnitDetailInfoPosition(const FIntPoint& Point)
 	
 	const FVector WorldPosition = TileDataPtr->UnitOnTile ? TileDataPtr->UnitOnTile->GetActorLocation() : TileDataPtr->Transform.GetLocation();
 	UnitBriefInfoPtr->UpdateWidgetPosition(WorldPosition);
+}
+
+void UUPawnProcess_Normal::NotifyCurrentSelected()
+{
+	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
+	if(TileDataPtr != nullptr)
+	{
+		PawnInstance->GetEventCenter()->EventOfChoseGrid.Broadcast(TileDataPtr);	
+	}
 }
 
 void UUPawnProcess_Normal::ClearDangerousTiles()

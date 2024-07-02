@@ -23,6 +23,7 @@ protected:
 public:
 	// Called every frame
 	// virtual void Tick(float DeltaTime) override;
+	virtual bool IsHeal() override{return true;}
 	virtual bool CanExecute() override;
 	virtual TArray<FIntPoint> Range(const FIntPoint&) override;
 	virtual TArray<FIntPoint> Indicator(const FIntPoint& Index) override;

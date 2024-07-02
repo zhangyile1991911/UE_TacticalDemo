@@ -276,6 +276,7 @@ public:
 	void WalkDone(){WalkNum-=1;}
 	bool CanAttack()const{return AtkNum > 0;}
 	void AttackDone(){AtkNum-=1;}
+	int AttackCount()const{return AtkNum;}
 	bool HasAttackDone()const{return AtkNum != MyProperty.AtkCount;}
 	//タン始まる前に　計算やプロパティリなどセットする
 	void BeforeStartTurn();

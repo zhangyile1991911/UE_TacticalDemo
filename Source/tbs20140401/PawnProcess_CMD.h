@@ -8,6 +8,7 @@
 
 class UBottomActionBar;
 class UCmdWidget;
+class UUGameUI_UnitBriefInfo;
 /**
  * 
  */
@@ -20,6 +21,14 @@ protected:
 	int CmdIndex;
 	TObjectPtr<UBottomActionBar> BottomActionBarInstance;
 	TObjectPtr<UCmdWidget> CmdWidgetInstance;
+
+	UPROPERTY()
+	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoPtr;
+
+	TArray<FIntPoint> ArrayOfAbilityRange;
+
+	void ShowBriefInfo();
+	void ClearAbilityRange();
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn) override; 
 	virtual void TickProcess()override;

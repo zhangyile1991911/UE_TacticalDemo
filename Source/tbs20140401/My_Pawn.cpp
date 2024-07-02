@@ -8,6 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "EventCenter.h"
 #include "Grid.h"
 #include "MyAction.h"
 #include "MyCombatSystem.h"
@@ -153,6 +154,8 @@ void AMy_Pawn::BeginPlay()
 	ChooseTargetProcess = NewObject<UPawnProcess_ChooseTarget>(this);
 	MoveProcess = NewObject<UPawnProcess_Move>(this);
 	CalcAnimProcess = NewObject<UPawnProcess_CalcAnim>(this);
+
+	EventCenter = NewObject<UEventCenter>(this);
 	
 	CurrentProcess = nullptr;
 

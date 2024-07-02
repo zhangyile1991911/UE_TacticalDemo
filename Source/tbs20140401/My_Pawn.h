@@ -11,6 +11,7 @@
 
 #include "My_Pawn.generated.h"
 
+class UEventCenter;
 class UPawnProcess_CalcAnim;
 class UPawnProcess_Move;
 class UPawnProcess_ChooseTarget;
@@ -59,6 +60,9 @@ protected:
 	TObjectPtr<USpringArmComponent> m_springArm;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TObjectPtr<UCameraComponent> m_camera;
+
+	UPROPERTY()
+	TObjectPtr<UEventCenter> EventCenter;
 	
 	UPROPERTY()
 	TObjectPtr<UInputAction> MouseZoomAction;
@@ -218,6 +222,8 @@ public:
 
 	TObjectPtr<AMyUnit> GetSelectedUnit()const{return SelectedUnit;}
 	TObjectPtr<APathPointInst> GetMyPathPointInst()const{return MyPathPointInst;}
+
+	TObjectPtr<UEventCenter> GetEventCenter()const{return EventCenter;}
 
 	void CameraControlLeft()
 	{
