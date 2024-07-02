@@ -33,7 +33,7 @@
 <img src="gif/ThrowAtk.gif" alt="命令を入力したり取り消したり" width="320" height="180">
 9. 撃退
 <img src="gif/PushBackAtk.gif" alt="命令を入力したり取り消したり" width="320" height="180">
-10. 連携攻撃
+10. 挟み撃ち
 <img src="gif/CooperateAtk.gif" alt="命令を入力したり取り消したり" width="320" height="180">
 
 
