@@ -33,11 +33,24 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> SeqNum;
 
+	UPROPERTY(Transient,meta=(BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> Jump;
+
+	UPROPERTY(Transient,meta=(BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> Restore;
+	
 	TArray<TObjectPtr<UImage>> APs;
+
+	uint32 UniqueId;
+	bool bIsFocus = false;
 public:
 	void RefreshUnitIcon(TObjectPtr<AMyUnit> Unit);
-
+	
+	void OnFocus(uint32 UID);
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+	void PlayJumpAnim();
+	void PlayFallAnim();
+	
 };

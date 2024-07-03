@@ -3,6 +3,7 @@
 #include "Command.h"
 #include "MyUnit.h"
 #include "Grid.h"
+#include "InputBehavior.h"
 
 // bool UBattleFunc::IsWrapAttack(AMyUnit* Attacker,AMyUnit* Defender,AMyUnit* Cooperator)
 // {//todo
@@ -91,19 +92,47 @@ bool UBattleFunc::IsCritical(AMyUnit* Attacker,AMyUnit* Defender)
 bool UBattleFunc::IsBackAttack(AMyUnit* Attacker,AMyUnit* Defender)
 {
 	if(Attacker == Defender)return false;
-	FRotator AttackRotation;
+	// FRotator AttackRotation;
+	// if(Attacker->NeedToMove())
+	// {
+	// 	AttackRotation = Attacker->GetShadowUnitRotation();
+	// }
+	// else
+	// {
+	// 	AttackRotation = Attacker->GetUnitForward();
+	// }
+	// FRotator DefenderRotation = Defender->GetUnitForward();
+	// //只能说明是相同方向
+	// float DeltaYaw = FMathf::Abs(AttackRotation.Yaw - DefenderRotation.Yaw);
+	// bool bIsSameDir = DeltaYaw <= 0.01f;
+	// if(!bIsSameDir)return false;
+	FIntPoint DefenderPoint = Defender->GetGridIndex();;
+	EUnitDirectType Direct = Defender->GetUnitDirect();
+	switch (Direct)
+	{
+	case EUnitDirectType::LEFT:
+		DefenderPoint.Y += 1;
+		break;
+	case EUnitDirectType::RIGHT:
+		DefenderPoint.Y -= 1;
+		break;
+	case EUnitDirectType::FORWARD:
+		DefenderPoint.X -= 1;
+		break;
+	case EUnitDirectType::BACKWARD:
+		DefenderPoint.X += 1;
+		break;
+	}
+	FIntPoint AttackPoint;
 	if(Attacker->NeedToMove())
 	{
-		AttackRotation = Attacker->GetShadowUnitRotation();
+		AttackPoint = Attacker->GetTempDestinationGridIndex();
 	}
 	else
 	{
-		AttackRotation = Attacker->GetUnitForward();		
+		AttackPoint = Attacker->GetGridIndex();
 	}
-	FRotator DefenderRotation = Defender->GetUnitForward();
-	float DeltaYaw = FMathf::Abs(AttackRotation.Yaw - DefenderRotation.Yaw);
-	return DeltaYaw <= 0.0001f;
-
+	return AttackPoint == DefenderPoint;
 }
 
 /*

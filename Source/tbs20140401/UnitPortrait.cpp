@@ -26,6 +26,7 @@ void UUnitPortrait::RefreshUnitIcon(TObjectPtr<AMyUnit> Unit)
 	{
 		APs[i]->SetBrushTintColor(bright);
 	}
+	UniqueId = Unit->GetUniqueID();
 }
 
 void UUnitPortrait::NativeConstruct()
@@ -41,4 +42,28 @@ void UUnitPortrait::NativeDestruct()
 {
 	APs.Empty();
 	Super::NativeDestruct();
+}
+
+void UUnitPortrait::OnFocus(uint32 UID)
+{
+	if(UniqueId == UID && !bIsFocus)
+	{
+		PlayJumpAnim();
+		bIsFocus = true;
+	}
+	else if(bIsFocus)
+	{
+		PlayFallAnim();
+		bIsFocus = false;
+	}
+}
+
+void UUnitPortrait::PlayJumpAnim()
+{
+	PlayAnimation(Jump);
+}
+
+void UUnitPortrait::PlayFallAnim()
+{
+	PlayAnimation(Restore);
 }

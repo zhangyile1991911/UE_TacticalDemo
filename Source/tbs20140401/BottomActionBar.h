@@ -73,8 +73,15 @@ class TBS20140401_API UBottomActionBar : public UUserWidget
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> GridHeight;
 
+	UPROPERTY(Transient,meta=(BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> StartBattleHideUI;
+
+	UPROPERTY(Transient,meta=(BindWidgetAnim))
+	TObjectPtr<UWidgetAnimation> FinishBattleShowUI;
+
 	FDelegateHandle EventHandlerGrid;
 	FDelegateHandle EventHandlerProcess;
+	FDelegateHandle EventHandleUnitSelected;
 
 protected:
 	virtual void NativeConstruct() override;
@@ -84,9 +91,12 @@ protected:
 	void OnActionBarChanged(const TArray<TObjectPtr<AMyUnit>>& array);
 	void OnEventGrid(const FTileData* TileDataPtr);
 	void OnEventProcess(FText ProcessText);
+	void OnEventUnitSelect(uint32 UniqueID);
 public:
 	// TObjectPtr<UCmdWidget> GetCmdPanel()const{return CmdList;}
 	TObjectPtr<UCmdWidget> ShowCmdPanel(TObjectPtr<AMyUnit> UnitInstance,int CmdIndex)const;
 	TObjectPtr<UUGameUI_UnitBriefInfo> GetUnitBriefInfo()const{return UnitBriefInfo;}
 	TObjectPtr<UUnitInfoDetail> GetUnitDetailInfo()const{return UnitDetailInfoPanel;}
+	void PlayHideBattleUI();
+	void PlayShowBattleUI();
 };

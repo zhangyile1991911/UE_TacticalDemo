@@ -343,9 +343,7 @@ void AMy_Pawn::MouseZooming(const FInputActionValue& val)
 
 void AMy_Pawn::CamClockWise(const FInputActionValue& val)
 {
-	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::CamClockWise %f "),m_rotationDesired.Yaw)
 	float b1 = val.Get<FInputActionValue::Axis1D>();
-	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::CamClockWise %f"),b1)
 	if(b1 > 0.0f)
 	{
 		if(IsStartGame)

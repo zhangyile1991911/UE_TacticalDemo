@@ -433,7 +433,15 @@ void UUPawnProcess_Normal::NotifyCurrentSelected()
 	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
 	if(TileDataPtr != nullptr)
 	{
-		PawnInstance->GetEventCenter()->EventOfChoseGrid.Broadcast(TileDataPtr);	
+		PawnInstance->GetEventCenter()->EventOfChoseGrid.Broadcast(TileDataPtr);
+	}
+	if(TileDataPtr->UnitOnTile != nullptr)
+	{
+		PawnInstance->GetEventCenter()->EventOfChosenUnit.Broadcast(TileDataPtr->UnitOnTile->GetUniqueID());
+	}
+	else
+	{
+		PawnInstance->GetEventCenter()->EventOfChosenUnit.Broadcast(0);
 	}
 }
 

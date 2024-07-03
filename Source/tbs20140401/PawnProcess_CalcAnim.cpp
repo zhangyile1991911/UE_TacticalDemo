@@ -7,6 +7,7 @@
 #include "MyUnit.h"
 #include "UnitAbilityAnim.h"
 #include "BattleReport.h"
+#include "BottomActionBar.h"
 #include "MyHUD.h"
 
 void UPawnProcess_CalcAnim::CheckFlow(FlowControl Control)
@@ -167,6 +168,7 @@ void UPawnProcess_CalcAnim::AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Abilit
 	UnitInstance->AttackDone();
 	
 	CheckFlow(IDLE);
+	PawnInstance->GetMyHUD()->GetGameUI()->PlayShowBattleUI();
 }
 
 // void UPawnProcess_CalcAnim::AbilityCompletedEvent(TObjectPtr<AUnitAbilityAnim> Ability)
@@ -200,6 +202,7 @@ void UPawnProcess_CalcAnim::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	//进入演出环节
 	ChosenAbilityAnim->DoAnimation(Report,PawnInstance);
 	PawnInstance->GetMyHUD()->ShowBattleInfoUI(true);
+	PawnInstance->GetMyHUD()->GetGameUI()->PlayHideBattleUI();
 }
 
 void UPawnProcess_CalcAnim::TickProcess()

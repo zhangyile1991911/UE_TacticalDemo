@@ -141,7 +141,7 @@ TArray<FIntPoint> AUnitAbility_Archery::Range(const FIntPoint& CenterPoint)
 
 bool AUnitAbility_Archery::IsValidTarget(const FTileData* TileData, AGrid* MyGrid)
 {
-	return true;
+	return IsValidUnit(TileData->UnitOnTile);
 }
 
 bool AUnitAbility_Archery::IsValidUnit(TObjectPtr<AMyUnit> Unit)

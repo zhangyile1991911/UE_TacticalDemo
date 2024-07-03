@@ -45,6 +45,7 @@ void UBottomActionBar::NativeConstruct()
 		AMy_Pawn* MyPawn = Cast<AMy_Pawn>(CurPawn);
 		EventHandlerGrid = MyPawn->GetEventCenter()->EventOfChoseGrid.AddUObject(this,&UBottomActionBar::OnEventGrid);	
 		EventHandlerProcess = MyPawn->GetEventCenter()->EventOfProcessChanged.AddUObject(this,&UBottomActionBar::OnEventProcess);
+		EventHandleUnitSelected = MyPawn->GetEventCenter()->EventOfChosenUnit.AddUObject(this,&UBottomActionBar::OnEventUnitSelect);
 	}
 	
 }
@@ -65,7 +66,9 @@ void UBottomActionBar::BeginDestroy()
     	APawn* CurPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
     	if(CurPawn == nullptr)return;
     	AMy_Pawn* MyPawn = Cast<AMy_Pawn>(CurPawn);
-		MyPawn->GetEventCenter()->EventOfChoseGrid.Remove(EventHandlerGrid);	
+		MyPawn->GetEventCenter()->EventOfChoseGrid.Remove(EventHandlerGrid);
+		MyPawn->GetEventCenter()->EventOfChoseGrid.Remove(EventHandleUnitSelected);
+		MyPawn->GetEventCenter()->EventOfChoseGrid.Remove(EventHandlerProcess);
     }
 }
 
@@ -143,10 +146,28 @@ void UBottomActionBar::OnEventProcess(FText ProcessText)
 	ProcessTxt->SetText(ProcessText);
 }
 
+void UBottomActionBar::OnEventUnitSelect(uint32 UniqueID)
+{
+	for(int i = 0;i < Portraits.Num();i++)
+	{
+		Portraits[i]->OnFocus(UniqueID);
+	}
+}
+
 TObjectPtr<UCmdWidget> UBottomActionBar::ShowCmdPanel(TObjectPtr<AMyUnit> UnitInstance,int CmdIndex) const
 {
 	CmdList->SetVisibility(ESlateVisibility::Visible);
 	CmdList->RefreshUnitCmd(UnitInstance);
 	CmdList->SelectCmd(CmdIndex);
 	return CmdList;
+}
+
+void UBottomActionBar::PlayHideBattleUI()
+{
+	PlayAnimation(StartBattleHideUI);
+}
+
+void UBottomActionBar::PlayShowBattleUI()
+{
+	PlayAnimation(FinishBattleShowUI);
 }

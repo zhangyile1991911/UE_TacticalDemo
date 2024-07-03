@@ -38,6 +38,7 @@ void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 		if(bIsSelf && bNeedToMove)
 		{
 			UnitBriefInfoInstance->ShowTargetInfoAndTab(UnitInstance,-1);
+			PawnInstance->GetEventCenter()->EventOfChosenUnit.Broadcast(UnitInstance->GetUniqueID());
 		}
 		else
 		{
@@ -46,8 +47,9 @@ void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 	}
 	else
 	{
-		const bool IsValid = ChosenAbilityPtr->IsValidTarget(TileData,PawnInstance->GetMyGrid());
-		if(IsValid)
+		const bool bIsInArea = ArrayOfAbilityRange.Contains(Index);
+		const bool bIsValid = ChosenAbilityPtr->IsValidTarget(TileData,PawnInstance->GetMyGrid());
+		if(bIsValid&&bIsInArea)
 		{
 			// const bool bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,StandingUnit);
 			float HitPer = UBattleFunc::CalculateHitRate(UnitInstance,StandingUnit,PawnInstance->GetMyGrid(),bIsWrapAttack,bIsBackAttack);
@@ -66,6 +68,7 @@ void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 				UnitBriefInfoInstance->ShowTargetInfoAndTab(StandingUnit,-1);	
 			}
 		}
+		PawnInstance->GetEventCenter()->EventOfChosenUnit.Broadcast(StandingUnit->GetUniqueID());
 	}
 	if(bShow)
 	{
@@ -86,7 +89,8 @@ void UPawnProcess_ChooseTarget::ShowTargetUnitBriefInfo(const FIntPoint& Index)
 	}
 	else
 	{
-		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);	
+		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);
+		PawnInstance->GetEventCenter()->EventOfChosenUnit.Broadcast(0);
 	}
 }
 
@@ -95,7 +99,6 @@ void UPawnProcess_ChooseTarget::HideTargetUnitBriefInfo()
 	if(UnitBriefInfoInstance != nullptr)
 	{
 		UnitBriefInfoInstance->SetVisibility(ESlateVisibility::Hidden);
-		UnitBriefInfoInstance = nullptr;
 	}
 }
 
@@ -126,6 +129,60 @@ void UPawnProcess_ChooseTarget::SubscribeCameraActing()
 		UnitBriefInfoInstance->UpdateWidgetPosition(WorldPosition);
 	}
 	
+}
+
+void UPawnProcess_ChooseTarget::CheckBackAttack(TObjectPtr<AMyUnit> TempTarget)
+{
+	do
+	{//背击判断
+		if(ChosenAbilityPtr->IsArea())break;
+		
+		bIsBackAttack = false;
+		if(TempTarget == nullptr)
+		{
+			BattleInfoInstance->HideBackAtkTips();
+			break;
+		}
+		FIntPoint Delta = CurrentCursor - UnitInstance->GetTempDestinationGridIndex();
+		if(FMathf::Abs(Delta.X) > 0 && FMathf::Abs(Delta.Y) > 0)break;
+			
+		//必须相邻 才会判断
+		bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,TempTarget);
+		if(!bIsBackAttack)
+		{
+			BattleInfoInstance->HideBackAtkTips();
+			break;
+		}
+		bool IsValid = ChosenAbilityPtr->IsValidUnit(TempTarget);
+		if(IsValid)
+		{
+			BattleInfoInstance->ShowBackAtkTips(TempTarget);
+		}
+	}
+	while (false);
+}
+
+void UPawnProcess_ChooseTarget::CheckCooperateAttack(TObjectPtr<AMyUnit> TempTarget)
+{
+	do
+	{//夹击判断
+		if(ChosenAbilityPtr->IsArea())break;
+		bIsWrapAttack = false;
+		if(TempTarget == nullptr)
+		{
+			BattleInfoInstance->HideCooperatorTips();
+			break;
+		}
+		auto Cooperator = UBattleFunc::HasWrapAttackUnit(UnitInstance,TempTarget,PawnInstance->GetMyGrid());
+		bIsWrapAttack = Cooperator != nullptr;
+		if(!bIsWrapAttack)
+		{
+			BattleInfoInstance->HideCooperatorTips();
+			break;
+		}
+		BattleInfoInstance->ShowCooperatorTips(Cooperator);
+	}
+	while (false);
 }
 
 void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
@@ -173,6 +230,11 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 
 	UnitDetailInfoPtr->SetVisibility(ESlateVisibility::Hidden);
 	bIsTab = false;
+
+	const TObjectPtr<AMyUnit> TempTarget = PawnInstance->GetMyGrid()->GetUnitOnTile(CurrentCursor);
+
+	CheckBackAttack(TempTarget);
+	CheckCooperateAttack(TempTarget);
 	
 	PawnInstance->GetEventCenter()->EventOfProcessChanged.Broadcast(FText::FromName(TEXT("ターゲットを選択")));
 }
@@ -185,7 +247,8 @@ void UPawnProcess_ChooseTarget::TickProcess()
 void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 {
 	// Super::HandleDirectionInput(Input);
-
+	if(bIsTab)return;
+	
 	FIntPoint next;
 	// next.X = CurrentCursor.X + Input.Y;
 	// next.Y = CurrentCursor.Y + Input.X;
@@ -211,18 +274,18 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		break;
 	}
 
-	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(next);
-	if(TileDataPtr == nullptr)
-	{
-		HideTargetUnitBriefInfo();
-		return;
-	}
-	
-	if(TileDataPtr->UnitOnTile == UnitInstance)
-	{
-		HideTargetUnitBriefInfo();
-		return;
-	}
+	// const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(next);
+	// if(TileDataPtr == nullptr)
+	// {
+	// 	HideTargetUnitBriefInfo();
+	// 	return;
+	// }
+	//
+	// if(TileDataPtr->UnitOnTile == UnitInstance)
+	// {
+	// 	HideTargetUnitBriefInfo();
+	// 	return;
+	// }
 	
 	// if(!PawnInstance->GetMyGrid()->IsValidGridIndex(next))
 	// {
@@ -266,53 +329,56 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		
 	UnitInstance->RotateSelfByDestination(UnitInstance->GetTempDestinationGridIndex(),CurrentCursor);
 	const TObjectPtr<AMyUnit> TempTarget = PawnInstance->GetMyGrid()->GetUnitOnTile(CurrentCursor);
-	do
-	{//背击判断
-		if(ChosenAbilityPtr->IsArea())break;
-		
-		bIsBackAttack = false;
-		if(TempTarget == nullptr)
-		{
-			BattleInfoInstance->HideBackAtkTips();
-			break;
-		}
-		FIntPoint Delta = CurrentCursor - UnitInstance->GetTempDestinationGridIndex();
-		if(FMathf::Abs(Delta.X) > 0 && FMathf::Abs(Delta.Y) > 0)break;
-			
-		//必须相邻 才会判断
-		bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,TempTarget);
-		if(!bIsBackAttack)
-		{
-			BattleInfoInstance->HideBackAtkTips();
-			break;
-		}
-		bool IsValid = ChosenAbilityPtr->IsValidUnit(TempTarget);
-		if(IsValid)
-		{
-			BattleInfoInstance->ShowBackAtkTips(TempTarget);
-		}
-	}
-	while (false);
-		
-	do
-	{//夹击判断
-		if(ChosenAbilityPtr->IsArea())break;
-		bIsWrapAttack = false;
-		if(TempTarget == nullptr)
-		{
-			BattleInfoInstance->HideCooperatorTips();
-			break;
-		}
-		auto Cooperator = UBattleFunc::HasWrapAttackUnit(UnitInstance,TempTarget,PawnInstance->GetMyGrid());
-		bIsWrapAttack = Cooperator != nullptr;
-		if(!bIsWrapAttack)
-		{
-			BattleInfoInstance->HideCooperatorTips();
-			break;
-		}
-		BattleInfoInstance->ShowCooperatorTips(Cooperator);
-	}
-	while (false);
+
+	CheckBackAttack(TempTarget);
+	CheckCooperateAttack(TempTarget);
+	// do
+	// {//背击判断
+	// 	if(ChosenAbilityPtr->IsArea())break;
+	// 	
+	// 	bIsBackAttack = false;
+	// 	if(TempTarget == nullptr)
+	// 	{
+	// 		BattleInfoInstance->HideBackAtkTips();
+	// 		break;
+	// 	}
+	// 	FIntPoint Delta = CurrentCursor - UnitInstance->GetTempDestinationGridIndex();
+	// 	if(FMathf::Abs(Delta.X) > 0 && FMathf::Abs(Delta.Y) > 0)break;
+	// 		
+	// 	//必须相邻 才会判断
+	// 	bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,TempTarget);
+	// 	if(!bIsBackAttack)
+	// 	{
+	// 		BattleInfoInstance->HideBackAtkTips();
+	// 		break;
+	// 	}
+	// 	bool IsValid = ChosenAbilityPtr->IsValidUnit(TempTarget);
+	// 	if(IsValid)
+	// 	{
+	// 		BattleInfoInstance->ShowBackAtkTips(TempTarget);
+	// 	}
+	// }
+	// while (false);
+	// 	
+	// do
+	// {//夹击判断
+	// 	if(ChosenAbilityPtr->IsArea())break;
+	// 	bIsWrapAttack = false;
+	// 	if(TempTarget == nullptr)
+	// 	{
+	// 		BattleInfoInstance->HideCooperatorTips();
+	// 		break;
+	// 	}
+	// 	auto Cooperator = UBattleFunc::HasWrapAttackUnit(UnitInstance,TempTarget,PawnInstance->GetMyGrid());
+	// 	bIsWrapAttack = Cooperator != nullptr;
+	// 	if(!bIsWrapAttack)
+	// 	{
+	// 		BattleInfoInstance->HideCooperatorTips();
+	// 		break;
+	// 	}
+	// 	BattleInfoInstance->ShowCooperatorTips(Cooperator);
+	// }
+	// while (false);
 
 	ShowTargetUnitBriefInfo(CurrentCursor);
 }
@@ -372,6 +438,7 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 	
 	// PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
 	HideTargetUnitBriefInfo();
+	UnitBriefInfoInstance = nullptr;
 		
 
 	if(BattleInfoInstance != nullptr)
@@ -390,39 +457,46 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 
 void UPawnProcess_ChooseTarget::HandleLeftInput()
 {
-	PawnInstance->CameraControlLeft();
+	if(!bIsTab)
+		PawnInstance->CameraControlLeft();
 }
 
 void UPawnProcess_ChooseTarget::HandleRightInput()
 {
-	PawnInstance->CameraControlRight();
+	if(!bIsTab)
+		PawnInstance->CameraControlRight();
 }
 
 void UPawnProcess_ChooseTarget::HandleZooming(float Val)
 {
-	PawnInstance->CameraControlZooming(Val);
+	if(!bIsTab)
+		PawnInstance->CameraControlZooming(Val);
 }
 
 void UPawnProcess_ChooseTarget::HandleTabInput()
 {
 	if(!bIsTab)
 	{
-		const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
-		if(TileDataPtr == nullptr)return;
+		do
+		{
+			if(CurrentCursor == UnitInstance->GetTempDestinationGridIndex())
+			{
+				auto Team = PawnInstance->GetMyCombatSystem()->GetOneSideTeam(UnitInstance->GetUnitSide());
+				UnitDetailInfoPtr->ShowUnitTeamInfo(Team,UnitInstance);
+				break;
+			}
 
-		if(TileDataPtr == nullptr)return;
-		if(TileDataPtr->UnitOnTile == nullptr)return;
-		if(TileDataPtr->UnitOnTile == UnitInstance)return;
-		if(TileDataPtr->Index == UnitInstance->GetTempDestinationGridIndex())
-		{
-			auto Team = PawnInstance->GetMyCombatSystem()->GetOneSideTeam(UnitInstance->GetUnitSide());
-			UnitDetailInfoPtr->ShowUnitTeamInfo(Team,UnitInstance);
-		}
-		else
-		{
+			const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
+			if(TileDataPtr == nullptr)return;
+		
+			if(TileDataPtr->UnitOnTile == nullptr)return;
+			if(TileDataPtr->UnitOnTile == UnitInstance)return;
 			auto Team = PawnInstance->GetMyCombatSystem()->GetOneSideTeam(TileDataPtr->UnitOnTile->GetUnitSide());
-			UnitDetailInfoPtr->ShowUnitTeamInfo(Team,TileDataPtr->UnitOnTile);	
-		}
+			UnitDetailInfoPtr->ShowUnitTeamInfo(Team,TileDataPtr->UnitOnTile);
+			
+		}while(false);
+			
+		
 		
 		bIsTab = true;
 	}

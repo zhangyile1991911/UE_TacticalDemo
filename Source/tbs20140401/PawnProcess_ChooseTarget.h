@@ -41,6 +41,9 @@ protected:
 	void ClearIndicatorRange();
 	UFUNCTION()
 	void SubscribeCameraActing();
+
+	void CheckBackAttack(TObjectPtr<AMyUnit>);
+	void CheckCooperateAttack(TObjectPtr<AMyUnit>);
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn)override;
 	virtual void TickProcess()override;
