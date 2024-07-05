@@ -11,6 +11,9 @@
 #include "TileData.h"
 #include "UnitInfoDetail.h"
 #include "UnitPortrait.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -37,6 +40,7 @@ void UBottomActionBar::NativeConstruct()
 	CmdList->SetVisibility(ESlateVisibility::Hidden);
 
 	UnitDetailInfoPanel->SetVisibility(ESlateVisibility::Hidden);
+	FocusImage->SetVisibility(ESlateVisibility::Hidden);
 
 	if(GetWorld() != nullptr && GetWorld()->GetFirstPlayerController() != nullptr)
 	{
@@ -154,12 +158,44 @@ void UBottomActionBar::OnEventUnitSelect(uint32 UniqueID)
 	}
 }
 
-TObjectPtr<UCmdWidget> UBottomActionBar::ShowCmdPanel(TObjectPtr<AMyUnit> UnitInstance,int CmdIndex) const
+TObjectPtr<UCmdWidget> UBottomActionBar::ShowCmdPanel(TObjectPtr<AMyUnit> UnitInstance,int CmdIndex,bool bShowIdle) const
 {
 	CmdList->SetVisibility(ESlateVisibility::Visible);
-	CmdList->RefreshUnitCmd(UnitInstance);
+	CmdList->RefreshUnitCmd(UnitInstance,bShowIdle);
 	CmdList->SelectCmd(CmdIndex);
 	return CmdList;
+}
+
+void UBottomActionBar::ShowFocusUnit(FVector Location)
+{
+	if(PlayerControllerPtr == nullptr)
+	{
+		PlayerControllerPtr = GetWorld()->GetFirstPlayerController();	
+	}
+
+	FVector2D ScreenLocation;
+	const bool Result = PlayerControllerPtr->ProjectWorldLocationToScreen(Location,ScreenLocation,true);
+	if(Result)
+	{
+		auto M_Image = FocusImage->GetDynamicMaterial();
+		if(M_Image)
+		{
+			int32 w,h;
+			PlayerControllerPtr->GetViewportSize(w,h);
+			float x = ScreenLocation.X/w;
+			float y = ScreenLocation.Y/h;
+			M_Image->SetVectorParameterValue(TEXT("WindowSize"),FLinearColor(w,h,0,0));
+			M_Image->SetScalarParameterValue(TEXT("ScreenPosX"),x);
+			M_Image->SetScalarParameterValue(TEXT("ScreenPosY"),y);
+		}
+		FocusImage->SetVisibility(ESlateVisibility::Visible);
+	}
+
+}
+
+void UBottomActionBar::HideFocus()
+{
+	FocusImage->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UBottomActionBar::PlayHideBattleUI()

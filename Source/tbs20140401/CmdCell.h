@@ -46,4 +46,5 @@ public:
 	void RefreshCell(const FText& Name,int Cost);
 	void DoSelected();
 	void DoUnSelected();
+	void HideContent();
 };

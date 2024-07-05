@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "BottomActionBar.generated.h"
 
+class UImage;
 struct FTileData;
 class UTextBlock;
 class UUGameUI_UnitBriefInfo;
@@ -14,6 +15,8 @@ class AMyUnit;
 class UUnitPortrait;
 class UFirstRolePortrait;
 class UUnitInfoDetail;
+class UCanvasPanelSlot;
+class APlayerController;
 /**
  * 
  */
@@ -79,10 +82,17 @@ class TBS20140401_API UBottomActionBar : public UUserWidget
 	UPROPERTY(Transient,meta=(BindWidgetAnim))
 	TObjectPtr<UWidgetAnimation> FinishBattleShowUI;
 
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UImage> FocusImage;
+	
 	FDelegateHandle EventHandlerGrid;
 	FDelegateHandle EventHandlerProcess;
 	FDelegateHandle EventHandleUnitSelected;
 
+	UPROPERTY()
+	TObjectPtr<APlayerController> PlayerControllerPtr;
+	// UPROPERTY()
+	// TObjectPtr<UCanvasPanelSlot> CanvasPanelSlot;
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -94,9 +104,13 @@ protected:
 	void OnEventUnitSelect(uint32 UniqueID);
 public:
 	// TObjectPtr<UCmdWidget> GetCmdPanel()const{return CmdList;}
-	TObjectPtr<UCmdWidget> ShowCmdPanel(TObjectPtr<AMyUnit> UnitInstance,int CmdIndex)const;
+	TObjectPtr<UCmdWidget> ShowCmdPanel(TObjectPtr<AMyUnit> UnitInstance,int CmdIndex,bool bShowIdle=true)const;
 	TObjectPtr<UUGameUI_UnitBriefInfo> GetUnitBriefInfo()const{return UnitBriefInfo;}
 	TObjectPtr<UUnitInfoDetail> GetUnitDetailInfo()const{return UnitDetailInfoPanel;}
+
+	void ShowFocusUnit(FVector Location);
+	void HideFocus();
+	
 	void PlayHideBattleUI();
 	void PlayShowBattleUI();
 };

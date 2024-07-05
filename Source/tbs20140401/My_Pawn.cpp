@@ -154,7 +154,8 @@ void AMy_Pawn::BeginPlay()
 	ChooseTargetProcess = NewObject<UPawnProcess_ChooseTarget>(this);
 	MoveProcess = NewObject<UPawnProcess_Move>(this);
 	CalcAnimProcess = NewObject<UPawnProcess_CalcAnim>(this);
-
+	
+	
 	EventCenter = NewObject<UEventCenter>(this);
 	
 	CurrentProcess = nullptr;

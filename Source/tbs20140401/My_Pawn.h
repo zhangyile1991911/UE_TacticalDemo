@@ -11,6 +11,7 @@
 
 #include "My_Pawn.generated.h"
 
+class UPawnProcess_Focus;
 class UEventCenter;
 class UPawnProcess_CalcAnim;
 class UPawnProcess_Move;

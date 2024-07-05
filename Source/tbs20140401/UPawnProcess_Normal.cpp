@@ -4,6 +4,7 @@
 #include "UPawnProcess_Normal.h"
 
 #include "BottomActionBar.h"
+#include "CmdWidget.h"
 #include "EventCenter.h"
 #include "MyUnit.h"
 #include "Grid.h"
@@ -42,10 +43,12 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	}
 	
 	//展示UI信息
-	auto Tmp = PawnInstance->GetMyHUD()->GetGameUI();
-	UnitBriefInfoPtr = Tmp->GetUnitBriefInfo();
+	UnitBottomActionBar = PawnInstance->GetMyHUD()->GetGameUI();
+	UnitBriefInfoPtr = UnitBottomActionBar->GetUnitBriefInfo();
 	ShowTargetUnitBriefInfo(CurrentCursor);
-	UnitDetailInfoPtr = Tmp->GetUnitDetailInfo();
+	UnitDetailInfoPtr = UnitBottomActionBar->GetUnitDetailInfo();
+	
+	
 	PawnInstance->OnCameraActing.AddDynamic(this,&UUPawnProcess_Normal::SubscribeCamera);
 
 	UnitInstance->HideShadowUnit();
@@ -72,6 +75,22 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 {
 	Super::HandleDirectionInput(Input);
 
+	if(bIsFocus)
+	{
+		int NextCmdIndex = CmdIndex - Input.Y;
+		NextCmdIndex = FMath::Clamp(NextCmdIndex,0,UnitInstance->GetSelectableAbilityNum());
+		if(NextCmdIndex == CmdIndex)
+		{
+			return;
+		}
+		CmdWidgetPtr->SelectCmd(NextCmdIndex);
+		CmdIndex = NextCmdIndex;
+		return;
+	}
+	if(bIsTab)
+	{
+		return;
+	}
 	FIntPoint  Previous = CurrentCursor;
 	FIntPoint Next;
 	
@@ -130,20 +149,23 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 
 void UUPawnProcess_Normal::HandleCancelInput()
 {
-	
 	UE_LOG(LogTemp,Log,TEXT("UUPawnProcess_Normal::HandleCancelInput()"))
-	if(!bIsTab)
+	if(bIsFocus)
+	{
+		ExitFocusMode();
+	}
+	else if(bIsTab)
+	{
+		UnitDetailInfoPtr->HideUnitTeamInfo();
+		bIsTab = false;
+	}
+	else
 	{
 		ClearPathFinding();
 		UnitInstance->ResetTempDestinationGridIndex();
 		PawnInstance->UpdateTileStatusByIndex(UnitInstance->GetGridIndex(),ETileState::Selected);
 	
-		PawnInstance->SwitchToIdle();	
-	}
-	else
-	{
-		UnitDetailInfoPtr->HideUnitTeamInfo();
-		bIsTab = false;
+		PawnInstance->SwitchToIdle();
 	}
 	
 }
@@ -151,7 +173,10 @@ void UUPawnProcess_Normal::HandleCancelInput()
 void UUPawnProcess_Normal::HandleConfirmInput()
 {
 	Super::HandleConfirmInput();
-	
+	if(bIsTab || bIsFocus)
+	{
+		return;
+	}
 	if(UnitInstance->GetPathComponent()->IsMoveInReachableTiles(CurrentCursor))
 	{
 		//将影子放到目的地上(キャラのスタンドインを目的に置いとく)
@@ -165,15 +190,42 @@ void UUPawnProcess_Normal::HandleConfirmInput()
 			}
 			if(TileData->UnitOnTile != nullptr)
 			{
+				EnterFocusMode();
 				return;
 			}
+
 			UnitInstance->MoveShadowOnTile(TileData->Transform.GetLocation());
 			UnitInstance->SetTempDestinationGridIndex(CurrentCursor);
+			
 			PawnInstance->LookAtGrid(CurrentCursor);
+			
 		}
 		PawnInstance->SwitchToCmdInput();
 	}
-		
+	else
+	{
+		EnterFocusMode();
+	}
+}
+
+void UUPawnProcess_Normal::EnterFocusMode()
+{
+	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
+	if(TileDataPtr == nullptr)return;
+	if(TileDataPtr->UnitOnTile == nullptr)return;
+	if(TileDataPtr->UnitOnTile == UnitInstance)return;
+	UnitBottomActionBar->ShowFocusUnit(TileDataPtr->UnitOnTile->GetActorLocation());
+	CmdIndex = 0;
+	CmdWidgetPtr = UnitBottomActionBar->ShowCmdPanel(UnitInstance,CmdIndex,false);
+	bIsFocus = true;
+}
+
+void UUPawnProcess_Normal::ExitFocusMode()
+{
+	UnitBottomActionBar->HideFocus();
+	if(CmdWidgetPtr)
+		CmdWidgetPtr->SetVisibility(ESlateVisibility::Hidden);
+	bIsFocus = false;
 }
 
 void UUPawnProcess_Normal::HandleLeftInput()
@@ -181,6 +233,10 @@ void UUPawnProcess_Normal::HandleLeftInput()
 	if(bIsTab)
 	{
 		UnitDetailInfoPtr->PreviousUnit();
+	}
+	else if(bIsFocus)
+	{//暂时什么都不做
+		
 	}
 	else
 	{
@@ -193,6 +249,10 @@ void UUPawnProcess_Normal::HandleRightInput()
 	if(bIsTab)
 	{
 		UnitDetailInfoPtr->NextUnit();
+	}
+	else if(bIsFocus)
+	{//暂时什么都不做
+		
 	}
 	else
 	{
@@ -229,14 +289,22 @@ void UUPawnProcess_Normal::ExitProcess()
 	ClearPathFinding();
 	ClearWalkableTiles();
 	ClearDangerousTiles();
+	ClearOtherUnitRange();
 	PawnInstance->RemoveTileStateByIndex(CurrentCursor,ETileState::Selected);
 	UnitBriefInfoPtr->SetVisibility(ESlateVisibility::Hidden);
 	ThreatenEnemies.Empty();
+	OtherUnitRange.Empty();
 	// UnitInstance->HideShadowUnit();
 	PawnInstance->GetMyCombatSystem()->HideUnitThreaten();
 	UnitDetailInfoPtr->HideUnitTeamInfo();
 	PawnInstance->GetMyPathPointInst()->HidePathPoint();
 	PawnInstance->OnCameraActing.RemoveDynamic(this,&UUPawnProcess_Normal::SubscribeCamera);
+
+	ExitFocusMode();
+	
+	UnitBottomActionBar = nullptr;
+	UnitDetailInfoPtr = nullptr;
+	UnitBriefInfoPtr = nullptr;
 }
 
 void UUPawnProcess_Normal::ClearPathFinding()

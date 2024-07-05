@@ -32,4 +32,7 @@ struct FSkillData
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSubclassOf<AUnitAbilityAnim> SkillAnim;//技能演出
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FText Description;//技能描述
 };

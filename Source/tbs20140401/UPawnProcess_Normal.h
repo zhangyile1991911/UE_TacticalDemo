@@ -6,8 +6,10 @@
 #include "PawnProcess.h"
 #include "UPawnProcess_Normal.generated.h"
 
+class UCmdWidget;
 class UUGameUI_UnitBriefInfo;
 class UUnitInfoDetail;
+class UBottomActionBar;
 /**
  * 
  */
@@ -31,10 +33,16 @@ protected:
 	TObjectPtr<UUGameUI_UnitBriefInfo> UnitBriefInfoPtr;
 	UPROPERTY()
 	TObjectPtr<UUnitInfoDetail> UnitDetailInfoPtr;
+	UPROPERTY()
+	TObjectPtr<UBottomActionBar> UnitBottomActionBar;
+	UPROPERTY()
+	TObjectPtr<UCmdWidget> CmdWidgetPtr;
 
 	int Calucating = 0;
+	int CmdIndex = 0;
 	bool bIsTab = false;
 	bool bIsRestore = false;
+	bool bIsFocus = false;
 protected:
 	void ClearPathFinding();
 	void ClearWalkableTiles();
@@ -53,6 +61,8 @@ protected:
 	void SubscribeCamera();
 	void UpdateUnitDetailInfoPosition(const FIntPoint& Point);
 	void NotifyCurrentSelected();
+	void EnterFocusMode();
+	void ExitFocusMode();
 public:
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn) override;
 	virtual void TickProcess() override;

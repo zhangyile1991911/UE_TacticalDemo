@@ -38,6 +38,8 @@ void UCmdCell::RefreshCell(const FText& Name,int Cost)
 		APList[i]->SetVisibility(ESlateVisibility::Visible);
 	}
 	AbilityName->SetText(Name);
+	AbilityName->SetVisibility(ESlateVisibility::Visible);
+	AbilityIcon->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UCmdCell::DoSelected()
@@ -49,3 +51,14 @@ void UCmdCell::DoUnSelected()
 {
 	PlayAnimation(UnSelected);
 }
+
+void UCmdCell::HideContent()
+{
+	for(int i = 0;i < APList.Num();i++)
+	{
+		APList[i]->SetVisibility(ESlateVisibility::Hidden);
+	}
+	AbilityName->SetVisibility(ESlateVisibility::Hidden);
+	AbilityIcon->SetVisibility(ESlateVisibility::Hidden);
+}
+
