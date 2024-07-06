@@ -8,10 +8,10 @@
 #include "UnitAbilityAnim.h"
 #include "UnitInfoDetailPortrait.h"
 #include "Blueprint/WidgetTree.h"
+#include "UnitData.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
-#include "Components/Spacer.h"
 #include "Components/TextBlock.h"
 
 void UUnitInfoDetail::NativeConstruct()
@@ -99,31 +99,31 @@ void UUnitInfoDetail::ShowUnitDetailInfo(AMyUnit* MyUnit)
 	
 	switch (MyUnit->GetUnitType())
 	{
-	case EUnitType::Warrior:
-	case EUnitType::EnemyWarrior:
+	case ETBSUnitType::Warrior:
+	case ETBSUnitType::EnemyWarrior:
 		JobTxt->SetText(NSLOCTEXT("","","战士"));
 		break;
-	case EUnitType::Ranger:
-	case EUnitType::EnemyRanger:
+	case ETBSUnitType::Ranger:
+	case ETBSUnitType::EnemyRanger:
 		JobTxt->SetText(NSLOCTEXT("","","游侠"));
 		break;
-	case EUnitType::Slime:
-	case EUnitType::EnemySlime:
+	case ETBSUnitType::Slime:
+	case ETBSUnitType::EnemySlime:
 		JobTxt->SetText(NSLOCTEXT("","","史莱姆"));
 		break;
-	case EUnitType::Priest:
-	case EUnitType::EnemyPriest:
+	case ETBSUnitType::Priest:
+	case ETBSUnitType::EnemyPriest:
 		JobTxt->SetText(NSLOCTEXT("","","牧师"));
 		break;
-	case EUnitType::Chicken:
-	case EUnitType::EnemyChicken:
+	case ETBSUnitType::Chicken:
+	case ETBSUnitType::EnemyChicken:
 		JobTxt->SetText(NSLOCTEXT("","","鸡"));
 		break;
-	case EUnitType::Bat:
-	case EUnitType::EnemyBat:
+	case ETBSUnitType::Bat:
+	case ETBSUnitType::EnemyBat:
 		JobTxt->SetText(NSLOCTEXT("","","蝙蝠"));
 		break;
-	case EUnitType::EnemyTank:
+	case ETBSUnitType::EnemyTank:
 		JobTxt->SetText(NSLOCTEXT("","","坦克"));
 		break;
 	}

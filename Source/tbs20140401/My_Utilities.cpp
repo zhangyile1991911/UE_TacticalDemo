@@ -42,7 +42,7 @@ bool IsIntEven(int i)
 }
 
 
-FUnitData* GetUnitData(const EUnitType unitType)
+FUnitData* GetUnitData(const ETBSUnitType unitType)
 {
 	static UDataTable* LoadedDataTable = nullptr;
 	if(LoadedDataTable == nullptr)
@@ -54,50 +54,50 @@ FUnitData* GetUnitData(const EUnitType unitType)
 	FUnitData* row = nullptr;
 	switch (unitType)
 	{
-	case EUnitType::Warrior:
+	case ETBSUnitType::Warrior:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Warrior")),"");
 		break;
-	case EUnitType::Slime:
+	case ETBSUnitType::Slime:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Slime")),"");
 		break;
-	case EUnitType::Ranger:
+	case ETBSUnitType::Ranger:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Ranger")),"");
 		break;
-	case EUnitType::Priest:
+	case ETBSUnitType::Priest:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Priest")),"");
 		break;
-	case EUnitType::Chicken:
+	case ETBSUnitType::Chicken:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Chicken")),"");
 		break;
-	case EUnitType::Bat:
+	case ETBSUnitType::Bat:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Bat")),"");
 		break;
-	case EUnitType::EnemyWarrior:
+	case ETBSUnitType::EnemyWarrior:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyWarrior")),"");
 		break;
-	case EUnitType::EnemySlime:
+	case ETBSUnitType::EnemySlime:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemySlime")),"");
 		break;
-	case EUnitType::EnemyRanger:
+	case ETBSUnitType::EnemyRanger:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyRanger")),"");
 		break;
-	case EUnitType::EnemyTank:
+	case ETBSUnitType::EnemyTank:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyTank")),"");
 		break;
-	case EUnitType::EnemyBat:
+	case ETBSUnitType::EnemyBat:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyBat")),"");
 		break;
-	case EUnitType::EnemyChicken:
+	case ETBSUnitType::EnemyChicken:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyChicken")),"");
 		break;
-	case EUnitType::EnemyPriest:
+	case ETBSUnitType::EnemyPriest:
 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyPriest")),"");
 		break;
 	}
 	return row;
 }
 
-FUnitColorDataAsset* GetUnitDataColor(const EUnitType unitType)
+FUnitColorDataAsset* GetUnitDataColor(const ETBSUnitType unitType)
 {
 	static UDataTable* LoadedDataTable = nullptr;
 	if(LoadedDataTable == nullptr)
@@ -109,43 +109,43 @@ FUnitColorDataAsset* GetUnitDataColor(const EUnitType unitType)
 	FUnitColorDataAsset* row = nullptr;
 	switch (unitType)
 	{
-	case EUnitType::Warrior:
+	case ETBSUnitType::Warrior:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("Warrior")),"");
 		break;
-	case EUnitType::Slime:
+	case ETBSUnitType::Slime:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("Slime")),"");
 		break;
-	case EUnitType::Ranger:
+	case ETBSUnitType::Ranger:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("Ranger")),"");
 		break;
-	case EUnitType::Priest:
+	case ETBSUnitType::Priest:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("Priest")),"");
 		break;
-	case EUnitType::Bat:
+	case ETBSUnitType::Bat:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("Bat")),"");
 		break;
-	case EUnitType::Chicken:
+	case ETBSUnitType::Chicken:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("Chicken")),"");
 		break;
-	case EUnitType::EnemyWarrior:
+	case ETBSUnitType::EnemyWarrior:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyWarrior")),"");
 		break;
-	case EUnitType::EnemySlime:
+	case ETBSUnitType::EnemySlime:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemySlime")),"");
 		break;
-	case EUnitType::EnemyRanger:
+	case ETBSUnitType::EnemyRanger:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyRanger")),"");
 		break;
-	case EUnitType::EnemyTank:
+	case ETBSUnitType::EnemyTank:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyTank")),"");
 		break;
-	case EUnitType::EnemyPriest:
+	case ETBSUnitType::EnemyPriest:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyPriest")),"");
 		break;
-	case EUnitType::EnemyChicken:
+	case ETBSUnitType::EnemyChicken:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyChicken")),"");
 		break;
-	case EUnitType::EnemyBat:
+	case ETBSUnitType::EnemyBat:
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyBat")),"");
 		break;
 	}

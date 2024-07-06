@@ -6,7 +6,7 @@
 #include "UnitData.generated.h"
 
 UENUM(BlueprintType)
-enum class EUnitType:uint8
+enum class ETBSUnitType:uint8
 {
 	Warrior UMETA(DisplayName="Warrior"),
 	Ranger UMETA(DisplayName="Ranger"),
@@ -29,7 +29,7 @@ struct FUnitData:public FTableRowBase
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	EUnitType Type;
+	ETBSUnitType Type;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FUnitDataAsset Assets;

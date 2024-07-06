@@ -3,6 +3,7 @@
 
 #include "MyTab_PathFinding.h"
 
+#include "UnitData.h"
 #include "MyButtonAction.h"
 #include "MyButtonList_Units.h"
 #include "MyDebugTextAndColorsOnTiles.h"
@@ -149,7 +150,7 @@ void UMyTab_PathFinding::AddRemoveUnitClicked()
 	}
 }
 
-void UMyTab_PathFinding::OnUnitTypeChanged(EUnitType UnitType)
+void UMyTab_PathFinding::OnUnitTypeChanged(ETBSUnitType UnitType)
 {
 	GetMyPawn()->SetCurrentSelectedUnitType(UnitType);
 }

@@ -7,9 +7,9 @@
 #include "Blueprint/UserWidget.h"
 #include "MyButtonList_Units.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FUnitTypeChange,EUnitType,UnitType);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FUnitTypeChange,ETBSUnitType,UnitType);
 
-enum class EUnitType : uint8;
+// enum class EUnitType : uint8;
 class UButtonUnit;
 class UHorizontalBox;
 /**
@@ -27,7 +27,7 @@ protected:
 	// TSubclassOf<UUserWidget> MyButtonBlueprint;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="FromCPP")
-	EUnitType CurrentSelectedType = EUnitType::Warrior;
+	ETBSUnitType CurrentSelectedType = ETBSUnitType::Warrior;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="FromCPP")
 	bool IsLookingRight = false;
@@ -46,6 +46,6 @@ protected:
 
 	TObjectPtr<UButtonUnit> GetCurrentSelectedButton()const{return CurrentSelectedButton;}
 public:
-	EUnitType GetCurrentSelectedType()const{return CurrentSelectedType;}
+	ETBSUnitType GetCurrentSelectedType()const{return CurrentSelectedType;}
 	FUnitTypeChange OnUnitTypeChanged;
 };

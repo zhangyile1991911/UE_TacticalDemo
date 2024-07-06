@@ -6,7 +6,7 @@
 #include "MyAction.h"
 #include "Action_AddUnit.generated.h"
 
-enum class EUnitType : uint8;
+// enum class EUnitType : uint8;
 /**
  * 
  */
@@ -15,7 +15,7 @@ class TBS20140401_API AAction_AddUnit : public AMyAction
 {
 	GENERATED_BODY()
 protected:
-	EUnitType UnitType;
+	// EUnitType UnitType;
 	bool IsAddingUnit;
 protected:
 	virtual void ExecuteAction(const FIntPoint& index) override;

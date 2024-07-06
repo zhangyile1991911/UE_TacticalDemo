@@ -3,10 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MyButtonList_Units.h"
 #include "Blueprint/UserWidget.h"
 #include "UnitInfoDetailPortrait.generated.h"
-
+enum class ETBSUnitType:uint8;
 class UImage;
 class UBorder;
 /**
@@ -29,7 +28,7 @@ protected:
 	UPROPERTY(Transient,meta=(BindWidgetAnim))
 	TObjectPtr<UWidgetAnimation> UnHighlight;
 public:
-	void ShowUnitPortrait(EUnitType UnitType);
+	void ShowUnitPortrait(ETBSUnitType UnitType);
 	void HideUnitPortrait();
 
 	void DoHighlight();

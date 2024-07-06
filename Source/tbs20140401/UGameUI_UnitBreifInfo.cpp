@@ -3,7 +3,7 @@
 
 #include "UGameUI_UnitBreifInfo.h"
 
-#include "BattleFunc.h"
+#include "UnitData.h"
 #include "MyButtonList_Units.h"
 #include "Components/TextBlock.h"
 #include "MyUnit.h"
@@ -40,31 +40,31 @@ void UUGameUI_UnitBriefInfo::RefreshUnitBaseBriefInfo(TObjectPtr<AMyUnit> Unit)
 	//Job
 	switch (Unit->GetUnitType())
 	{
-	case EUnitType::Warrior:
-	case EUnitType::EnemyWarrior:
+	case ETBSUnitType::Warrior:
+	case ETBSUnitType::EnemyWarrior:
 		UnitNameText->SetText(FText::FromName(TEXT("戦士")));
 		break;
-	case EUnitType::Slime:
-	case EUnitType::EnemySlime:
+	case ETBSUnitType::Slime:
+	case ETBSUnitType::EnemySlime:
 		UnitNameText->SetText(FText::FromName(TEXT("スライム")));
 		break;
-	case EUnitType::Ranger:
-	case EUnitType::EnemyRanger:
+	case ETBSUnitType::Ranger:
+	case ETBSUnitType::EnemyRanger:
 		UnitNameText->SetText(FText::FromName(TEXT("レンジャー")));
 		break;
-	case EUnitType::Bat:
-	case EUnitType::EnemyBat:
+	case ETBSUnitType::Bat:
+	case ETBSUnitType::EnemyBat:
 		UnitNameText->SetText(FText::FromName(TEXT("バット")));
 		break;
-	case EUnitType::Chicken:
-	case EUnitType::EnemyChicken:
+	case ETBSUnitType::Chicken:
+	case ETBSUnitType::EnemyChicken:
 		UnitNameText->SetText(FText::FromName(TEXT("鳥")));
 		break;
-	case EUnitType::Priest:
-	case EUnitType::EnemyPriest:
+	case ETBSUnitType::Priest:
+	case ETBSUnitType::EnemyPriest:
 		UnitNameText->SetText(FText::FromName(TEXT("司祭")));
 		break;
-	case EUnitType::EnemyTank:
+	case ETBSUnitType::EnemyTank:
 		UnitNameText->SetText(FText::FromName(TEXT("タンク")));
 		break;
 	}
@@ -90,31 +90,31 @@ void UUGameUI_UnitBriefInfo::RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Defender,f
 
 	switch (Defender->GetUnitType())
 	{
-	case EUnitType::Warrior:
-	case EUnitType::EnemyWarrior:
+	case ETBSUnitType::Warrior:
+	case ETBSUnitType::EnemyWarrior:
 		UnitNameText->SetText(FText::FromName(TEXT("戦士")));
 		break;
-	case EUnitType::Slime:
-	case EUnitType::EnemySlime:
+	case ETBSUnitType::Slime:
+	case ETBSUnitType::EnemySlime:
 		UnitNameText->SetText(FText::FromName(TEXT("スライム")));
 		break;
-	case EUnitType::Ranger:
-	case EUnitType::EnemyRanger:
+	case ETBSUnitType::Ranger:
+	case ETBSUnitType::EnemyRanger:
 		UnitNameText->SetText(FText::FromName(TEXT("レンジャー")));
 		break;
-	case EUnitType::Bat:
-	case EUnitType::EnemyBat:
+	case ETBSUnitType::Bat:
+	case ETBSUnitType::EnemyBat:
 		UnitNameText->SetText(FText::FromName(TEXT("バット")));
 		break;
-	case EUnitType::Chicken:
-	case EUnitType::EnemyChicken:
+	case ETBSUnitType::Chicken:
+	case ETBSUnitType::EnemyChicken:
 		UnitNameText->SetText(FText::FromName(TEXT("鳥")));
 		break;
-	case EUnitType::Priest:
-	case EUnitType::EnemyPriest:
+	case ETBSUnitType::Priest:
+	case ETBSUnitType::EnemyPriest:
 		UnitNameText->SetText(FText::FromName(TEXT("司祭")));
 		break;
-	case EUnitType::EnemyTank:
+	case ETBSUnitType::EnemyTank:
 		UnitNameText->SetText(FText::FromName(TEXT("タンク")));
 		break;
 		

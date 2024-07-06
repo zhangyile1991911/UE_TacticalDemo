@@ -173,7 +173,7 @@ public:
 	UFUNCTION()
 	void SetCurrentTileType(ETileType ttype){CurSetTileType = ttype;}
 
-	EUnitType CurrentSelectedUnitType;
+	ETBSUnitType CurrentSelectedUnitType;
 
 	bool IsStartGame = false;
 protected:
@@ -214,8 +214,8 @@ public:
 	bool CanHoverGround();
 	void UpdateTileTypeUnderCursor(FIntPoint index);
 
-	void SetCurrentSelectedUnitType(EUnitType UnitType){CurrentSelectedUnitType = UnitType;}
-	EUnitType GetCurrentSelectedUnitType()const{return CurrentSelectedUnitType;}
+	void SetCurrentSelectedUnitType(ETBSUnitType UnitType){CurrentSelectedUnitType = UnitType;}
+	ETBSUnitType GetCurrentSelectedUnitType()const{return CurrentSelectedUnitType;}
 
 	// UFUNCTION(BlueprintCallable)
 	// AGrid* GetMyGridForBP()const{return MyGrid;}

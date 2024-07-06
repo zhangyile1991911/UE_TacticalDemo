@@ -700,6 +700,8 @@ void AMyUnit::BeforeStartTurn()
 	WalkNum = 1;
 	AbilityTargetGridIndex = FIntPoint(-999,-999);
 	TempDestinationGridIndex = GridIndex;
+	MyRuntimeProperty.ActionPoint += 1;
+	MyRuntimeProperty.ActionPoint = FMathf::Clamp(MyRuntimeProperty.ActionPoint,0,3);
 }
 
 void AMyUnit::FinishTurn(bool bAsync)
@@ -716,6 +718,26 @@ void AMyUnit::FinishTurn(bool bAsync)
 	{
 		PathComponent->UnitWalkablePath(0);
 	}
+}
+
+bool AMyUnit::HasEnoughAP(int AP)const
+{
+	return MyRuntimeProperty.ActionPoint >= AP;
+}
+
+bool AMyUnit::ConsumeAP(int AP)
+{
+	if(MyRuntimeProperty.ActionPoint >= AP)
+	{
+		MyRuntimeProperty.ActionPoint -= AP;
+		return true;
+	}
+	return false;
+}
+
+int AMyUnit::AP() const
+{
+	return MyRuntimeProperty.ActionPoint;
 }
 
 void AMyUnit::RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex)

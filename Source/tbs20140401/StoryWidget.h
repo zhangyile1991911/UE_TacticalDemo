@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class TBS20140401_API UStoryWidget : public UUserWidget
 {
 	GENERATED_BODY()

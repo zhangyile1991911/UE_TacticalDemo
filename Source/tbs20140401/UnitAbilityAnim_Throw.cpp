@@ -13,7 +13,7 @@ AUnitAbilityAnim_Throw::AUnitAbilityAnim_Throw()
 
 bool AUnitAbilityAnim_Throw::CanExecute()
 {
-	return true;
+	return OwnerInstance->HasEnoughAP(SkillData.SpendPoint);
 }
 
 TArray<FIntPoint> AUnitAbilityAnim_Throw::Range(const FIntPoint& Int32Point)

@@ -31,7 +31,7 @@ void AShadowUnit::BeginPlay()
 void AShadowUnit::RefreshUnit(TObjectPtr<AMyUnit> Master,UClass* AnimBP,FUnitColorDataAsset* DataAssetPtr)
 {
 	MyMaster = Master;
-	EUnitType UnitType = MyMaster->GetUnitType();
+	ETBSUnitType UnitType = MyMaster->GetUnitType();
 	auto pData = GetUnitData(UnitType);
 	if(pData == nullptr)
 	{

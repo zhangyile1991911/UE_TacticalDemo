@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "MyTab_PathFinding.generated.h"
 
-enum class EUnitType : uint8;
+enum class ETBSUnitType : uint8;
 class UMyButtonList_Units;
 class UMySpinBox_WithName;
 class AMyGridPathfinding;
@@ -102,5 +102,5 @@ protected:
 	void AddRemoveUnitClicked();
 
 	UFUNCTION()
-	void OnUnitTypeChanged(EUnitType UnitType);
+	void OnUnitTypeChanged(ETBSUnitType UnitType);
 };

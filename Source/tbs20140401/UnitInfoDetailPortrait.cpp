@@ -5,7 +5,7 @@
 #include "My_Utilities.h"
 #include "Components/Image.h"
 
-void UUnitInfoDetailPortrait::ShowUnitPortrait(EUnitType UnitType)
+void UUnitInfoDetailPortrait::ShowUnitPortrait(ETBSUnitType UnitType)
 {
 	const FUnitData* UnitData = GetUnitData(UnitType);
 	if(UnitData == nullptr)

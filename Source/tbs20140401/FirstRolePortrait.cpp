@@ -21,13 +21,13 @@ void UFirstRolePortrait::RefreshByUnit(TObjectPtr<AMyUnit> Unit)
 
 	switch (Unit->GetUnitType())
 	{
-	case EUnitType::Warrior:
+	case ETBSUnitType::Warrior:
 		Name->SetText(FText::FromName(TEXT("战士")));
 		break;
-	case EUnitType::Slime:
+	case ETBSUnitType::Slime:
 		Name->SetText(FText::FromName(TEXT("史莱姆")));
 		break;
-	case EUnitType::Ranger:
+	case ETBSUnitType::Ranger:
 		Name->SetText(FText::FromName(TEXT("游侠")));
 		break;
 	}

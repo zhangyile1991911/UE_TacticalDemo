@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 #include "ShadowUnit.h"
 #include "UnitData.h"
+#include "UnitRunTimeProperty.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Actor.h"
-#include "UnitRunTimeProperty.h"
 #include "MyUnit.generated.h"
 
 
@@ -69,7 +69,7 @@ protected:
 
 	// int UniqueID;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	EUnitType UnitType = EUnitType::Warrior;
+	ETBSUnitType UnitType = ETBSUnitType::Warrior;
 
 	// uint8 testAnimIndex;
 	
@@ -226,7 +226,7 @@ public:
 	int GetCurrentDistanceToAction()const{return CurrentDistanceToAction;}
 	void ResetCurrentDistanceToAction(){CurrentDistanceToAction = 0;}
 	void AddCurrentDistanceToAction(){CurrentDistanceToAction += MyProperty.Agility;}
-	EUnitType GetUnitType()const{return UnitType;}
+	ETBSUnitType GetUnitType()const{return UnitType;}
 
 	void MoveShadowOnTile(const FVector& location);
 	void ShowShadowUnit();
@@ -282,7 +282,10 @@ public:
 	//タン始まる前に　計算やプロパティリなどセットする
 	void BeforeStartTurn();
 	void FinishTurn(bool bAsync);
-	
+
+	bool HasEnoughAP(int AP)const;
+	bool ConsumeAP(int AP);
+	int AP()const;
 
 	void RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex);
 

@@ -30,7 +30,7 @@ protected:
 	TObjectPtr<UBorder> Border_IsSelected;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	EUnitType UnitType = EUnitType::Warrior;
+	ETBSUnitType UnitType = ETBSUnitType::Warrior;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	bool IsLookingRight=false;
@@ -50,7 +50,7 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FUButtonUnitClick OnClickTopic;
 	void SetIsSelected(bool selected);
-	EUnitType GetUnitType()const{return UnitType;}
+	ETBSUnitType GetUnitType()const{return UnitType;}
 	bool GetIsSelected()const{return IsSelected;}
 	bool GetIsLookingRight()const{return IsLookingRight;}
 };
