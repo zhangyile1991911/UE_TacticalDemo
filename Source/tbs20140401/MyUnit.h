@@ -115,6 +115,7 @@ protected:
 	TArray<TObjectPtr<UChildActorComponent>> OwnAbilityActorComponents;
 	UPROPERTY()
 	TArray<TObjectPtr<AUnitAbilityAnim>> OwnAbilityAnimList;
+	
 	// UPROPERTY()
 	// TArray<TObjectPtr<UUnitAbility>> OwnAbilityList;
 	

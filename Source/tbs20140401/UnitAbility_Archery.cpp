@@ -148,7 +148,7 @@ bool AUnitAbility_Archery::IsValidUnit(TObjectPtr<AMyUnit> Unit)
 {
 	if(Unit == nullptr)return false;
 	if(Unit->IsDead())return false;
-	if(Unit->IsFriend(Unit->GetUnitSide()))return false;
+	if(OwnerInstance->IsFriend(Unit->GetUnitSide()))return false;
 	return true;
 }
 

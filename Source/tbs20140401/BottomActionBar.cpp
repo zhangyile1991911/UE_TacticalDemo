@@ -9,6 +9,7 @@
 #include "MyCombatSystem.h"
 #include "My_Pawn.h"
 #include "TileData.h"
+#include "UGameUI_UnitBreifInfo.h"
 #include "UnitInfoDetail.h"
 #include "UnitPortrait.h"
 #include "Blueprint/WidgetLayoutLibrary.h"

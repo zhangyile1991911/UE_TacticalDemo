@@ -25,6 +25,8 @@
 #include "PawnProcess_Idle.h"
 #include "PawnProcess_ChooseTarget.h"
 #include "PawnProcess_Move.h"
+#include "PawnProcess_Story.h"
+#include "StoryTeller.h"
 
 
 // Sets default values
@@ -145,6 +147,9 @@ void AMy_Pawn::BeginPlay()
 
 	actor = UGameplayStatics::GetActorOfClass(GetWorld(),APathPointInst::StaticClass());
 	MyPathPointInst = Cast<APathPointInst>(actor);
+
+	actor = UGameplayStatics::GetActorOfClass(GetWorld(),AStoryTeller::StaticClass());
+	MyStoryTeller = Cast<AStoryTeller>(actor);
 	// OnTileTYpeChanged.AddDynamic(this,&AMy_Pawn::SetCurrentTileType);
 
 	NormalProcess = NewObject<UUPawnProcess_Normal>(this);
@@ -154,6 +159,7 @@ void AMy_Pawn::BeginPlay()
 	ChooseTargetProcess = NewObject<UPawnProcess_ChooseTarget>(this);
 	MoveProcess = NewObject<UPawnProcess_Move>(this);
 	CalcAnimProcess = NewObject<UPawnProcess_CalcAnim>(this);
+	StoryProcess = NewObject<UPawnProcess_Story>(this);
 	
 	
 	EventCenter = NewObject<UEventCenter>(this);
@@ -595,5 +601,10 @@ void AMy_Pawn::SwitchToMove()
 void AMy_Pawn::SwitchToCalcAnim()
 {
 	SwitchProcess(CalcAnimProcess);
+}
+
+void AMy_Pawn::SwitchToTellStory()
+{
+	SwitchProcess(StoryProcess);
 }
 

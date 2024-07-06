@@ -69,6 +69,7 @@ public:
 	}
 	TObjectPtr<AMyUnit> SortActionPriority();
 	TObjectPtr<AMyUnit> GetFirstUnit()const{return FirstUnit;}
+	
 	TArray<TObjectPtr<AMyUnit>> GetThreatenEnemies(TObjectPtr<AMyUnit>);
 	ReSortEvent ReSortEvent;
 

@@ -34,6 +34,8 @@ class UCameraComponent;
 struct FInputActionValue;
 class UInputAction;
 class APathPointInst;
+class AStoryTeller;
+class UPawnProcess_Story;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FCameraEvent);
 
@@ -106,6 +108,9 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<APathPointInst> MyPathPointInst;
+
+	UPROPERTY()
+	TObjectPtr<AStoryTeller> MyStoryTeller;
 	
 	UPROPERTY()
 	TObjectPtr<AMyHUD> MyHUDInstance;
@@ -134,9 +139,13 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UPawnProcess_CalcAnim> CalcAnimProcess;
 	UPROPERTY()
+	TObjectPtr<UPawnProcess_Story> StoryProcess;
+	UPROPERTY()
 	TObjectPtr<UPawnProcess> CurrentProcess;
 
 	ECameraDirectType CameraDirect = ECameraDirectType::FORWARD;
+
+	bool bHasReadStory = false;
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	float Location_Speed = 20.0f;
@@ -210,7 +219,7 @@ public:
 
 	// UFUNCTION(BlueprintCallable)
 	// AGrid* GetMyGridForBP()const{return MyGrid;}
-	
+	TObjectPtr<AStoryTeller> GetMyStoryTeller()const{return MyStoryTeller;}
 	TObjectPtr<AGrid> GetMyGrid()const{return MyGrid;}
 	TObjectPtr<AMyCombatSystem> GetMyCombatSystem()const{return MyCombatSystem;}
 	TObjectPtr<AMyGridPathfinding> GetMyGridPathFinding()const{return MyGridPathfinding;}
@@ -240,6 +249,9 @@ public:
 		val += m_curArmLength;
 		m_curArmLength = FMathf::Clamp(val,MaxMin_ArmLength.X,MaxMin_ArmLength.Y);
 	}
+
+	bool ReadStory()const{return bHasReadStory;}
+	void SetReadStory(){bHasReadStory = true;}
 	
 	void LookAtGrid(const FIntPoint&);
 	void LookAtUnit(TObjectPtr<AMyUnit>);
@@ -251,6 +263,7 @@ public:
 	void SwitchToBeforeTurn();
 	void SwitchToMove();
 	void SwitchToCalcAnim();
+	void SwitchToTellStory();
 	
 	FCameraEvent OnCameraActing;
 };
