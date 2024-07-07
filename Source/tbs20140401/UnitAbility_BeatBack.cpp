@@ -117,23 +117,24 @@ FBattleReport AUnitAbility_BeatBack::DoCalculation(TObjectPtr<AMyUnit> Target, A
 	//扣除血量
 	Target->AddHP(Report.Damage);
 	//先确认方向 攻撃者の向いている方向を取得する
-	auto EDirectType = OwnerInstance->GetUnitDirect();
-	FIntPoint VecIntPoint(0,0);
-	switch (EDirectType)
-	{
-	case EUnitDirectType::LEFT:
-		VecIntPoint.Y = -1;
-		break;
-	case EUnitDirectType::RIGHT:
-		VecIntPoint.Y = 1;
-		break;
-	case EUnitDirectType::FORWARD:
-		VecIntPoint.X = 1;
-		break;
-	case EUnitDirectType::BACKWARD:
-		VecIntPoint.X = -1;
-		break;
-	}
+	const FIntPoint VecIntPoint = Target->GetGridIndex() - OwnerInstance->GetStandGridIndex();
+	// auto EDirectType = ;
+	// FIntPoint VecIntPoint(0,0);
+	// switch (EDirectType)
+	// {
+	// case EUnitDirectType::LEFT:
+	// 	VecIntPoint.Y = -1;
+	// 	break;
+	// case EUnitDirectType::RIGHT:
+	// 	VecIntPoint.Y = 1;
+	// 	break;
+	// case EUnitDirectType::FORWARD:
+	// 	VecIntPoint.X = 1;
+	// 	break;
+	// case EUnitDirectType::BACKWARD:
+	// 	VecIntPoint.X = -1;
+	// 	break;
+	// }
 	//沿着方向一直推　その方向に沿って押し続ける
 	FIntPoint PreviousPoint = Target->GetGridIndex();
 	FIntPoint TargetIntPoint = Target->GetGridIndex();
@@ -142,13 +143,14 @@ FBattleReport AUnitAbility_BeatBack::DoCalculation(TObjectPtr<AMyUnit> Target, A
 	{
 		if(!MyGrid->IsValidGridIndex(TargetIntPoint))
 			break;
-		if(!MyGrid->TileGridHasUnit(TargetIntPoint))
+		if(MyGrid->TileGridHasUnit(TargetIntPoint))
 			break;
 		const FTileData* Previous = MyGrid->GetTileDataByIndex(PreviousPoint);
 		const FTileData* Current = MyGrid->GetTileDataByIndex(TargetIntPoint);
 		const int HeightDelta = FMathf::Abs(Previous->Height - Current->Height);
 		if(HeightDelta > 1)break;
-		
+
+		PreviousPoint = TargetIntPoint;
 		TargetIntPoint += VecIntPoint;
 	}
 	while (true);

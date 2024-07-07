@@ -295,6 +295,12 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 	// 	ShowTargetUnitBriefInfo(next);
 	// 	return;
 	// }
+
+	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(next);
+	if(TileDataPtr != nullptr)
+	{
+		PawnInstance->GetEventCenter()->EventOfChoseGrid.Broadcast(TileDataPtr);
+	}
 	//先清理掉上一次 指示器范围
 	//前回のインジケーターをクリアする
 	ClearIndicatorRange();
@@ -336,11 +342,7 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 	CheckBackAttack(TempTarget);
 	CheckCooperateAttack(TempTarget);
 	
-	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
-	if(TileDataPtr != nullptr)
-	{
-		PawnInstance->GetEventCenter()->EventOfChoseGrid.Broadcast(TileDataPtr);
-	}
+	
 
 	ShowTargetUnitBriefInfo(CurrentCursor);
 }
