@@ -147,7 +147,10 @@ void UPawnProcess_ChooseTarget::CheckBackAttack(TObjectPtr<AMyUnit> TempTarget)
 		if(FMathf::Abs(Delta.X) > 0 && FMathf::Abs(Delta.Y) > 0)break;
 			
 		//必须相邻 才会判断
-		bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,TempTarget);
+		bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,
+			TempTarget,
+			PawnInstance->GetMyGrid(),
+			ChosenAbilityPtr->GetSkillData().AllowableDeviation);
 		if(!bIsBackAttack)
 		{
 			BattleInfoInstance->HideBackAtkTips();
@@ -202,20 +205,20 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	}
 	
 	// ChosenAbilityAnim = UnitInstance->GetChosenAbilityAnim();
-
+	const FIntPoint StandIndex = UnitInstance->GetStandGridIndex();
+	const int StandHeight = PawnInstance->GetMyGrid()->GetTileDataByIndex(StandIndex)->Height;
 	CurrentCursor = PawnInstance->GetSelectedTile();
-	//显示攻击范围
-	if(UnitInstance->NeedToMove())
-	{
-		ArrayOfAbilityRange = ChosenAbilityPtr->Range(UnitInstance->GetTempDestinationGridIndex());
-	}
-	else
-	{
-		ArrayOfAbilityRange = ChosenAbilityPtr->Range(UnitInstance->GetGridIndex());	
-	}
 	
+	//显示攻击范围
+	ArrayOfAbilityRange = ChosenAbilityPtr->Range(UnitInstance->GetStandGridIndex());
 	for(const FIntPoint& one : ArrayOfAbilityRange)
 	{
+		const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(one);
+		if(TileDataPtr == nullptr)continue;
+		if(!ChosenAbilityPtr->CheckDeviation(TileDataPtr->Height,StandHeight))
+		{
+			continue;
+		}
 		PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::AbilityRange);
 	}
 
@@ -332,53 +335,12 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 
 	CheckBackAttack(TempTarget);
 	CheckCooperateAttack(TempTarget);
-	// do
-	// {//背击判断
-	// 	if(ChosenAbilityPtr->IsArea())break;
-	// 	
-	// 	bIsBackAttack = false;
-	// 	if(TempTarget == nullptr)
-	// 	{
-	// 		BattleInfoInstance->HideBackAtkTips();
-	// 		break;
-	// 	}
-	// 	FIntPoint Delta = CurrentCursor - UnitInstance->GetTempDestinationGridIndex();
-	// 	if(FMathf::Abs(Delta.X) > 0 && FMathf::Abs(Delta.Y) > 0)break;
-	// 		
-	// 	//必须相邻 才会判断
-	// 	bIsBackAttack = UBattleFunc::IsBackAttack(UnitInstance,TempTarget);
-	// 	if(!bIsBackAttack)
-	// 	{
-	// 		BattleInfoInstance->HideBackAtkTips();
-	// 		break;
-	// 	}
-	// 	bool IsValid = ChosenAbilityPtr->IsValidUnit(TempTarget);
-	// 	if(IsValid)
-	// 	{
-	// 		BattleInfoInstance->ShowBackAtkTips(TempTarget);
-	// 	}
-	// }
-	// while (false);
-	// 	
-	// do
-	// {//夹击判断
-	// 	if(ChosenAbilityPtr->IsArea())break;
-	// 	bIsWrapAttack = false;
-	// 	if(TempTarget == nullptr)
-	// 	{
-	// 		BattleInfoInstance->HideCooperatorTips();
-	// 		break;
-	// 	}
-	// 	auto Cooperator = UBattleFunc::HasWrapAttackUnit(UnitInstance,TempTarget,PawnInstance->GetMyGrid());
-	// 	bIsWrapAttack = Cooperator != nullptr;
-	// 	if(!bIsWrapAttack)
-	// 	{
-	// 		BattleInfoInstance->HideCooperatorTips();
-	// 		break;
-	// 	}
-	// 	BattleInfoInstance->ShowCooperatorTips(Cooperator);
-	// }
-	// while (false);
+	
+	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(CurrentCursor);
+	if(TileDataPtr != nullptr)
+	{
+		PawnInstance->GetEventCenter()->EventOfChoseGrid.Broadcast(TileDataPtr);
+	}
 
 	ShowTargetUnitBriefInfo(CurrentCursor);
 }
@@ -448,8 +410,12 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 		BattleInfoInstance->SetVisibility(ESlateVisibility::Hidden);
 		BattleInfoInstance = nullptr;
 	}
-
-	UnitDetailInfoPtr->SetVisibility(ESlateVisibility::Hidden);
+	if(UnitDetailInfoPtr != nullptr)
+	{
+		UnitDetailInfoPtr->SetVisibility(ESlateVisibility::Hidden);	
+		UnitDetailInfoPtr = nullptr;
+	}
+	
 	bIsTab = false;
 	
 	PawnInstance->OnCameraActing.RemoveDynamic(this,&UPawnProcess_ChooseTarget::SubscribeCameraActing);

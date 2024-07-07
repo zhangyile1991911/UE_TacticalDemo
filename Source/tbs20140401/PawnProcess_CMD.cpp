@@ -18,6 +18,8 @@
 
 void UPawnProcess_CMD::ShowBriefInfo()
 {
+	ClearAbilityRange();
+	
 	auto ChosenAbilityPtr = UnitInstance->GetChosenAbilityAnim();
 	if(ChosenAbilityPtr->IsIdle())
 	{
@@ -25,29 +27,28 @@ void UPawnProcess_CMD::ShowBriefInfo()
 		return;
 	}
 	//显示可以攻击范围
-	ClearAbilityRange();
-
 	TObjectPtr<AMyUnit> TargetUnit = nullptr;
-	if(UnitInstance->NeedToMove())
-	{
-		ArrayOfAbilityRange = ChosenAbilityPtr->Range(UnitInstance->GetTempDestinationGridIndex());
-	}
-	else
-	{
-		ArrayOfAbilityRange = ChosenAbilityPtr->Range(UnitInstance->GetGridIndex());	
-	}
-	
+	ArrayOfAbilityRange = ChosenAbilityPtr->Range(UnitInstance->GetStandGridIndex());
+
+	const FIntPoint StandIndex = UnitInstance->GetStandGridIndex();
+	const int StandHeight = PawnInstance->GetMyGrid()->GetTileDataByIndex(StandIndex)->Height;
+	 
 	for(const FIntPoint& one : ArrayOfAbilityRange)
 	{
-		PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::AbilityRange);
+		const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(one);
+		if(TileDataPtr == nullptr)continue;
+		
+		if(!ChosenAbilityPtr->CheckDeviation(TileDataPtr->Height,StandHeight))
+		{
+			continue;
+		}
 
+		PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::AbilityRange);	
+		
 		//治疗或者范围攻击 都不会自动选择目标
 		if(ChosenAbilityPtr->IsArea()||ChosenAbilityPtr->IsHeal())continue;
 		//已经有目标就跳过
 		if(TargetUnit != nullptr)continue;
-		
-		const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(one);
-		if(TileDataPtr == nullptr)continue;
 
 		if(TileDataPtr->UnitOnTile == nullptr)continue;
 
@@ -70,7 +71,9 @@ void UPawnProcess_CMD::ShowBriefInfo()
 	}
 	
 	const bool bHasWrap = UBattleFunc::HasWrapAttackUnit(UnitInstance,TargetUnit,PawnInstance->GetMyGrid()) != nullptr;
-	const bool bIsBack = UBattleFunc::IsBackAttack(UnitInstance,TargetUnit);
+	const bool bIsBack = UBattleFunc::IsBackAttack(UnitInstance,TargetUnit,
+		PawnInstance->GetMyGrid(),
+		ChosenAbilityPtr->GetSkillData().AllowableDeviation);
 	const float HitPercent = UBattleFunc::CalculateHitRate(UnitInstance,TargetUnit,PawnInstance->GetMyGrid(),bIsBack,bHasWrap);
 	UnitBriefInfoPtr->ShowTargetBriefInfoOnly(TargetUnit,HitPercent);
 
@@ -119,10 +122,6 @@ void UPawnProcess_CMD::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	UnitInstance->SetChosenAbility(0);
 	CmdIndex = 0;
 	ShowBriefInfo();
-	// CmdWidgetInstance = BottomActionBarInstance->GetCmdPanel();
-	// CmdWidgetInstance->SetVisibility(ESlateVisibility::Visible);
-	// CmdWidgetInstance->RefreshUnitCmd(UnitInstance);
-	// CmdWidgetInstance->SelectCmd(CmdIndex);
 }
 
 void UPawnProcess_CMD::TickProcess()
@@ -186,10 +185,16 @@ void UPawnProcess_CMD::ExitProcess()
 {
 	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_CMD::ExitProcess"))
 	Super::ExitProcess();
-	CmdWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+	
+	if(CmdWidgetInstance != nullptr)
+	{
+		CmdWidgetInstance->HideCmdPanel();	
+		CmdWidgetInstance = nullptr;
+	}
+	
 	UnitBriefInfoPtr->SetVisibility(ESlateVisibility::Hidden);
 	BottomActionBarInstance = nullptr;
-	CmdWidgetInstance = nullptr;
+	
 	UnitInstance->HideShadowUnit();
 	UnitInstance = nullptr;
 

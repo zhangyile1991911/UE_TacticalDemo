@@ -23,6 +23,8 @@ struct FTileData
 	FTransform Transform;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSet<ETileState> States;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int Height = 0;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TObjectPtr<AMyUnit> UnitOnTile;

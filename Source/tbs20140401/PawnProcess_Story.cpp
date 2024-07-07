@@ -24,6 +24,7 @@ void UPawnProcess_Story::HandleConfirmInput()
 {
 	Super::HandleConfirmInput();
 	PawnInstance->GetMyStoryTeller()->ToNext();
+	PawnInstance->SetReadStory();
 }
 
 void UPawnProcess_Story::ExitProcess()

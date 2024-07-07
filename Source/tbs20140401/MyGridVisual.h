@@ -58,7 +58,7 @@ public:
 	void DestroyGridVisual();
 	void UpdateTileVisual(const FTileData*,EGriUpdateMode mode);
 	void RemoveTile(FIntPoint);
-	void AddTileVisual(FTileData);
+	void AddTileVisual(const FTileData&);
 
 };
 

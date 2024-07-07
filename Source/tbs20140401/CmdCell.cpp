@@ -26,20 +26,29 @@ void UCmdCell::NativeDestruct()
 	
 }
 
-void UCmdCell::RefreshCell(const FText& Name,int Cost)
+void UCmdCell::RefreshCell(const FText& Name,int Cost,bool CanExecute)
 {
 	for(TObjectPtr<UImage> ap : APList)
 	{
-		ap->SetVisibility(ESlateVisibility::Hidden);
+		ap->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	
 	for(int i = 0;i < Cost;i++)
 	{
 		APList[i]->SetVisibility(ESlateVisibility::Visible);
 	}
+	
 	AbilityName->SetText(Name);
 	AbilityName->SetVisibility(ESlateVisibility::Visible);
 	AbilityIcon->SetVisibility(ESlateVisibility::Visible);
+
+	FSlateColor FontColor = FSlateColor(FLinearColor(1.0f,1.0f,1.0f));
+	if(!CanExecute)
+	{
+		FontColor = FSlateColor(FLinearColor(0.2f,0.2f,0.2f));
+	}
+
+	AbilityName->SetColorAndOpacity(FontColor);
 }
 
 void UCmdCell::DoSelected()
@@ -56,9 +65,10 @@ void UCmdCell::HideContent()
 {
 	for(int i = 0;i < APList.Num();i++)
 	{
-		APList[i]->SetVisibility(ESlateVisibility::Hidden);
+		APList[i]->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	AbilityName->SetVisibility(ESlateVisibility::Hidden);
 	AbilityIcon->SetVisibility(ESlateVisibility::Hidden);
+	this->SetRenderTranslation(FVector2D(10.0f,0.f));
 }
 

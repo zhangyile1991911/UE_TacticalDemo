@@ -224,8 +224,10 @@ void UUPawnProcess_Normal::EnterFocusMode()
 void UUPawnProcess_Normal::ExitFocusMode()
 {
 	UnitBottomActionBar->HideFocus();
-	if(CmdWidgetPtr)
-		CmdWidgetPtr->SetVisibility(ESlateVisibility::Hidden);
+	if(CmdWidgetPtr != nullptr)
+	{
+		CmdWidgetPtr->HideCmdPanel();
+	}
 	bIsFocus = false;
 }
 

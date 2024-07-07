@@ -32,30 +32,11 @@ void AUnitAbility_Archery::Tick(float DeltaTime)
 
 bool AUnitAbility_Archery::CanExecute()
 {
-	return true;
+	return OwnerInstance->HasEnoughAP(SkillData.SpendPoint);
 }
 
 TArray<FIntPoint> AUnitAbility_Archery::Range(const FIntPoint& CenterPoint)
 {
-	// FIntPoint StandPoint;
-	// if(OwnerInstance->NeedToMove())
-	// {
-	// 	StandPoint = OwnerInstance->GetTempDestinationGridIndex();
-	// }
-	// else
-	// {
-	// 	StandPoint  = OwnerInstance->GetGridIndex();
-	// }
-	// TArray<FIntPoint> IndicatorRange;
-	// IndicatorRange.Reserve(16);
-	// for(int i = SkillData.Range.X;i <= SkillData.Range.Y;i++)
-	// {
-	// 	IndicatorRange.Add(FIntPoint(StandPoint.X+i,StandPoint.Y));
-	// 	IndicatorRange.Add(FIntPoint(StandPoint.X-i,StandPoint.Y));
-	// 	IndicatorRange.Add(FIntPoint(StandPoint.X,StandPoint.Y+i));
-	// 	IndicatorRange.Add(FIntPoint(StandPoint.X,StandPoint.Y-i));
-	// }
-	// return MoveTemp(IndicatorRange);
 	TArray<FIntPoint> Path;
 	TArray<FIntPoint> Result;
 	TSet<FIntPoint> Discovered;
@@ -141,7 +122,11 @@ TArray<FIntPoint> AUnitAbility_Archery::Range(const FIntPoint& CenterPoint)
 
 bool AUnitAbility_Archery::IsValidTarget(const FTileData* TileData, AGrid* MyGrid)
 {
-	return IsValidUnit(TileData->UnitOnTile);
+	const FIntPoint& StandIndex = OwnerInstance->GetStandGridIndex();
+	const FTileData* StandTileData = MyGrid->GetTileDataByIndex(StandIndex);
+	const bool bIsDeviation = CheckDeviation(TileData->Height,StandTileData->Height); 
+	const bool bIsValidUnit =  IsValidUnit(TileData->UnitOnTile);
+	return bIsDeviation && bIsValidUnit;
 }
 
 bool AUnitAbility_Archery::IsValidUnit(TObjectPtr<AMyUnit> Unit)
@@ -162,9 +147,20 @@ TArray<FIntPoint> AUnitAbility_Archery::Indicator(const FIntPoint& Index)
 TArray<TObjectPtr<AMyUnit>> AUnitAbility_Archery::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)
 {
 	const auto TileDataPtr = MyGrid->GetTileDataByIndex(Point);
+	
 	TArray<TObjectPtr<AMyUnit>> Targets;
-	Targets.Add(TileDataPtr->UnitOnTile);
-	return Targets;
+
+	do
+	{
+		if(TileDataPtr == nullptr)break;
+		if(TileDataPtr->UnitOnTile == nullptr)break;
+		if(TileDataPtr->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))break;
+		if(!CheckTileDataHeight(TileDataPtr,MyGrid))break;
+		Targets.Add(TileDataPtr->UnitOnTile);
+	}
+	while (false);
+	
+	return MoveTemp(Targets);
 }
 
 FBattleReport AUnitAbility_Archery::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,

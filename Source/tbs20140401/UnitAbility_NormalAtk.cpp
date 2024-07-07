@@ -29,7 +29,7 @@ AUnitAbility_NormalAtk::AUnitAbility_NormalAtk()
 
 bool AUnitAbility_NormalAtk::CanExecute()
 {
-	return true;
+	return OwnerInstance->HasEnoughAP(SkillData.SpendPoint);
 }
 
 TArray<FIntPoint> AUnitAbility_NormalAtk::Range(const FIntPoint& Int32Point)
@@ -49,8 +49,8 @@ bool AUnitAbility_NormalAtk::IsValidTarget(const FTileData* TileData,AGrid* MyGr
 	if(TileData->UnitOnTile == nullptr)return false;
 	if(TileData->UnitOnTile->IsDead())return false;
 	if(TileData->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return false;
-
-	return true;
+	
+	return CheckTileDataHeight(TileData,MyGrid);
 }
 
 bool AUnitAbility_NormalAtk::IsValidUnit(TObjectPtr<AMyUnit> Unit)
@@ -64,8 +64,18 @@ bool AUnitAbility_NormalAtk::IsValidUnit(TObjectPtr<AMyUnit> Unit)
 TArray<TObjectPtr<AMyUnit>> AUnitAbility_NormalAtk::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)
 {
 	TArray<TObjectPtr<AMyUnit>> Targets;
-	TObjectPtr<AMyUnit> one = MyGrid->GetUnitOnTile(Point);
-	if(one != nullptr)Targets.Add(one);
+	const FTileData* TileDataPtr = MyGrid->GetTileDataByIndex(Point);
+
+	do
+	{
+		if(TileDataPtr == nullptr)break;
+		if(TileDataPtr->UnitOnTile == nullptr)break;
+		if(TileDataPtr->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))break;
+		if(!CheckTileDataHeight(TileDataPtr,MyGrid))break;
+		Targets.Add(TileDataPtr->UnitOnTile);
+	}
+	while (false);
+	
 	return MoveTemp(Targets);
 }
 
@@ -88,7 +98,7 @@ FBattleReport AUnitAbility_NormalAtk::DoCalculation(TObjectPtr<AMyUnit> Target, 
 	Report.IsCritical = UBattleFunc::IsCritical(OwnerInstance,Target);;
 	Report.Cooperator = Cooperator;
 	Report.CooperatorTarget = Cooperator != nullptr ? Target : nullptr;
-	Report.IsBackAtk = UBattleFunc::IsBackAttack(OwnerInstance,Target);
+	Report.IsBackAtk = UBattleFunc::IsBackAttack(OwnerInstance,Target,MyGrid,SkillData.AllowableDeviation);
 	Report.HitPercent = UBattleFunc::CalculateHitRate(OwnerInstance,Target,MyGrid,Cooperator != nullptr,Report.IsBackAtk);
 
 	const int Num = FMath::RandRange(0,100);

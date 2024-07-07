@@ -34,7 +34,7 @@ void AUnitAbility_AreaAtk::BeginDestroy()
 
 bool AUnitAbility_AreaAtk::CanExecute()
 {
-	return true;
+	return OwnerInstance->HasEnoughAP(SkillData.SpendPoint);
 }
 
 TArray<FIntPoint> AUnitAbility_AreaAtk::Range(const FIntPoint& Point)
@@ -58,24 +58,11 @@ bool AUnitAbility_AreaAtk::IsValidTarget(const FTileData* TileData,AGrid* MyGrid
 {
 	if(TileData == nullptr)return false;
 	//スキルの範囲ないで、敵がなかったら　実行できない
-	FIntPoint Index = TileData->Index;
-	TArray<FIntPoint> Area;
-	Area.Reserve(5);
-	Area.Add(FIntPoint(Index.X,Index.Y));
-	Area.Add(FIntPoint(Index.X+1,Index.Y));
-	Area.Add(FIntPoint(Index.X-1,Index.Y));
-	Area.Add(FIntPoint(Index.X,Index.Y+1));
-	Area.Add(FIntPoint(Index.X,Index.Y-1));
-
-	for(int i = 0;i < Area.Num();i++)
-	{
-		const FTileData* Temp = MyGrid->GetTileDataByIndex(Area[i]);
-		if(Temp == nullptr)continue;
-		if(Temp->UnitOnTile == nullptr)continue;
-		if(!Temp->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return true;
-	}
 	
-	return false;
+	const FIntPoint& StandIndex = OwnerInstance->GetStandGridIndex();
+	const FTileData* StandTileData = MyGrid->GetTileDataByIndex(StandIndex);
+	const bool bIsDeviation = CheckDeviation(TileData->Height,StandTileData->Height);
+	return bIsDeviation;
 }
 
 bool AUnitAbility_AreaAtk::IsValidUnit(TObjectPtr<AMyUnit> Unit)
@@ -94,6 +81,10 @@ TArray<TObjectPtr<AMyUnit>> AUnitAbility_AreaAtk::TakeTargets(const FIntPoint& P
 	Area.Add(FIntPoint(Point.X-1,Point.Y));
 	Area.Add(FIntPoint(Point.X,Point.Y+1));
 	Area.Add(FIntPoint(Point.X,Point.Y-1));
+
+	const FIntPoint& StandIndex = OwnerInstance->GetStandGridIndex();
+	const FTileData* StandTileData = MyGrid->GetTileDataByIndex(StandIndex);
+	
 	for(const auto& one : Area)
 	{
 		TObjectPtr<AMyUnit> TargetUnit = MyGrid->GetUnitOnTile(one);
@@ -102,7 +93,10 @@ TArray<TObjectPtr<AMyUnit>> AUnitAbility_AreaAtk::TakeTargets(const FIntPoint& P
 		bool IsFriend = TargetUnit->IsFriend(OwnerInstance->GetUnitSide());
 		if(IsFriend)continue;
 
-		Targets.Add(TargetUnit);
+		const auto TileData = MyGrid->GetTileDataByIndex(one);
+		const bool bIsDeviation = CheckDeviation(TileData->Height,StandTileData->Height);
+		if(bIsDeviation)
+			Targets.Add(TargetUnit);
 	}
 	return MoveTemp(Targets);
 }

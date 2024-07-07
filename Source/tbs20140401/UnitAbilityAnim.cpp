@@ -3,6 +3,7 @@
 
 #include "UnitAbilityAnim.h"
 #include "BattleReport.h"
+#include "Grid.h"
 #include "MyGridPathfinding.h"
 #include "MyUnit.h"
 
@@ -17,6 +18,20 @@ AUnitAbilityAnim::AUnitAbilityAnim()
 void AUnitAbilityAnim::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+bool AUnitAbilityAnim::CheckDeviation(int HeightA,int HeightB)
+{
+	const int HeightDelta = FMath::Abs(HeightA - HeightB);
+	if(HeightDelta > SkillData.AllowableDeviation)return false;
+	return true;
+}
+
+bool AUnitAbilityAnim::CheckTileDataHeight(const FTileData* TileDataPtr, AGrid* MyGrid)
+{
+	const FIntPoint& StandIndex = OwnerInstance->GetStandGridIndex();
+	const FTileData* StandTileData = MyGrid->GetTileDataByIndex(StandIndex);
+	return CheckDeviation(TileDataPtr->Height,StandTileData->Height);
 }
 
 // Called every frame

@@ -4,6 +4,7 @@
 #include "MyUnit.h"
 #include "Grid.h"
 #include "InputBehavior.h"
+#include "UnitAbilityAnim.h"
 
 // bool UBattleFunc::IsWrapAttack(AMyUnit* Attacker,AMyUnit* Defender,AMyUnit* Cooperator)
 // {//todo
@@ -30,6 +31,7 @@
 AMyUnit* UBattleFunc::HasWrapAttackUnit(AMyUnit* Attacker, AMyUnit* Defender,AGrid* Grid)
 {
 	FIntPoint Center = Defender->GetGridIndex();
+	//まず　周囲の取る
 	TArray<FIntPoint> Around;
 	Around.Reserve(4);
 	Around.Add(FIntPoint(Center.X+1,Center.Y));
@@ -69,7 +71,15 @@ AMyUnit* UBattleFunc::HasWrapAttackUnit(AMyUnit* Attacker, AMyUnit* Defender,AGr
 		float AngleDegrees = FMath::RadiansToDegrees(AngleRadians);
 		UE_LOG(LogTemp,Log,TEXT("DirA %s DirB %s"),*DirA.ToString(),*DirB.ToString())
 		UE_LOG(LogTemp,Log,TEXT("HasWrapAttackUnit AngleDegrees = %f"),AngleDegrees)
-		if(AngleDegrees > 90)return Cooperator;
+		if(AngleDegrees > 90)
+		{//计算高度差
+			const auto CooperatorAbility = Cooperator->GetCooperationAbilityAnim();
+			const FIntPoint DefenderIndex = Defender->GetGridIndex();
+			const FTileData* DefenderTileData = Grid->GetTileDataByIndex(DefenderIndex);
+			const bool bIsHeight = CooperatorAbility->CheckTileDataHeight(DefenderTileData,Grid);
+			if(bIsHeight)
+				return Cooperator;
+		}
 	}
 	
 	return nullptr;
@@ -89,7 +99,7 @@ bool UBattleFunc::IsCritical(AMyUnit* Attacker,AMyUnit* Defender)
 // 	return nullptr;
 // }
 
-bool UBattleFunc::IsBackAttack(AMyUnit* Attacker,AMyUnit* Defender)
+bool UBattleFunc::IsBackAttack(AMyUnit* Attacker,AMyUnit* Defender,AGrid* MyGrid,int Deviation)
 {
 	if(Attacker == Defender)return false;
 	// FRotator AttackRotation;
@@ -106,33 +116,31 @@ bool UBattleFunc::IsBackAttack(AMyUnit* Attacker,AMyUnit* Defender)
 	// float DeltaYaw = FMathf::Abs(AttackRotation.Yaw - DefenderRotation.Yaw);
 	// bool bIsSameDir = DeltaYaw <= 0.01f;
 	// if(!bIsSameDir)return false;
-	FIntPoint DefenderPoint = Defender->GetGridIndex();;
+	FIntPoint BackAtkPoint = Defender->GetGridIndex();
 	EUnitDirectType Direct = Defender->GetUnitDirect();
 	switch (Direct)
 	{
 	case EUnitDirectType::LEFT:
-		DefenderPoint.Y += 1;
+		BackAtkPoint.Y += 1;
 		break;
 	case EUnitDirectType::RIGHT:
-		DefenderPoint.Y -= 1;
+		BackAtkPoint.Y -= 1;
 		break;
 	case EUnitDirectType::FORWARD:
-		DefenderPoint.X -= 1;
+		BackAtkPoint.X -= 1;
 		break;
 	case EUnitDirectType::BACKWARD:
-		DefenderPoint.X += 1;
+		BackAtkPoint.X += 1;
 		break;
 	}
-	FIntPoint AttackPoint;
-	if(Attacker->NeedToMove())
-	{
-		AttackPoint = Attacker->GetTempDestinationGridIndex();
-	}
-	else
-	{
-		AttackPoint = Attacker->GetGridIndex();
-	}
-	return AttackPoint == DefenderPoint;
+	const FIntPoint& AttackPoint = Attacker->GetStandGridIndex();
+	const FTileData* BackAtkTileData = MyGrid->GetTileDataByIndex(BackAtkPoint);
+	const FTileData* DefendTileData = MyGrid->GetTileDataByIndex(Defender->GetGridIndex());
+	if(BackAtkTileData == nullptr || DefendTileData == nullptr)return false;
+	const int Delta = FMathf::Abs(BackAtkTileData->Height - DefendTileData->Height);
+	if(Delta > Deviation)return false;
+	
+	return AttackPoint == BackAtkPoint;
 }
 
 /*

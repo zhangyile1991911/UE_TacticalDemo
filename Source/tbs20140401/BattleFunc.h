@@ -12,7 +12,7 @@ class TBS20140401_API UBattleFunc : public UObject
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable)
-	static bool IsBackAttack(AMyUnit* Attacker,AMyUnit* Defender);
+	static bool IsBackAttack(AMyUnit* Attacker,AMyUnit* Defender,AGrid* MyGrid,int Deviation);
 
 	// UFUNCTION(BlueprintCallable)
 	// static bool IsWrapAttack(AMyUnit* Attacker,AMyUnit* Defender,AMyUnit* Cooperator);

@@ -16,7 +16,7 @@ AUnitAbility_LongRangeAtk::AUnitAbility_LongRangeAtk()
 
 bool AUnitAbility_LongRangeAtk::CanExecute()
 {
-	return true;
+	return OwnerInstance->HasEnoughAP(SkillData.SpendPoint);
 }
 
 TArray<FIntPoint> AUnitAbility_LongRangeAtk::Range(const FIntPoint& Int32Point)
@@ -44,7 +44,8 @@ bool AUnitAbility_LongRangeAtk::IsValidTarget(const FTileData* TileData,AGrid* M
 		if(TempPtr->UnitOnTile == nullptr)continue;
 		if(TempPtr->UnitOnTile->IsDead())continue;
 		if(TempPtr->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))continue;
-
+		if(!CheckTileDataHeight(TempPtr,MyGrid))continue;
+		
 		return true;
 	}
 	
@@ -61,15 +62,8 @@ bool AUnitAbility_LongRangeAtk::IsValidUnit(TObjectPtr<AMyUnit> Unit)
 
 TArray<FIntPoint> AUnitAbility_LongRangeAtk::Indicator(const FIntPoint& Index)
 {
-	FIntPoint StandPoint;
-	if(OwnerInstance->NeedToMove())
-	{
-		StandPoint = OwnerInstance->GetTempDestinationGridIndex();
-	}
-	else
-	{
-		StandPoint  = OwnerInstance->GetGridIndex();
-	}
+	FIntPoint StandPoint = OwnerInstance->GetStandGridIndex();
+	
 	FVector2D Dir = Index - StandPoint;
 	Dir = Dir.GetSafeNormal();
 	TArray<FIntPoint> IndicatorRange;
@@ -86,15 +80,7 @@ TArray<FIntPoint> AUnitAbility_LongRangeAtk::Indicator(const FIntPoint& Index)
 TArray<TObjectPtr<AMyUnit>> AUnitAbility_LongRangeAtk::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)
 {
 	TArray<TObjectPtr<AMyUnit>> Targets;
-	FVector2D Dir;
-	if(OwnerInstance->NeedToMove())
-	{
-		Dir = Point - OwnerInstance->GetTempDestinationGridIndex();
-	}
-	else
-	{
-		Dir = Point - OwnerInstance->GetGridIndex();
-	}
+	FVector2D Dir = Point - OwnerInstance->GetStandGridIndex();
 	Dir = Dir.GetSafeNormal();
 	int X = Dir.X;
 	int Y = Dir.Y;
@@ -103,8 +89,12 @@ TArray<TObjectPtr<AMyUnit>> AUnitAbility_LongRangeAtk::TakeTargets(const FIntPoi
 	{
 		Tmp.X += X;
 		Tmp.Y += Y;
-		auto Unit = MyGrid->GetUnitOnTile(Tmp);
-		if(Unit != nullptr)Targets.Add(Unit);
+		const FTileData* TileDataPtr = MyGrid->GetTileDataByIndex(Tmp);
+		if(TileDataPtr == nullptr)continue;
+		if(TileDataPtr->UnitOnTile == nullptr)continue;
+		if(!CheckTileDataHeight(TileDataPtr,MyGrid))continue;
+		
+		Targets.Add(TileDataPtr->UnitOnTile);
 	}
 	return MoveTemp(Targets);
 }
@@ -123,7 +113,7 @@ FBattleReport AUnitAbility_LongRangeAtk::DoCalculation(const TArray<TObjectPtr<A
 		if(HitInfo.Cooperator != nullptr)HitInfo.CooperatorTarget = OneTarget;
 		
 		HitInfo.IsCritical = UBattleFunc::IsCritical(OwnerInstance,OneTarget);
-		HitInfo.IsBackAtk = UBattleFunc::IsBackAttack(OwnerInstance,OneTarget);
+		HitInfo.IsBackAtk = UBattleFunc::IsBackAttack(OwnerInstance,OneTarget,MyGrid,SkillData.AllowableDeviation);
 		HitInfo.HitPercent = UBattleFunc::CalculateHitRate(OwnerInstance,OneTarget,MyGrid,HitInfo.Cooperator != nullptr,Report.IsBackAtk);
 
 		int Num = FMath::RandRange(0,100);

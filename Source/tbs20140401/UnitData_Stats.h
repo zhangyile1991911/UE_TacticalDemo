@@ -76,6 +76,9 @@ struct FUnitProperty
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int AtkCount = 1;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int HeightTolerance = 1;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int FireResistance;

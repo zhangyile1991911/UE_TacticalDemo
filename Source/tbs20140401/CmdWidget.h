@@ -63,6 +63,7 @@ protected:
 public:
 	void RefreshUnitCmd(TObjectPtr<AMyUnit> Unit,bool bShowIdle);
 	void SelectCmd(int index);
+	void HideCmdPanel();
 protected:
 	virtual void NativeDestruct() override;
 };

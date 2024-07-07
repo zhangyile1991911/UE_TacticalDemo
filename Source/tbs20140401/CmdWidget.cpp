@@ -30,8 +30,11 @@ void UCmdWidget::RefreshUnitCmd(TObjectPtr<AMyUnit> Unit,bool bShowIdle)
 	{
 		if(ArrayOfAbility[i]->IsShowOnCmd() == false)continue;
 		if(ArrayOfAbility[i]->IsIdle() && !bShowIdle)continue;
-		
-		AbilityList[i]->RefreshCell(ArrayOfAbility[i]->GetAbilityName(),ArrayOfAbility[i]->GetCost());
+
+		const bool bCanExecute = Unit->HasEnoughAP(ArrayOfAbility[i]->GetCost());
+		AbilityList[i]->RefreshCell(ArrayOfAbility[i]->GetAbilityName(),
+			ArrayOfAbility[i]->GetCost(),
+			bCanExecute);
 		AbilityList[i]->SetVisibility(ESlateVisibility::Visible);
 		AbilityNum++;
 	}
@@ -74,6 +77,16 @@ void UCmdWidget::SelectCmd(int index)
 	}
 	Describe->SetText(ArrayOfAbility[index]->GetSkillData().Description);	
 	
+}
+
+void UCmdWidget::HideCmdPanel()
+{
+	for(const auto& one : AbilityList)
+	{
+		one->HideContent();
+	}
+	this->SetVisibility(ESlateVisibility::Hidden);
+	SelectedIndex = -1;
 }
 
 void UCmdWidget::NativeDestruct()

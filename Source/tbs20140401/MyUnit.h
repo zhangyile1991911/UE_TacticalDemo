@@ -197,7 +197,7 @@ public:
 	// void testloop();
 	const FIntPoint& GetGridIndex()const{return GridIndex;}
 	void SetGridIndex(const FIntPoint& index){GridIndex = index;}
-
+	FIntPoint GetStandGridIndex()const;
 	void RefreshUnit(TObjectPtr<AMy_Pawn> My_Pawn,TObjectPtr<AGrid> grid,const FIntPoint& index);
 
 	void SetHovered(bool h);
@@ -299,6 +299,7 @@ public:
 	bool IsFriend(int Side)const{return MyRuntimeProperty.UnitSide == Side;}
 
 	int GetMaxAtkRange()const{return MaxAtkRange+MyRuntimeProperty.Move;}
+	int GetMaxAtkDeviation()const;
 	int GetMove()const{return MyRuntimeProperty.Move;}
 	// int GetUniqueID()const{return UniqueID;}
 	const TSet<FIntPoint>& GetAttackRanges()const{return AttackRanges;}
@@ -307,5 +308,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void TurnToTarget(AMyUnit* Unit);
+
+	int GetHeightTolerance()const{return MyProperty.HeightTolerance;}
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

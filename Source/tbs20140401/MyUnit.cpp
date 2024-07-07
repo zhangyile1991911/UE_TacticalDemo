@@ -219,6 +219,16 @@ void AMyUnit::OnAnimInstanceCompleted()
 	
 }
 
+FIntPoint AMyUnit::GetStandGridIndex() const
+{
+	if(NeedToMove())
+	{
+		return GetTempDestinationGridIndex();
+	}
+	
+	return GetGridIndex();
+}
+
 void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const FIntPoint& index)
 {
 	My_Pawn = Pawn;
@@ -268,7 +278,7 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	//プロパティをコピー
 	MyRuntimeProperty.HP = MyProperty.HP;
 	MyRuntimeProperty.Move = MyProperty.Move;
-	MyRuntimeProperty.ActionPoint = MyProperty.ActionPoint;
+	MyRuntimeProperty.ActionPoint = 0;//MyProperty.ActionPoint;
 	MyRuntimeProperty.Power = MyProperty.Power;
 	MyRuntimeProperty.PhysicDefend = MyProperty.PhysicDefend;
 	MyRuntimeProperty.MagicPower = MyProperty.MagicPower;
@@ -844,6 +854,16 @@ FRotator AMyUnit::GetUnitForward() const
 		return MyShadowUnit->GetActorRotation();
 	}
 	return MySkeletalMeshComponent->GetRelativeRotation();
+}
+
+int AMyUnit::GetMaxAtkDeviation() const
+{
+	int MaxAtkDeviation = 0;
+	for (const auto Element : OwnAbilityAnimList)
+	{
+		MaxAtkDeviation = FMathf::Max(Element->GetSkillData().AllowableDeviation,MaxAtkDeviation);
+	}
+	return MaxAtkDeviation;
 }
 
 

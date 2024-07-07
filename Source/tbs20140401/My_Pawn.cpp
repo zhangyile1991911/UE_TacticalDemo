@@ -455,43 +455,43 @@ void AMy_Pawn::UnitMove(const FInputActionValue& value)
 	FVector2D tmp = value.Get<FInputActionValue::Axis2D>();
 	// UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::UnitMove %f %f "),tmp.X,tmp.Y)
 	
-	CurrentProcess->HandleDirectionInput(tmp);
+	if(CurrentProcess)CurrentProcess->HandleDirectionInput(tmp);
 }
 
 void AMy_Pawn::ConfirmClick(const FInputActionValue& value)
 {
 	if(!IsStartGame)return;
-	CurrentProcess->HandleConfirmInput();
+	if(CurrentProcess)CurrentProcess->HandleConfirmInput();
 }
 
 void AMy_Pawn::CancelClick(const FInputActionValue& value)
 {
 	if(!IsStartGame)return;
-	CurrentProcess->HandleCancelInput();
+	if(CurrentProcess)CurrentProcess->HandleCancelInput();
 }
 
 void AMy_Pawn::SpaceClick(const FInputActionValue& value)
 {
 	if(!IsStartGame)return;
-	CurrentProcess->HandleSpaceInput();
+	if(CurrentProcess)CurrentProcess->HandleSpaceInput();
 }
 
 void AMy_Pawn::TabClick(const FInputActionValue& value)
 {
 	if(!IsStartGame)return;
-	CurrentProcess->HandleTabInput();
+	if(CurrentProcess)CurrentProcess->HandleTabInput();
 }
 
 void AMy_Pawn::LeftClick(const FInputActionValue& value)
 {
 	if(IsStartGame)return;
-	CurrentProcess->HandleLeftInput();
+	if(CurrentProcess)CurrentProcess->HandleLeftInput();
 }
 
 void AMy_Pawn::RightClick(const FInputActionValue& value)
 {
 	if(IsStartGame)return;
-	CurrentProcess->HandleRightInput();
+	if(CurrentProcess)CurrentProcess->HandleRightInput();
 }
 
 void AMy_Pawn::SwitchProcess(TObjectPtr<UPawnProcess> NextProcess)

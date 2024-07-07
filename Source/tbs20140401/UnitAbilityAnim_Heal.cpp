@@ -23,7 +23,7 @@ void AUnitAbilityAnim_Heal::BeginPlay()
 
 bool AUnitAbilityAnim_Heal::CanExecute()
 {
-	return true;
+	return OwnerInstance->HasEnoughAP(SkillData.SpendPoint);
 }
 
 
@@ -112,7 +112,8 @@ bool AUnitAbilityAnim_Heal::IsValidTarget(const FTileData* TileData, AGrid* MyGr
 	if(TileData->UnitOnTile == nullptr)return false;
 	if(TileData->UnitOnTile->IsDead())return false;
 	if(TileData->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return true;
-	return false;
+	
+	return CheckTileDataHeight(TileData,MyGrid);
 }
 
 bool AUnitAbilityAnim_Heal::IsValidUnit(TObjectPtr<AMyUnit> Unit)
@@ -128,10 +129,15 @@ TArray<TObjectPtr<AMyUnit>> AUnitAbilityAnim_Heal::TakeTargets(const FIntPoint& 
 	TArray<TObjectPtr<AMyUnit>> Targets;
 	const FTileData* TileDataPtr = MyGrid->GetTileDataByIndex(Point);
 
-	if(TileDataPtr == nullptr)return Targets;
-	if(TileDataPtr->UnitOnTile == nullptr)return Targets;
-	if(!TileDataPtr->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return Targets;
-	Targets.Add(TileDataPtr->UnitOnTile);
+	do
+	{
+		if(TileDataPtr == nullptr)break;
+		if(TileDataPtr->UnitOnTile == nullptr)break;
+		if(!TileDataPtr->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))break;
+		if(!CheckTileDataHeight(TileDataPtr,MyGrid))break;
+		Targets.Add(TileDataPtr->UnitOnTile);
+	}
+	while (false);
 	
 	return MoveTemp(Targets);
 }

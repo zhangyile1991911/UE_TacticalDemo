@@ -124,8 +124,7 @@ void UBottomActionBar::OnActionBarChanged(const TArray<TObjectPtr<AMyUnit>>& arr
 
 void UBottomActionBar::OnEventGrid(const FTileData* TileDataPtr)
 {
-	const int Height = TileDataPtr->Transform.GetLocation().Z/100;
-	GridHeight->SetText(FText::Format(NSLOCTEXT("","","{0}"),Height));
+	GridHeight->SetText(FText::Format(NSLOCTEXT("","","{0}"),TileDataPtr->Height));
 	switch (TileDataPtr->TileType)
 	{
 	case ETileType::Normal:

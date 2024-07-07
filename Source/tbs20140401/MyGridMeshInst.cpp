@@ -33,7 +33,7 @@ void AMyGridMeshInst::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AMyGridMeshInst::AddInstance(FTransform& instancedTransform,FIntPoint index,const TSet<ETileState>& states)
+void AMyGridMeshInst::AddInstance(const FTransform& instancedTransform,FIntPoint index,const TSet<ETileState>& states)
 {
 	RemoveInstance(index);
 	auto instIndex = InstancedStaticMeshComponent->AddInstance(instancedTransform,true);

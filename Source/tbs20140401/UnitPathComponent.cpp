@@ -216,7 +216,8 @@ bool UUnitPathComponent::DiscoverTileByWalkableType(const int UnitSide,const FIn
 		FIntPoint NextIndex = CenterIndex + Neighbors[i];
 
 		if(AnalysedTileIndexes.Contains(NextIndex))continue;
-		
+
+		const auto CenterTileDataPtr = ParentPtr->MyGrid->GetTileDataByIndex(CenterIndex);
 		const auto NextTileDataPtr = ParentPtr->MyGrid->GetTileDataByIndex(NextIndex);
 		if(NextTileDataPtr == nullptr)continue;
 		if(NextTileDataPtr->UnitOnTile != nullptr && !NextTileDataPtr->UnitOnTile->IsFriend(UnitSide))
@@ -226,8 +227,9 @@ bool UUnitPathComponent::DiscoverTileByWalkableType(const int UnitSide,const FIn
 		if(!IsTileTypeWalkable(NextTileDataPtr->TileType))continue;
 		const float z = NextTileDataPtr->Transform.GetLocation().Z;
 		//高低差
-		const float center_z = NextTileDataPtr->Transform.GetLocation().Z;
-		const bool isRemove = FMathf::Abs(z - center_z) > ParentPtr->MyGrid->GetGridTileSize().Z;
+		// const float center_z = NextTileDataPtr->Transform.GetLocation().Z;
+		// const bool isRemove = FMathf::Abs(z - center_z) > ParentPtr->MyGrid->GetGridTileSize().Z;
+		const bool isRemove = NextTileDataPtr->Height - CenterTileDataPtr->Height > ParentPtr->GetHeightTolerance();
 		if(isRemove)continue;
 		
 		if(!WalkableType.Contains(NextTileDataPtr->TileType))continue;;
@@ -519,6 +521,7 @@ void UUnitPathComponent::UnitAssaultRange(bool bIsTemp)
 	}
 	
 	// AssaultRangeTiles.Empty();
+	int MaxAtkDeviation = ParentPtr->GetMaxAtkDeviation();
 	for(int i = 1;i <= ParentPtr->MaxAtkRange;i++)
 	{
 		for (const auto& BorderIndex : BorderTileIndexes)
@@ -526,60 +529,42 @@ void UUnitPathComponent::UnitAssaultRange(bool bIsTemp)
 			// FIntPoint Direction = BorderIndex - ParentPtr->GridIndex;
 			//如果是上下 左右 就往前扩一格
 			FIntPoint Up(BorderIndex.X +i,BorderIndex.Y);
+			const FTileData* BorderTileData = ParentPtr->MyGrid->GetTileDataByIndex(BorderIndex);
+
+			if(const FTileData* UpTileData = ParentPtr->MyGrid->GetTileDataByIndex(Up))
+			{
+				const int Delta = FMathf::Abs(UpTileData->Height - BorderTileData->Height);
+				if(Delta <= MaxAtkDeviation)
+					AddAssaultRange(Up,bIsTemp);			
+			}
+			
 			FIntPoint Right(BorderIndex.X ,BorderIndex.Y+i);
+			if(const FTileData* RightTileData = ParentPtr->MyGrid->GetTileDataByIndex(Right))
+			{
+				const int Delta = FMathf::Abs(RightTileData->Height - BorderTileData->Height);
+				if(Delta <= MaxAtkDeviation)
+					AddAssaultRange(Right,bIsTemp);			
+			}
+			
 			FIntPoint Left(BorderIndex.X ,BorderIndex.Y-i);
+			if(const FTileData* LeftTileData = ParentPtr->MyGrid->GetTileDataByIndex(Left))
+			{
+				const int Delta = FMathf::Abs(LeftTileData->Height - BorderTileData->Height);
+				if(Delta <= MaxAtkDeviation)
+					AddAssaultRange(Left,bIsTemp);			
+			}
+			
 			FIntPoint Down(BorderIndex.X - i,BorderIndex.Y);
-			AddAssaultRange(Up,bIsTemp);
-			AddAssaultRange(Right,bIsTemp);
-			AddAssaultRange(Down,bIsTemp);
-			AddAssaultRange(Left,bIsTemp);
-			// if( FMathf::Abs(Direction.X) > 0 && FMathf::Abs(Direction.Y) >0)
-			// {//说明是斜着走
-			// 	if(Direction.X > 0 && Direction.Y > 0)
-			// 	{//右上
-			// 		FIntPoint Up(BorderIndex.X +i,BorderIndex.Y);
-			// 		FIntPoint Right(BorderIndex.X ,BorderIndex.Y+i);
-			// 		AddAssaultRange(Up,bIsTemp);
-			// 		AddAssaultRange(Right,bIsTemp);
-			// 	}
-			// 	else if(Direction.X > 0 && Direction.Y < 0)
-			// 	{//左上
-			// 		FIntPoint Up(BorderIndex.X +i,BorderIndex.Y);
-			// 		FIntPoint Left(BorderIndex.X ,BorderIndex.Y-i);
-			// 		AddAssaultRange(Up,bIsTemp);
-			// 		AddAssaultRange(Left,bIsTemp);
-			// 	}
-			// 	else if(Direction.X < 0 && Direction.Y < 0)
-			// 	{//左下
-			// 		FIntPoint Down(BorderIndex.X - i,BorderIndex.Y);
-			// 		FIntPoint Left(BorderIndex.X ,BorderIndex.Y-i);
-			// 		AddAssaultRange(Down,bIsTemp);
-			// 		AddAssaultRange(Left,bIsTemp);
-			// 	}
-			// 	else
-			// 	{//右下
-			// 		FIntPoint Down(BorderIndex.X - i,BorderIndex.Y);
-			// 		FIntPoint Right(BorderIndex.X ,BorderIndex.Y-i);
-			// 		AddAssaultRange(Down,bIsTemp);
-			// 		AddAssaultRange(Right,bIsTemp);
-			// 	}
-			// }
-			// else if(Direction.X > 0)
-			// {//上
-			// 	AddAssaultRange(FIntPoint(BorderIndex.X+i,BorderIndex.Y),bIsTemp);
-			// }
-			// else if(Direction.X < 0)
-			// {//下
-			// 	AddAssaultRange(FIntPoint(BorderIndex.X-i,BorderIndex.Y),bIsTemp);
-			// }
-			// else if(Direction.Y > 0)
-			// {//右
-			// 	AddAssaultRange(FIntPoint(BorderIndex.X,BorderIndex.Y+i),bIsTemp);
-			// }
-			// else if(Direction.Y < 0)
-			// {//左
-			// 	AddAssaultRange(FIntPoint(BorderIndex.X,BorderIndex.Y-i),bIsTemp);
-			// }
+			if(const FTileData* DownTileData = ParentPtr->MyGrid->GetTileDataByIndex(Down))
+			{
+				const int Delta = FMathf::Abs(DownTileData->Height - BorderTileData->Height);
+				if(Delta <= MaxAtkDeviation)
+					AddAssaultRange(Down,bIsTemp);			
+			}
+			
+			// AddAssaultRange(Right,bIsTemp);
+			// AddAssaultRange(Down,bIsTemp);
+			// AddAssaultRange(Left,bIsTemp);
 		}
 	}
 	if(!bIsTemp)

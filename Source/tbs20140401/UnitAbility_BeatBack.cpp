@@ -31,7 +31,7 @@ void AUnitAbility_BeatBack::Tick(float DeltaTime)
 
 bool AUnitAbility_BeatBack::CanExecute()
 {
-	return true;
+	return OwnerInstance->HasEnoughAP(SkillData.SpendPoint);
 }
 
 TArray<FIntPoint> AUnitAbility_BeatBack::Range(const FIntPoint& Int32Point)
@@ -50,7 +50,9 @@ bool AUnitAbility_BeatBack::IsValidTarget(const FTileData* TileData, AGrid* MyGr
 	if(TileData->UnitOnTile == nullptr)return false;
 	if(TileData->UnitOnTile->IsDead())return false;
 	if(TileData->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return false;
-	return true;
+	
+	const bool bIsDeviation = CheckTileDataHeight(TileData,MyGrid);
+	return bIsDeviation;
 }
 
 bool AUnitAbility_BeatBack::IsValidUnit(TObjectPtr<AMyUnit> Unit)
@@ -76,7 +78,12 @@ TArray<TObjectPtr<AMyUnit>> AUnitAbility_BeatBack::TakeTargets(const FIntPoint& 
 	if(TileDataPtr->UnitOnTile == nullptr)return Targets;
 	if(TileDataPtr->UnitOnTile->IsDead())return Targets;
 	if(TileDataPtr->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return Targets;
-	Targets.Add(TileDataPtr->UnitOnTile);
+
+	const FIntPoint& StandIndex = OwnerInstance->GetStandGridIndex();
+	const FTileData* StandTileData = MyGrid->GetTileDataByIndex(StandIndex);
+	const bool bIsDeviation = CheckDeviation(TileDataPtr->Height,StandTileData->Height);
+	if(bIsDeviation)
+		Targets.Add(TileDataPtr->UnitOnTile);
 	return Targets;
 }
 
@@ -94,7 +101,7 @@ FBattleReport AUnitAbility_BeatBack::DoCalculation(TObjectPtr<AMyUnit> Target, A
 	Report.IsCritical = UBattleFunc::IsCritical(OwnerInstance,Target);;
 	Report.Cooperator = nullptr;
 	Report.CooperatorTarget = nullptr;
-	Report.IsBackAtk = UBattleFunc::IsBackAttack(OwnerInstance,Target);
+	Report.IsBackAtk = UBattleFunc::IsBackAttack(OwnerInstance,Target,MyGrid,SkillData.AllowableDeviation);
 	Report.HitPercent = UBattleFunc::CalculateHitRate(OwnerInstance,Target,MyGrid,false,Report.IsBackAtk);
 
 	const int Num = FMath::RandRange(0,100);
@@ -127,13 +134,25 @@ FBattleReport AUnitAbility_BeatBack::DoCalculation(TObjectPtr<AMyUnit> Target, A
 		VecIntPoint.X = -1;
 		break;
 	}
-	//沿着方向一直推　その方向に沿って押す
+	//沿着方向一直推　その方向に沿って押し続ける
+	FIntPoint PreviousPoint = Target->GetGridIndex();
 	FIntPoint TargetIntPoint = Target->GetGridIndex();
 	TargetIntPoint += VecIntPoint;
-	while(MyGrid->IsValidGridIndex(TargetIntPoint) && !MyGrid->TileGridHasUnit(TargetIntPoint))
+	do
 	{
+		if(!MyGrid->IsValidGridIndex(TargetIntPoint))
+			break;
+		if(!MyGrid->TileGridHasUnit(TargetIntPoint))
+			break;
+		const FTileData* Previous = MyGrid->GetTileDataByIndex(PreviousPoint);
+		const FTileData* Current = MyGrid->GetTileDataByIndex(TargetIntPoint);
+		const int HeightDelta = FMathf::Abs(Previous->Height - Current->Height);
+		if(HeightDelta > 1)break;
+		
 		TargetIntPoint += VecIntPoint;
 	}
+	while (true);
+	
 	TargetIntPoint -= VecIntPoint;
 	const FTileData* DestPtr = MyGrid->GetTileDataByIndex(TargetIntPoint);
 	Report.FirstIndex = DestPtr->Transform.GetLocation();

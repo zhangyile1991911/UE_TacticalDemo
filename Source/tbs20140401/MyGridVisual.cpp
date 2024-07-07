@@ -98,7 +98,7 @@ void AMyGridVisual::DestroyGridVisual()
 		LayerBGridMeshInst->ClearInstance();
 }
 
-void AMyGridVisual::AddTileVisual(FTileData data)
+void AMyGridVisual::AddTileVisual(const FTileData& data)
 {
 	if(IsTileTypeWalkable(data.TileType))
 	{

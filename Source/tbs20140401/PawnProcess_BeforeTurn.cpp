@@ -34,21 +34,21 @@ void UPawnProcess_BeforeTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	Unit->BeforeStartTurn();
 	
 	PawnInstance->UpdateTileStatusByIndex(Unit->GetGridIndex(),ETileState::Selected);
+
+	// if(PawnInstance->ReadStory())
+	// {
+	// 	PawnInstance->SwitchToNormal();		
+	// }
+	// else
+	// {
+	// 	PawnInstance->SwitchToTellStory();
+	// }
+	PawnInstance->SwitchToNormal();
 }
 
 void UPawnProcess_BeforeTurn::TickProcess()
 {
 	Super::TickProcess();
-
-	if(PawnInstance->ReadStory())
-	{
-		PawnInstance->SwitchToNormal();		
-	}
-	else
-	{
-		PawnInstance->SwitchToTellStory();
-	}
-	
 }
 
 void UPawnProcess_BeforeTurn::HandleDirectionInput(const FVector2D& Input)

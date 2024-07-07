@@ -7,6 +7,7 @@
 #include "TileData.h"
 #include "MyUnit.h"
 #include "BattleReport.h"
+#include "Grid.h"
 
 AUnitAbility_Cooperate::AUnitAbility_Cooperate()
 {
@@ -39,7 +40,19 @@ bool AUnitAbility_Cooperate::IsValidTarget(const FTileData* TileData,AGrid* MyGr
 
 TArray<TObjectPtr<AMyUnit>> AUnitAbility_Cooperate::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)
 {
-	return Super::TakeTargets(Point, MyGrid);
+	TArray<TObjectPtr<AMyUnit>> Targets;
+	const FTileData* TileDataPtr = MyGrid->GetTileDataByIndex(Point);
+	do
+	{
+		if(TileDataPtr == nullptr)break;
+		if(TileDataPtr->UnitOnTile == nullptr)break;
+		if(TileDataPtr->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))break;
+		if(!CheckTileDataHeight(TileDataPtr,MyGrid))break;
+		Targets.Add(TileDataPtr->UnitOnTile);
+	}
+	while (false);
+	
+	return MoveTemp(Targets);
 }
 
 FBattleReport AUnitAbility_Cooperate::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,bool NeedCooperator)
@@ -54,7 +67,7 @@ FBattleReport AUnitAbility_Cooperate::DoCalculation(TObjectPtr<AMyUnit> Target, 
 	Report.Defender = Target;
 	Report.IsCritical = UBattleFunc::IsCritical(OwnerInstance,Target);;
 	Report.Cooperator = nullptr;
-	Report.IsBackAtk = UBattleFunc::IsBackAttack(OwnerInstance,Target);
+	Report.IsBackAtk = UBattleFunc::IsBackAttack(OwnerInstance,Target,MyGrid,SkillData.AllowableDeviation);
 	Report.HitPercent = UBattleFunc::CalculateHitRate(OwnerInstance,Target,MyGrid,false,Report.IsBackAtk);
 
 	int Num = FMath::RandRange(0,100);

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "SkillData.h"
+#include "TileData.h"
 #include "UnitAbilityAnim.generated.h"
 
 class AMyGridPathfinding;
@@ -73,7 +74,9 @@ public:
 	virtual bool IsCooperate(){return false;}
 	virtual bool IsArea(){return false;}
 	virtual bool IsHeal(){return false;}
-	
+
+	virtual bool CheckDeviation(int HeightA,int HeightB);
+	virtual bool CheckTileDataHeight(const FTileData* TileData, AGrid* MyGrid);
 	EAbilityComplete CompletedEvent;
 	FAbilityComplete CompletedCallback;
 	// Called every frame

@@ -189,6 +189,7 @@ void AGrid::SpawnGrid()
 			data.Index = index;
 			data.TileType = ETileType::Normal;
 			data.Transform = TileTransform;
+			data.Height = 0;
 			if(UseEnvironment)
 			{
 				data.TileType = TraceForGround(TileTransform);
@@ -325,7 +326,7 @@ FGridShapeData* AGrid::GetGridShape()
 	return GetShapeData(GridShape);
 }
 
-void AGrid::AddGridTile(FTileData data)
+void AGrid::AddGridTile(const FTileData& data)
 {
 	GridTiles.Add(data.Index,data);
 	GridVisual->AddTileVisual(data);
@@ -627,6 +628,8 @@ void AGrid::IncreaseDecreaseTileHeight(const FIntPoint& index,bool increase)
 	data->Transform.SetLocation(curLocation);
 	GridVisual->UpdateTileVisual(data,EGriUpdateMode::UpdateTransform);
 
+	data->Height += increase ? 1 : -1;
+	
 	if(data->UnitOnTile)
 	{
 		data->UnitOnTile->SetActorLocation(curLocation);

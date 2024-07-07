@@ -81,7 +81,7 @@ public:
 	FVector GetGridBottomLeft()const{return GridBottomLeftCornerLocation;}
 	FVector2D GetGridTileCount()const{return GridTileCount;}
 	FGridShapeData* GetGridShape();
-	void AddGridTile(FTileData data);
+	void AddGridTile(const FTileData& data);
 	void DestroyGrid();
 	FVector GetCursorLocationOnGrid(TObjectPtr<APlayerController> playerIndex,bool traceForGround,bool traceForEmptySpace);
 	FIntPoint GetTileIndexUnderCursor(TObjectPtr<APlayerController> playerIndex,bool traceForGround,bool traceForEmptySpace);

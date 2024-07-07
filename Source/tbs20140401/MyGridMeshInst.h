@@ -28,7 +28,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void InitializeGridMeshInst(UStaticMesh* mesh,UMaterialInstance* mi,FVector color,ECollisionEnabled::Type ce);
 	void ClearInstance();
-	void AddInstance(FTransform& instancedTransform,FIntPoint index,const TSet<ETileState>& states);
+	void AddInstance(const FTransform& instancedTransform,FIntPoint index,const TSet<ETileState>& states);
 	void RemoveInstance(FIntPoint);
 	void UpdateInstance(FIntPoint,const TSet<ETileState>& states);
 	void UpdateInstanceTransform(const FIntPoint& index,const FTransform& Transform);

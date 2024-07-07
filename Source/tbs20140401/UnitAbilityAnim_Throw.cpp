@@ -33,8 +33,11 @@ bool AUnitAbilityAnim_Throw::IsValidTarget(const FTileData* TileData, AGrid* MyG
 	if(TileData->UnitOnTile == nullptr)return false;
 	if(TileData->UnitOnTile->IsDead())return false;
 	if(TileData->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))return false;
-
-	return true;
+	
+	const FIntPoint& StandIndex = OwnerInstance->GetStandGridIndex();
+	const FTileData* StandTileData = MyGrid->GetTileDataByIndex(StandIndex);
+	const bool bIsDeviation = CheckDeviation(TileData->Height,StandTileData->Height);
+	return bIsDeviation;
 }
 
 bool AUnitAbilityAnim_Throw::IsValidUnit(TObjectPtr<AMyUnit> Unit)
@@ -42,14 +45,24 @@ bool AUnitAbilityAnim_Throw::IsValidUnit(TObjectPtr<AMyUnit> Unit)
 	if(Unit == nullptr)return false;
 	if(Unit->IsDead())return false;
 	if(Unit->IsFriend(OwnerInstance->GetUnitSide()))return false;
+	
 	return true;
 }
 
 TArray<TObjectPtr<AMyUnit>> AUnitAbilityAnim_Throw::TakeTargets(const FIntPoint& Point, AGrid* MyGrid)
 {
 	TArray<TObjectPtr<AMyUnit>> Targets;
-	TObjectPtr<AMyUnit> one = MyGrid->GetUnitOnTile(Point);
-	if(one != nullptr)Targets.Add(one);
+	const FTileData* TileDataPtr = MyGrid->GetTileDataByIndex(Point);
+	do
+	{
+		if(TileDataPtr == nullptr)break;
+		if(TileDataPtr->UnitOnTile == nullptr)break;
+		if(TileDataPtr->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))break;
+		if(!CheckTileDataHeight(TileDataPtr,MyGrid))break;
+		Targets.Add(TileDataPtr->UnitOnTile);
+	}
+	while (false);
+
 	return MoveTemp(Targets);
 }
 
@@ -69,7 +82,7 @@ FBattleReport AUnitAbilityAnim_Throw::DoCalculation(TObjectPtr<AMyUnit> Target, 
 	Report.IsCritical = UBattleFunc::IsCritical(OwnerInstance,Target);;
 	Report.Cooperator = nullptr;
 	Report.CooperatorTarget = nullptr;
-	Report.IsBackAtk = UBattleFunc::IsBackAttack(OwnerInstance,Target);
+	Report.IsBackAtk = UBattleFunc::IsBackAttack(OwnerInstance,Target,MyGrid,SkillData.AllowableDeviation);
 	Report.HitPercent = UBattleFunc::CalculateHitRate(OwnerInstance,Target,MyGrid,false,Report.IsBackAtk);
 
 	const int Num = FMath::RandRange(0,100);
@@ -106,7 +119,10 @@ FBattleReport AUnitAbilityAnim_Throw::DoCalculation(TObjectPtr<AMyUnit> Target, 
 		break;
 	}
 	
+	
+	
 	const FTileData* TileDataPtr = MyGrid->GetTileDataByIndex(StandIndex);
+	
 	//1 头顶位置
 	Report.FirstIndex = OwnerInstance->GetActorLocation();
 	Report.FirstIndex.Z += 250.0f;
@@ -114,7 +130,7 @@ FBattleReport AUnitAbilityAnim_Throw::DoCalculation(TObjectPtr<AMyUnit> Target, 
 	do
 	{
 		if(TileDataPtr == nullptr)
-		{
+		{//如果是无效格子
 			UE_LOG(LogTemp,Log,TEXT("Attack Index = %s Defender Origin Index = %s FinishIndex %s"),
 				*OwnerInstance->GetGridIndex().ToString(),
 				*Target->GetGridIndex().ToString(),
@@ -123,7 +139,16 @@ FBattleReport AUnitAbilityAnim_Throw::DoCalculation(TObjectPtr<AMyUnit> Target, 
 			break;
 		}
 		if(TileDataPtr->UnitOnTile != nullptr)
-		{
+		{//如果已经有别的单位
+			UE_LOG(LogTemp,Log,TEXT("Attack Index = %s Defender Origin Index = %s FinishIndex %s"),
+				*OwnerInstance->GetGridIndex().ToString(),
+				*Target->GetGridIndex().ToString(),
+				*Target->GetGridIndex().ToString())
+			Report.SecondIndex = Target->GetActorLocation();
+			break;
+		}
+		if(!CheckTileDataHeight(TileDataPtr,MyGrid))
+		{//如果高度差超过了 还是放回原地
 			UE_LOG(LogTemp,Log,TEXT("Attack Index = %s Defender Origin Index = %s FinishIndex %s"),
 				*OwnerInstance->GetGridIndex().ToString(),
 				*Target->GetGridIndex().ToString(),
