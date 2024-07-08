@@ -21,15 +21,15 @@ AUnitAbility_AreaAtk::AUnitAbility_AreaAtk()
 void AUnitAbility_AreaAtk::BeginPlay()
 {
 	Super::BeginPlay();
-	AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyGridPathfinding::StaticClass());
-	MyGridPathfinding = Cast<AMyGridPathfinding>(Actor);
+	// AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyGridPathfinding::StaticClass());
+	// MyGridPathfinding = Cast<AMyGridPathfinding>(Actor);
 	
 }
 
 void AUnitAbility_AreaAtk::BeginDestroy()
 {
 	Super::BeginDestroy();
-	MyGridPathfinding = nullptr;
+	// MyGridPathfinding = nullptr;
 }
 
 bool AUnitAbility_AreaAtk::CanExecute()
@@ -39,7 +39,47 @@ bool AUnitAbility_AreaAtk::CanExecute()
 
 TArray<FIntPoint> AUnitAbility_AreaAtk::Range(const FIntPoint& Point)
 {
-	return MyGridPathfinding->UnitAbilityRange(Point,SkillData.Range);
+	// return MyGridPathfinding->UnitAbilityRange(Point,SkillData.Range);
+	TArray<FIntPoint> ArrayOfRange;
+	ArrayOfRange.Reserve(32);
+	TSet<FIntPoint> Discovered;
+	Discovered.Reserve(32);
+
+	ArrayOfRange.Add(Point);
+	Discovered.Add(Point);
+	int ReachIndex = 0;
+	while(ReachIndex < ArrayOfRange.Num())
+	{
+		const FIntPoint& CurrentPoint = ArrayOfRange[ReachIndex];
+		FIntPoint UP(CurrentPoint.X+1,CurrentPoint.Y);
+		FIntPoint RIGHT(CurrentPoint.X,CurrentPoint.Y+1);
+		FIntPoint DOWN(CurrentPoint.X-1,CurrentPoint.Y);
+		FIntPoint LEFT(CurrentPoint.X,CurrentPoint.Y-1);
+		int Dist = FMathf::Abs(UP.X - Point.X) + FMathf::Abs(UP.Y - Point.Y);
+		if(Discovered.Contains(UP) == false && Dist <= SkillData.Range.Y)
+		{
+			Discovered.Add(UP);
+			ArrayOfRange.Add(UP);
+		}
+		if(Discovered.Contains(RIGHT) == false && Dist <= SkillData.Range.Y)
+		{
+			Discovered.Add(RIGHT);
+			ArrayOfRange.Add(RIGHT);
+		}
+		if(Discovered.Contains(DOWN) == false && Dist <= SkillData.Range.Y)
+		{
+			Discovered.Add(DOWN);
+			ArrayOfRange.Add(DOWN);
+		}
+		if(Discovered.Contains(LEFT) == false && Dist <= SkillData.Range.Y)
+		{
+			Discovered.Add(LEFT);
+			ArrayOfRange.Add(LEFT);
+		}
+		ReachIndex += 1;
+	}
+	
+	return MoveTemp(ArrayOfRange);
 }
 
 TArray<FIntPoint> AUnitAbility_AreaAtk::Indicator(const FIntPoint& Index)

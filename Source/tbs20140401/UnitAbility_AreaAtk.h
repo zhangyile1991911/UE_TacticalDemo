@@ -11,8 +11,8 @@ class TBS20140401_API AUnitAbility_AreaAtk : public AUnitAbilityAnim
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	TObjectPtr<AMyGridPathfinding> MyGridPathfinding;
+	// UPROPERTY()
+	// TObjectPtr<AMyGridPathfinding> MyGridPathfinding;
 public:
 	// Sets default values for this actor's properties
 	AUnitAbility_AreaAtk();

@@ -211,15 +211,28 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	
 	//显示攻击范围
 	ArrayOfAbilityRange = ChosenAbilityPtr->Range(UnitInstance->GetStandGridIndex());
+	TArray<FIntPoint> InvalidIndex;
+	InvalidIndex.Reserve(16);
 	for(const FIntPoint& one : ArrayOfAbilityRange)
 	{
 		const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(one);
-		if(TileDataPtr == nullptr)continue;
+		if(TileDataPtr == nullptr)
+		{
+			InvalidIndex.Add(one);
+			continue;
+		}
+			
 		if(!ChosenAbilityPtr->CheckDeviation(TileDataPtr->Height,StandHeight))
 		{
+			InvalidIndex.Add(one);
 			continue;
 		}
 		PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::AbilityRange);
+	}
+
+	for(const FIntPoint& one : InvalidIndex)
+	{
+		ArrayOfAbilityRange.Remove(one);
 	}
 
 	auto Tmp = PawnInstance->GetMyHUD()->GetGameUI();
@@ -324,8 +337,16 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 	if(ChosenAbilityPtr->IsArea())
 	{
 		ArrayOfIndicatorRange = ChosenAbilityPtr->Indicator(next);
+
+		const FIntPoint StandIndex = UnitInstance->GetStandGridIndex();
+		const int StandHeight = PawnInstance->GetMyGrid()->GetTileDataByIndex(StandIndex)->Height;
 		for(const auto& one : ArrayOfIndicatorRange)
 		{
+			const FTileData* OneTileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(one);
+			if(!ChosenAbilityPtr->CheckDeviation(OneTileData->Height,StandHeight))
+			{
+				continue;
+			}
 			PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::IndicatorRange);	
 		}
 	}
