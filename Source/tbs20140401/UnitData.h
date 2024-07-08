@@ -8,6 +8,7 @@
 UENUM(BlueprintType)
 enum class ETBSUnitType:uint8
 {
+	None UMETA(DisplayName="None"),
 	Warrior UMETA(DisplayName="Warrior"),
 	Ranger UMETA(DisplayName="Ranger"),
 	Slime UMETA(DisplayName="Slime"),

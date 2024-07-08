@@ -37,13 +37,7 @@ AGrid::AGrid():GridTileSize(200.0f,200.0f,100.0f),GridTileCount(10.0f,10.0f)
 void AGrid::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	if(ChildActor_GridVisual->GetChildActor() == nullptr)
-	{
-		ChildActor_GridVisual->CreateChildActor();
-		GridVisual = Cast<AMyGridVisual>(ChildActor_GridVisual->GetChildActor());	
-	}
 	
-	if(GridVisual)SpawnGrid();
 }
 
 // Called when the game starts or when spawned
@@ -51,6 +45,8 @@ void AGrid::BeginPlay()
 {
 	Super::BeginPlay();
 	GridCenterLocation = GetActorLocation();
+	GridShape = EGridShape::Square;
+	InitChildActor();
 	// SpawnGrid();
 }
 
@@ -93,61 +89,65 @@ void AGrid::SpawnGridSize(FVector size)
 	SpawnGrid();
 }
 
+void AGrid::SetGridSize(FVector size)
+{
+	CurGridTileSize = GridTileSize = size;
+}
+
 void AGrid::SpawnGrid()
 {
-	GridVisual = Cast<AMyGridVisual>(ChildActor_GridVisual->GetChildActor());	
+	// GridVisual = Cast<AMyGridVisual>(ChildActor_GridVisual->GetChildActor());	
 	DestroyGrid();
-	if (GridShape == EGridShape::None)
-	{
-		return;
-	}
+	// if (GridShape == EGridShape::None)
+	// {
+	// 	return;
+	// }
 	
-	GridVisual->InitializedGridVisual(this);
 	CurGridTileSize = GridTileSize;
-	switch (GridShape)
-	{
-	case EGridShape::Triangle:
-		CurGridTileSize.X *= 2.0f;
-		CurGridTileSize.Y *= 1.0f;
-		CurGridTileSize.Z *= 1.0f;
-		break;
-	case EGridShape::Hexagon:
-		CurGridTileSize.X *= 1.5f;
-		CurGridTileSize.Y *= 1.0f;
-		CurGridTileSize.Z *= 1.0f;
-		break;
-	case EGridShape::Square:
-		break;
-	}
+	// switch (GridShape)
+	// {
+	// case EGridShape::Triangle:
+	// 	CurGridTileSize.X *= 2.0f;
+	// 	CurGridTileSize.Y *= 1.0f;
+	// 	CurGridTileSize.Z *= 1.0f;
+	// 	break;
+	// case EGridShape::Hexagon:
+	// 	CurGridTileSize.X *= 1.5f;
+	// 	CurGridTileSize.Y *= 1.0f;
+	// 	CurGridTileSize.Z *= 1.0f;
+	// 	break;
+	// case EGridShape::Square:
+	// 	break;
+	// }
 
 	GridTileCount.X = FMathf::Round(GridTileCount.X);
 	GridTileCount.Y = FMathf::Round(GridTileCount.Y);
 	
 	GridCenterLocation = SnapVectorToVector(GridCenterLocation,CurGridTileSize);
 	// GridCenterLocation = center;
-	if(GridShape == EGridShape::Triangle)
-	{
-		FVector v1((GridTileCount.X - 1)/2.0f,(GridTileCount.X - 1)/4.0f,0.0f);
-		v1 *= GridTileSize;
-		GridBottomLeftCornerLocation = GridCenterLocation - SnapVectorToVector(v1,CurGridTileSize);
-	}
-	else if(GridShape == EGridShape::Hexagon)
-	{
-		FVector v1(GridTileCount.X/3.0f,GridTileCount.Y/2.0f,0);
-		v1 *= GridTileSize;
-		GridBottomLeftCornerLocation = GridCenterLocation - SnapVectorToVector(v1,CurGridTileSize);
-	}
-	else
-	{
-		FIntPoint tmp;
-		tmp.X = GridTileCount.X -  (IsIntEven(GridTileCount.X) ? 0 : 1);
-		tmp.Y = GridTileCount.Y -  (IsIntEven(GridTileCount.Y) ? 0 : 1);
+	// if(GridShape == EGridShape::Triangle)
+	// {
+	// 	FVector v1((GridTileCount.X - 1)/2.0f,(GridTileCount.X - 1)/4.0f,0.0f);
+	// 	v1 *= GridTileSize;
+	// 	GridBottomLeftCornerLocation = GridCenterLocation - SnapVectorToVector(v1,CurGridTileSize);
+	// }
+	// else if(GridShape == EGridShape::Hexagon)
+	// {
+	// 	FVector v1(GridTileCount.X/3.0f,GridTileCount.Y/2.0f,0);
+	// 	v1 *= GridTileSize;
+	// 	GridBottomLeftCornerLocation = GridCenterLocation - SnapVectorToVector(v1,CurGridTileSize);
+	// }
+	// else
+	// {
+	FIntPoint tmp;
+	tmp.X = GridTileCount.X -  (IsIntEven(GridTileCount.X) ? 0 : 1);
+	tmp.Y = GridTileCount.Y -  (IsIntEven(GridTileCount.Y) ? 0 : 1);
 
-		tmp /= 2;
-		FVector v1(tmp.X,tmp.Y,0);
-		v1 *= GridTileSize;
-		GridBottomLeftCornerLocation = GridCenterLocation - v1;
-	}
+	tmp /= 2;
+	FVector v1(tmp.X,tmp.Y,0);
+	v1 *= GridTileSize;
+	GridBottomLeftCornerLocation = GridCenterLocation - v1;
+	// }
 	
 	
 	int lastXIndex = GridTileCount.X; 
@@ -200,6 +200,28 @@ void AGrid::SpawnGrid()
 		}
 	}
 
+	
+}
+
+void AGrid::InitChildActor()
+{
+	if(ChildActor_GridVisual->GetChildActor() == nullptr)
+	{
+		ChildActor_GridVisual->CreateChildActor([this](AActor* Actor)
+		{
+			GridVisual = Cast<AMyGridVisual>(Actor);
+			if(GridVisual)
+			{
+				GridVisual->InitializedGridVisual(this);
+				SpawnGrid();	
+			}
+		});
+	}
+	else
+	{
+		GridVisual = Cast<AMyGridVisual>(ChildActor_GridVisual->GetChildActor());
+		GridVisual->InitializedGridVisual(this);
+	}
 	
 }
 
@@ -522,8 +544,6 @@ void AGrid::AddNewOneTIle(FIntPoint index)
 	{
 		return;
 	}
-	
-	GridVisual = Cast<AMyGridVisual>(ChildActor_GridVisual->GetChildActor());	
 	
 	CurGridTileSize = GridTileSize;
 	switch (GridShape)

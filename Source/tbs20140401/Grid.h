@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "GridShapeData.h"
-#include "MyGridMeshInst.h"
 #include "MyGridVisual.h"
 #include "tbs20140401/TileData.h"
 #include "Grid.generated.h"
@@ -15,7 +14,7 @@ class UDataTable;
 class UInstancedStaticMeshComponent;
 class AMyGridMeshInst;
 
-UCLASS()
+UCLASS(Blueprintable)
 class TBS20140401_API AGrid : public AActor
 {
 	GENERATED_BODY()
@@ -66,6 +65,9 @@ protected:
 	
 	ETileType TraceForGround(FTransform& location);
 	void SpawnGrid();
+
+	void InitChildActor();
+	
 public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
@@ -76,10 +78,16 @@ public:
 	void SpawnGridTileCount(FVector2D tileCount);
 	void SpawnGridLocation(FVector location);
 	void SpawnGridSize(FVector size);
+	void SetGridSize(FVector size);
 	FVector GetGridTileSize()const{return GridTileSize;}
 	FVector GetGridCenterLocation()const{return GridCenterLocation;}
 	FVector GetGridBottomLeft()const{return GridBottomLeftCornerLocation;}
-	FVector2D GetGridTileCount()const{return GridTileCount;}
+	void SetGridBottomLeft(FVector Location)
+	{
+		GridBottomLeftCornerLocation = Location;
+	}
+	FIntPoint GetGridTileCount()const{return GridTileCount;}
+	void SetGridTileCount(FIntPoint TileCount){GridTileCount = TileCount;}
 	FGridShapeData* GetGridShape();
 	void AddGridTile(const FTileData& data);
 	void DestroyGrid();

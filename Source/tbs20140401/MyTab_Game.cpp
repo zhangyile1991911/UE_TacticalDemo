@@ -4,12 +4,15 @@
 #include "MyTab_Game.h"
 
 #include "Grid.h"
+#include "GridDataHelper.h"
+#include "GridInfoSave.h"
 #include "Components/Button.h"
 #include "GameFramework/HUD.h"
 #include "MyHUD.h"
 #include "My_Pawn.h"
 #include "MyCombatSystem.h"
-#include "My_PC.h"
+#include "MyUnit.h"
+#include "Kismet/GameplayStatics.h"
 
 
 void UMyTab_Game::NativeConstruct()
@@ -17,7 +20,9 @@ void UMyTab_Game::NativeConstruct()
 	Super::NativeConstruct();
 
 	StartGameBtn->OnClicked.AddDynamic(this,&UMyTab_Game::OnStartGameClicked);
-
+	SaveGridDataBtn->OnClicked.AddDynamic(this,&UMyTab_Game::OnSaveGridDataClicked);
+	LoadGridDataBtn->OnClicked.AddDynamic(this,&UMyTab_Game::OnLoadGirdDataClicked);
+	
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController)
 	{
@@ -58,4 +63,111 @@ void UMyTab_Game::OnStartGameClicked()
 	// {
 	// 	myPC->StartUnitTurn(firstUnit);
 	// }
+}
+
+void UMyTab_Game::OnSaveGridDataClicked()
+{
+	FGridInfoSave MyGridData;
+	MyGridData.Tiles.Reserve(512);
+	
+	AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(),AGrid::StaticClass());
+	AGrid* MyGridPtr = Cast<AGrid>(Actor);
+	if(MyGridPtr == nullptr)
+	{
+		UE_LOG(LogTemp,Log,TEXT("can't get Grid"))
+		return;
+	}
+
+	MyGridData.GridSize = MyGridPtr->GetGridTileSize();
+	MyGridData.GridTileCount = MyGridPtr->GetGridTileCount();
+	MyGridData.StartLocation = MyGridPtr->GetActorLocation();
+	MyGridData.GridBottomLeftCornerLocation = MyGridPtr->GetGridBottomLeft();
+	MyGridData.GridScale = MyGridData.GridSize / MyGridPtr->GetGridShape()->MeshSize;
+	const TMap<FIntPoint,FTileData>&  GridData = MyGridPtr->GetGridTiles();
+	for(const auto& Pair : GridData)
+	{
+		FTileInfoSave one;
+		one.CellIndex = Pair.Key;
+		one.CellTransform = Pair.Value.Transform;
+		one.Height = Pair.Value.Height;
+		one.TypeOfCell = static_cast<int>(Pair.Value.TileType);
+		if(Pair.Value.UnitOnTile != nullptr)
+		{
+			one.TypeOfUnitOnCell = static_cast<int>(Pair.Value.UnitOnTile->GetUnitType());	
+			one.DirectionOfUnitOnCell = static_cast<int>(Pair.Value.UnitOnTile->GetUnitDirect());
+		}
+		else
+		{
+			one.TypeOfUnitOnCell = static_cast<int>(ETBSUnitType::None);
+		}
+		
+		MyGridData.Tiles.Add(one);
+	}
+	
+	FString SavePath = FPaths::ProjectDir() / TEXT("/Content/GridData/Stage1.json");
+	UGridDataHelper::SaveGridToJson(MyGridData,SavePath);
+}
+
+void UMyTab_Game::OnLoadGirdDataClicked()
+{
+	FGridInfoSave MyGridData;
+	FString LoadPath = FPaths::ProjectDir() / TEXT("/Content/GridData/Stage1.json");
+	bool bIsSuccess = UGridDataHelper::LoadGridFromJson(MyGridData, LoadPath);
+	if(!bIsSuccess)
+	{
+		return;
+	}
+
+	AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(),AGrid::StaticClass());
+	AGrid* MyGridPtr = Cast<AGrid>(Actor);
+	
+	Actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyCombatSystem::StaticClass());
+	AMyCombatSystem* MyCombatPtr = Cast<AMyCombatSystem>(Actor);
+
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController == nullptr)
+	{
+		return;	
+	}
+	
+	AMy_Pawn* MyPawn = Cast<AMy_Pawn>(PlayerController->GetPawn());
+    if(MyPawn)
+    {
+    	MyPawnInstance = Cast<AMy_Pawn>(MyPawn);
+    }
+
+	MyGridPtr->SetGridSize(MyGridData.GridSize);
+	MyGridPtr->SetActorLocation(MyGridData.StartLocation);
+	MyGridPtr->SetGridTileCount(MyGridData.GridTileCount);
+	MyGridPtr->SetGridBottomLeft(MyGridData.GridBottomLeftCornerLocation);
+	for (const FTileInfoSave& Tile : MyGridData.Tiles)
+	{
+		// UE_LOG(LogTemp,Log,TEXT("%d %d"),Tile.CellIndex.X,Tile.CellIndex.Y)
+		FTileData NewTileData;
+		NewTileData.Index = Tile.CellIndex;
+		NewTileData.Height = Tile.Height;
+		NewTileData.TileType = static_cast<ETileType>(Tile.TypeOfCell);
+
+		FVector Location(
+				Tile.CellIndex.X * MyGridData.GridSize.X,
+				Tile.CellIndex.Y * MyGridData.GridSize.Y,
+				Tile.Height * MyGridData.GridSize.Z
+				);
+		Location += MyGridData.StartLocation;
+		FRotator ZeroRot(0,0,0);
+		NewTileData.Transform = Tile.CellTransform;
+		MyGridPtr->AddGridTile(NewTileData);
+
+		ETBSUnitType UT = static_cast<ETBSUnitType>(Tile.TypeOfUnitOnCell);
+		if(UT != ETBSUnitType::None)
+		{
+			EUnitDirectType Dir = static_cast<EUnitDirectType>(Tile.DirectionOfUnitOnCell);
+			TObjectPtr<AMyUnit> NewUnit = MyCombatPtr->AddUnitInCombatByType(NewTileData.Index,UT,Dir,MyPawn);	
+			NewTileData.UnitOnTile = NewUnit;
+		}
+	}
+
+	
+		
+	
 }

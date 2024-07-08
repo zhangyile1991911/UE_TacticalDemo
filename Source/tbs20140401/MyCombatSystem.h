@@ -7,6 +7,9 @@
 #include "MyCombatSystem.generated.h"
 
 
+enum class ETBSUnitType : uint8;
+enum class EUnitDirectType : uint8;
+
 class AAssaultTips;
 class AMy_Pawn;
 class AMyUnit;
@@ -56,6 +59,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void AddUnitInCombat(const FIntPoint& Index,TObjectPtr<AMy_Pawn> myPawn);
+	TObjectPtr<AMyUnit> AddUnitInCombatByType(const FIntPoint& Index,ETBSUnitType UT,EUnitDirectType Direction,AMy_Pawn* MyPawn);
 	void RemoveUnitInCombat(const FIntPoint& Index);
 	void RemoveUnitInCombat(TObjectPtr<AMyUnit> Unit);
 	void SetUnitIndexOnGrid(const FIntPoint& Index,TObjectPtr<AMyUnit> Unit);

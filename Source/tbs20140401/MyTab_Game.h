@@ -21,6 +21,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UButton> StartGameBtn;
 
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UButton> LoadGridDataBtn;
+
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UButton> SaveGridDataBtn;
+
 	UPROPERTY()
 	TObjectPtr<AMyHUD> MyHUDInstance;
 
@@ -32,4 +38,10 @@ protected:
 
 	UFUNCTION()
 	void OnStartGameClicked();
+	
+	UFUNCTION()
+	void OnSaveGridDataClicked();
+
+	UFUNCTION()
+	void OnLoadGirdDataClicked();
 };

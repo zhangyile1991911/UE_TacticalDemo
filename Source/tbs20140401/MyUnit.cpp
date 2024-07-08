@@ -235,10 +235,16 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	UnitType = My_Pawn == nullptr ? UnitType : My_Pawn->GetCurrentSelectedUnitType();
 	MyGrid = grid;
 	TempDestinationGridIndex = GridIndex = index;
-	const FUnitData* UnitData = GetUnitData(UnitType);
+	
+	RefreshUnit(UnitType);
+}
+
+void AMyUnit::RefreshUnit(ETBSUnitType UType)
+{
+	const FUnitData* UnitData = GetUnitData(UType);
 	if(UnitData == nullptr)
 	{
-		UE_LOG(LogTemp,Error,TEXT("%d data is null"),UnitType);
+		UE_LOG(LogTemp,Error,TEXT("%d data is null"),UType);
 		return;
 	}
 	
@@ -294,10 +300,6 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	MyRuntimeProperty.ThunderResistance = MyProperty.ThunderResistance;
 	MyRuntimeProperty.UnitSide = MyProperty.UnitSide;
 	AtkNum = MyProperty.AtkCount;
-	
-	// SetActorRotation(FRotator(0,360-90,0));
-
-	
 	
 	UpdateHoveredAndSelected();
 
@@ -384,7 +386,38 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 	}
 	
 	if(MyShadowUnit)MyShadowUnit->RefreshUnit(this,bp,Color);
+}
 
+void AMyUnit::RefreshUnitFromLoad(const FIntPoint& Index,
+	ETBSUnitType UType,
+	EUnitDirectType Direction,
+	TObjectPtr<AMy_Pawn> Pawn,
+	TObjectPtr<AGrid> Grid)
+{
+	My_Pawn = Pawn;
+	UnitType = UType;
+	MyGrid = Grid;
+	TempDestinationGridIndex = GridIndex = Index;
+	
+	RefreshUnit(UnitType);
+	switch (Direction)
+	{
+	case EUnitDirectType::LEFT:
+		TurnLeft();
+		break;
+	case EUnitDirectType::RIGHT:
+		TurnRight();
+		break;
+	case EUnitDirectType::FORWARD:
+		TurnForward();
+		break;
+	case EUnitDirectType::BACKWARD:
+		TurnBack();
+		break;
+	case EUnitDirectType::INVALID:
+		TurnRight();
+		break;
+	}
 }
 
 void AMyUnit::SetHovered(bool h)

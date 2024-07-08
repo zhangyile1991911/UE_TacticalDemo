@@ -178,6 +178,24 @@ void AMyCombatSystem::AddUnitInCombat(const FIntPoint& Index, TObjectPtr<AMy_Paw
 	Unit->RefreshUnit(myPawn,MyGrid,Index);
 }
 
+TObjectPtr<AMyUnit> AMyCombatSystem::AddUnitInCombatByType(const FIntPoint& Index, ETBSUnitType UT,
+	EUnitDirectType Direction, AMy_Pawn* MyPawn)
+{
+	AActor* actor = GetWorld()->SpawnActor(AMyUnit::StaticClass());
+	TObjectPtr<AMyUnit> Unit = Cast<AMyUnit>(actor);
+	
+	auto pData = MyGrid->GetTileDataByIndex(Index);
+	Unit->SetActorLocation(pData->Transform.GetLocation());
+
+	UnitsInCombat.Add(Unit->GetUniqueID(),Unit);
+	UnitsActionPriority.Add(Unit);
+	
+	MyGrid->AddTileDataUnitByIndex(Index,Unit);
+	Unit->RefreshUnitFromLoad(Index,UT,Direction,MyPawn,MyGrid);
+
+	return Unit;	
+}
+
 void AMyCombatSystem::RemoveUnitInCombat(const FIntPoint& Index)
 {
 	const FTileData* TileData = MyGrid->GetTileDataByIndex(Index);

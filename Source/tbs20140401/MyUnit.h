@@ -199,7 +199,8 @@ public:
 	void SetGridIndex(const FIntPoint& index){GridIndex = index;}
 	FIntPoint GetStandGridIndex()const;
 	void RefreshUnit(TObjectPtr<AMy_Pawn> My_Pawn,TObjectPtr<AGrid> grid,const FIntPoint& index);
-
+	void RefreshUnit(ETBSUnitType UType);
+	void RefreshUnitFromLoad(const FIntPoint& Index,ETBSUnitType UType,EUnitDirectType Direction,TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> Grid);
 	void SetHovered(bool h);
 	void SetSelected(bool h);
 
