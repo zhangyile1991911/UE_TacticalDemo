@@ -109,4 +109,7 @@ protected:
 
 	UFUNCTION()
 	void OnUnitTypeChanged(ETBSUnitType UnitType);
+public:
+	void UnSelectedAllBtn();
+	
 };

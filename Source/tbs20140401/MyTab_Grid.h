@@ -144,5 +144,10 @@ protected:
 	UFUNCTION()
 	void OnTileTypeChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
 
+	
+
 	FTimerHandle MyTimerHandle;
+
+public:
+	void UnselectedAllBtn();
 };

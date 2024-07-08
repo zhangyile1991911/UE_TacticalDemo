@@ -3,6 +3,8 @@
 
 #include "MyDebugMenu.h"
 
+#include "MyTab_Grid.h"
+#include "MyTab_PathFinding.h"
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 
@@ -49,6 +51,9 @@ void UMyDebugMenu::tab2()
 
 void UMyDebugMenu::tab3()
 {
+	// MyTab_Grid->UnselectedAllBtn();
+	MyTab_PathFinding->UnSelectedAllBtn();
+	
 	if(TabsContent->GetActiveWidgetIndex() == 3)
 	{
 		TabsContent->SetActiveWidgetIndex(0);
@@ -69,6 +74,8 @@ void UMyDebugMenu::tab3()
 
 void UMyDebugMenu::tab4()
 {
+	MyTab_Grid->UnselectedAllBtn();
+	// MyTab_PathFinding->UnSelectedAllBtn();
 	if(TabsContent->GetActiveWidgetIndex() == 4)
 	{
 		TabsContent->SetActiveWidgetIndex(0);

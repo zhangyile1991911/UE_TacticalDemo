@@ -183,3 +183,12 @@ void UMyTab_PathFinding::OnUnitTypeChanged(ETBSUnitType UnitType)
 {
 	GetMyPawn()->SetCurrentSelectedUnitType(UnitType);
 }
+
+void UMyTab_PathFinding::UnSelectedAllBtn()
+{
+	ShowTileNeighborsBtn->SetUnSelected();
+	SelectAndFindBtn->SetUnSelected();
+	AddRemoveUnitBtn->SetUnSelected();
+	RotateUnitBtn->SetUnSelected();
+	GetMyPawn()->SetSelectedActions(nullptr,nullptr);
+}

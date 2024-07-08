@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "MyDebugMenu.generated.h"
 
+class UMyTab_Game;
+class UMyTab_PathFinding;
+class UMyTab_Grid;
 class UWidgetSwitcher;
 /**
  * 
@@ -48,6 +51,16 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UWidgetSwitcher> TabsContent;
+
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UMyTab_Grid> MyTab_Grid;
+
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UMyTab_PathFinding> MyTab_PathFinding;
+
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UMyTab_Game> MyTab_Game;
+	
 
 	TArray<TObjectPtr<UButton>> TabButtons;
 	FLinearColor DefaultColor = FLinearColor(0.015686f,0.015686f,0.015686f,1.0f);

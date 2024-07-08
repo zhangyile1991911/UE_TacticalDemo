@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "MyTab_Game.generated.h"
 
+class UEditableText;
 class AMy_Pawn;
 class AMyHUD;
 class UButton;
@@ -27,6 +28,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UButton> SaveGridDataBtn;
 
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UEditableText> SaveFilePath;
+
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UEditableText> LoadFilePath;
+	
 	UPROPERTY()
 	TObjectPtr<AMyHUD> MyHUDInstance;
 
@@ -44,4 +51,5 @@ protected:
 
 	UFUNCTION()
 	void OnLoadGirdDataClicked();
+
 };

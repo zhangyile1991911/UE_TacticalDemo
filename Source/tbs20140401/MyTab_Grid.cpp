@@ -86,6 +86,7 @@ void UMyTab_Grid::NativeDestruct()
 {
 	Super::NativeDestruct();
 	UE_LOG(LogTemp,Log,TEXT("UMyTab_Grid::NativeDestruct()"))
+	GetWorld()->GetTimerManager().ClearTimer(MyTimerHandle);
 }
 
 void UMyTab_Grid::NativeOnInitialized()
@@ -308,4 +309,13 @@ void UMyTab_Grid::OnTileTypeChanged(FString SelectedItem, ESelectInfo::Type Sele
 	{
 		GetMyPawn()->SetCurrentTileType(ETileType::FlyingUnitsOnly);
 	}
+}
+
+void UMyTab_Grid::UnselectedAllBtn()
+{
+	SelectTileBtn->SetUnSelected();
+	AddRemoveBtn->SetUnSelected();
+	IncreaseBtn->SetUnSelected();
+	SetTileType->SetUnSelected();
+	GetMyPawn()->SetSelectedActions(nullptr,nullptr);
 }

@@ -12,6 +12,7 @@
 #include "My_Pawn.h"
 #include "MyCombatSystem.h"
 #include "MyUnit.h"
+#include "Components/EditableText.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -103,15 +104,16 @@ void UMyTab_Game::OnSaveGridDataClicked()
 		
 		MyGridData.Tiles.Add(one);
 	}
+
 	
-	FString SavePath = FPaths::ProjectDir() / TEXT("/Content/GridData/Stage1.json");
+	const FString SavePath = FPaths::Combine(FPaths::ProjectDir(), SaveFilePath->GetText().ToString());
 	UGridDataHelper::SaveGridToJson(MyGridData,SavePath);
 }
 
 void UMyTab_Game::OnLoadGirdDataClicked()
 {
 	FGridInfoSave MyGridData;
-	FString LoadPath = FPaths::ProjectDir() / TEXT("/Content/GridData/Stage1.json");
+	const FString LoadPath = FPaths::Combine(FPaths::ProjectDir(), LoadFilePath->GetText().ToString());
 	bool bIsSuccess = UGridDataHelper::LoadGridFromJson(MyGridData, LoadPath);
 	if(!bIsSuccess)
 	{
