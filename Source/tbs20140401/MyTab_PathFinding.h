@@ -55,6 +55,9 @@ protected:
 	TObjectPtr<UMyButtonAction> AddRemoveUnitBtn;
 
 	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UMyButtonAction> RotateUnitBtn;
+
+	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UMyButtonList_Units> ButtonList_Units;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,meta=(BindWidget))
@@ -100,6 +103,9 @@ protected:
 
 	UFUNCTION()
 	void AddRemoveUnitClicked();
+
+	UFUNCTION()
+	void RotateUnitClicked();
 
 	UFUNCTION()
 	void OnUnitTypeChanged(ETBSUnitType UnitType);
