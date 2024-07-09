@@ -28,8 +28,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowBattleInfoUI(bool IsShow);
 
+	//选择信息
 	TObjectPtr<UBottomActionBar> GetGameUI()const{return GameUI;}
 
+	//战斗信息 伤害 躲闪 暴击
 	TObjectPtr<UGameUI_BattleInfo> GetBattleInfoUI()const{return BattleInfoUI;}
 
 	UFUNCTION(BlueprintCallable)

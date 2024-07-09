@@ -199,6 +199,8 @@ void UPawnProcess_CalcAnim::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	//计算战报
 	Report = ChosenAbilityAnim->DoCalculation(TargetUnits,PawnInstance->GetMyGrid(),true);
 	// ReportIndex = 0;
+	//消耗AP
+	UnitInstance->ConsumeAP(ChosenAbilityAnim->GetCost());
 	//进入演出环节
 	ChosenAbilityAnim->DoAnimation(Report,PawnInstance);
 	PawnInstance->GetMyHUD()->ShowBattleInfoUI(true);

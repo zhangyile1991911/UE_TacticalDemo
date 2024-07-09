@@ -208,6 +208,8 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	const FIntPoint StandIndex = UnitInstance->GetStandGridIndex();
 	const int StandHeight = PawnInstance->GetMyGrid()->GetTileDataByIndex(StandIndex)->Height;
 	CurrentCursor = PawnInstance->GetSelectedTile();
+
+	UnitInstance->RotateSelfByDestination(UnitInstance->GetTempDestinationGridIndex(),CurrentCursor);
 	
 	//显示攻击范围
 	ArrayOfAbilityRange = ChosenAbilityPtr->Range(UnitInstance->GetStandGridIndex());
@@ -289,25 +291,7 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		next.Y = CurrentCursor.Y - Input.Y;
 		break;
 	}
-
-	// const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(next);
-	// if(TileDataPtr == nullptr)
-	// {
-	// 	HideTargetUnitBriefInfo();
-	// 	return;
-	// }
-	//
-	// if(TileDataPtr->UnitOnTile == UnitInstance)
-	// {
-	// 	HideTargetUnitBriefInfo();
-	// 	return;
-	// }
 	
-	// if(!PawnInstance->GetMyGrid()->IsValidGridIndex(next))
-	// {
-	// 	ShowTargetUnitBriefInfo(next);
-	// 	return;
-	// }
 
 	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(next);
 	if(TileDataPtr != nullptr)
