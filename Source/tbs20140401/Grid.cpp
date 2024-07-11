@@ -3,13 +3,11 @@
 
 #include "Grid.h"
 
-#include "BlueprintEditor.h"
 #include "GridModifier.h"
 #include "MyGridVisual.h"
 #include "MyUnit.h"
 #include "My_Utilities.h"
 #include "TileData.h"
-#include "Chaos/ClusterUnionManager.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/DataTable.h"
 
@@ -194,8 +192,10 @@ void AGrid::SpawnGrid()
 			{
 				data.TileType = TraceForGround(TileTransform);
 				data.Transform = TileTransform;
+				data.Height = (TileTransform.GetLocation().Z + 100 - 5) / GridTileSize.Z;
+				UE_LOG(LogTemp,Log,TEXT("TraceForGround TileTransform %s Height %d"),*TileTransform.GetLocation().ToString(),data.Height)
 			}
-			UE_LOG(LogTemp,Log,TEXT("grid type = %d location = %s"),data.TileType,*data.Transform.GetLocation().ToString());
+			// UE_LOG(LogTemp,Log,TEXT("grid type = %d location = %s"),data.TileType,*data.Transform.GetLocation().ToString());
 			AddGridTile(data);
 		}
 	}
@@ -584,7 +584,7 @@ void AGrid::AddNewOneTIle(FIntPoint index)
 		data.TileType = TraceForGround(TileTransform);
 		data.Transform = TileTransform;
 	}
-	UE_LOG(LogTemp,Log,TEXT("grid type = %d location = %s"),data.TileType,*data.Transform.GetLocation().ToString());
+	// UE_LOG(LogTemp,Log,TEXT("grid type = %d location = %s"),data.TileType,*data.Transform.GetLocation().ToString());
 	AddGridTile(data);
 }
 

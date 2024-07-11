@@ -169,6 +169,7 @@ void UPawnProcess_CalcAnim::AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Abilit
 	
 	CheckFlow(IDLE);
 	PawnInstance->GetMyHUD()->GetGameUI()->PlayShowBattleUI();
+	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_CalcAnim::AbilityCompleted"))
 }
 
 // void UPawnProcess_CalcAnim::AbilityCompletedEvent(TObjectPtr<AUnitAbilityAnim> Ability)

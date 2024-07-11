@@ -51,11 +51,12 @@ void UMyTab_Game::NativeDestruct()
 
 void UMyTab_Game::OnStartGameClicked()
 {
+	
 	MyHUDInstance->ShowGameUI(true);
 	MyPawnInstance->SetSelectedActions(nullptr,nullptr);
 	MyPawnInstance->GetMyCombatSystem()->ResetAllUnit();
 	MyPawnInstance->GetMyGrid()->RemoveStateAllTile(ETileState::Selected);
-	MyPawnInstance->StartGame();
+	MyPawnInstance->StartGame(false);
 	
 	// TObjectPtr<AMyUnit> firstUnit = MyPawnInstance->GetMyCombatSystem()->SortActionPriority();
 	// auto pc = GetWorld()->GetFirstPlayerController();
@@ -138,38 +139,6 @@ void UMyTab_Game::OnLoadGirdDataClicked()
     	MyPawnInstance = Cast<AMy_Pawn>(MyPawn);
     }
 
-	MyGridPtr->SetGridSize(MyGridData.GridSize);
-	MyGridPtr->SetActorLocation(MyGridData.StartLocation);
-	MyGridPtr->SetGridTileCount(MyGridData.GridTileCount);
-	MyGridPtr->SetGridBottomLeft(MyGridData.GridBottomLeftCornerLocation);
-	for (const FTileInfoSave& Tile : MyGridData.Tiles)
-	{
-		// UE_LOG(LogTemp,Log,TEXT("%d %d"),Tile.CellIndex.X,Tile.CellIndex.Y)
-		FTileData NewTileData;
-		NewTileData.Index = Tile.CellIndex;
-		NewTileData.Height = Tile.Height;
-		NewTileData.TileType = static_cast<ETileType>(Tile.TypeOfCell);
-
-		FVector Location(
-				Tile.CellIndex.X * MyGridData.GridSize.X,
-				Tile.CellIndex.Y * MyGridData.GridSize.Y,
-				Tile.Height * MyGridData.GridSize.Z
-				);
-		Location += MyGridData.StartLocation;
-		FRotator ZeroRot(0,0,0);
-		NewTileData.Transform = Tile.CellTransform;
-		MyGridPtr->AddGridTile(NewTileData);
-
-		ETBSUnitType UT = static_cast<ETBSUnitType>(Tile.TypeOfUnitOnCell);
-		if(UT != ETBSUnitType::None)
-		{
-			EUnitDirectType Dir = static_cast<EUnitDirectType>(Tile.DirectionOfUnitOnCell);
-			TObjectPtr<AMyUnit> NewUnit = MyCombatPtr->AddUnitInCombatByType(NewTileData.Index,UT,Dir,MyPawn);	
-			NewTileData.UnitOnTile = NewUnit;
-		}
-	}
-
-	
-		
+	UGridDataHelper::InstantiateGrid(MyGridData,MyGridPtr,MyCombatPtr,MyPawn);
 	
 }

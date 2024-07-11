@@ -11,6 +11,10 @@
 
 #include "My_Pawn.generated.h"
 
+class UPawnProcess_FinishTurn;
+class ADemoControl;
+class UPawnProcess_LoadFailed;
+class UPawnProcess_LoadStage;
 class UPawnProcess_Focus;
 class UEventCenter;
 class UPawnProcess_CalcAnim;
@@ -36,6 +40,7 @@ class UInputAction;
 class APathPointInst;
 class AStoryTeller;
 class UPawnProcess_Story;
+class AMyLevelLoading;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FCameraEvent);
 
@@ -111,6 +116,9 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<AStoryTeller> MyStoryTeller;
+
+	UPROPERTY()
+	TObjectPtr<AMyLevelLoading> MyLevelLoad;
 	
 	UPROPERTY()
 	TObjectPtr<AMyHUD> MyHUDInstance;
@@ -141,11 +149,23 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UPawnProcess_Story> StoryProcess;
 	UPROPERTY()
+	TObjectPtr<UPawnProcess_LoadStage> LoadStageProcess;
+	UPROPERTY()
+	TObjectPtr<UPawnProcess_LoadFailed> LoadFailedProcess;
+	UPROPERTY()
+	TObjectPtr<UPawnProcess_FinishTurn> FinishTurnProcess;
+	UPROPERTY()
 	TObjectPtr<UPawnProcess> CurrentProcess;
 
 	ECameraDirectType CameraDirect = ECameraDirectType::FORWARD;
-
+	
 	bool bHasReadStory = false;
+
+	int StageLevelNum = 1;
+
+	FTimerHandle TimerStartGameHandle;
+	
+	void DelayStartGame();
 public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	float Location_Speed = 20.0f;
@@ -173,9 +193,14 @@ public:
 	UFUNCTION()
 	void SetCurrentTileType(ETileType ttype){CurSetTileType = ttype;}
 
+	UFUNCTION(BlueprintCallable)
+	void Init();
+
 	ETBSUnitType CurrentSelectedUnitType;
 
 	bool IsStartGame = false;
+	int GetStageLevelNum()const{return StageLevelNum;}
+	void NextStageLevel(){StageLevelNum++;}
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -219,10 +244,11 @@ public:
 
 	// UFUNCTION(BlueprintCallable)
 	// AGrid* GetMyGridForBP()const{return MyGrid;}
-	TObjectPtr<AStoryTeller> GetMyStoryTeller()const{return MyStoryTeller;}
-	TObjectPtr<AGrid> GetMyGrid()const{return MyGrid;}
-	TObjectPtr<AMyCombatSystem> GetMyCombatSystem()const{return MyCombatSystem;}
-	TObjectPtr<AMyGridPathfinding> GetMyGridPathFinding()const{return MyGridPathfinding;}
+	TObjectPtr<AStoryTeller> GetMyStoryTeller();
+	TObjectPtr<AGrid> GetMyGrid();
+	TObjectPtr<AMyCombatSystem> GetMyCombatSystem();
+	TObjectPtr<AMyGridPathfinding> GetMyGridPathFinding();
+	TObjectPtr<AMyLevelLoading> GetMyLevelLoading();
 	
 	TObjectPtr<AMyHUD> GetMyHUD()const{return MyHUDInstance;}
 	UFUNCTION(BlueprintCallable)
@@ -231,7 +257,7 @@ public:
 	TObjectPtr<AMyUnit> GetUnitUnderCursor();
 
 	TObjectPtr<AMyUnit> GetSelectedUnit()const{return SelectedUnit;}
-	TObjectPtr<APathPointInst> GetMyPathPointInst()const{return MyPathPointInst;}
+	TObjectPtr<APathPointInst> GetMyPathPointInst();
 
 	TObjectPtr<UEventCenter> GetEventCenter()const{return EventCenter;}
 
@@ -255,7 +281,7 @@ public:
 	
 	void LookAtGrid(const FIntPoint&);
 	void LookAtUnit(TObjectPtr<AMyUnit>);
-	void StartGame();
+	void StartGame(bool bIsDemo);
 	void SwitchToCmdInput();
 	void SwitchToNormal();
 	void SwitchToIdle();
@@ -264,6 +290,9 @@ public:
 	void SwitchToMove();
 	void SwitchToCalcAnim();
 	void SwitchToTellStory();
+	void SwitchToLoadStage();
+	void SwitchToLoadFailed();
+	void SwitchToFinishTurn();
 	
 	FCameraEvent OnCameraActing;
 };

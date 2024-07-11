@@ -31,24 +31,12 @@ void UBottomActionBar::NativeConstruct()
 	Portraits.Add(P8);
 	Portraits.Add(P9);
 
-	AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyCombatSystem::StaticClass());
-	AMyCombatSystem* CombatSystem = Cast<AMyCombatSystem>(Actor);
 
-	CombatSystem->ReSortEvent.AddUObject(this,&UBottomActionBar::OnActionBarChanged);
+	
 	CmdList->SetVisibility(ESlateVisibility::Hidden);
 
 	UnitDetailInfoPanel->SetVisibility(ESlateVisibility::Hidden);
 	FocusImage->SetVisibility(ESlateVisibility::Hidden);
-
-	if(GetWorld() != nullptr && GetWorld()->GetFirstPlayerController() != nullptr)
-	{
-		APawn* CurPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
-		if(CurPawn == nullptr)return;
-		AMy_Pawn* MyPawn = Cast<AMy_Pawn>(CurPawn);
-		EventHandlerGrid = MyPawn->GetEventCenter()->EventOfChoseGrid.AddUObject(this,&UBottomActionBar::OnEventGrid);	
-		EventHandlerProcess = MyPawn->GetEventCenter()->EventOfProcessChanged.AddUObject(this,&UBottomActionBar::OnEventProcess);
-		EventHandleUnitSelected = MyPawn->GetEventCenter()->EventOfChosenUnit.AddUObject(this,&UBottomActionBar::OnEventUnitSelect);
-	}
 	
 }
 
@@ -161,6 +149,22 @@ TObjectPtr<UCmdWidget> UBottomActionBar::ShowCmdPanel(TObjectPtr<AMyUnit> UnitIn
 	CmdList->RefreshUnitCmd(UnitInstance,bShowIdle);
 	CmdList->SelectCmd(CmdIndex);
 	return CmdList;
+}
+
+void UBottomActionBar::RegisterEvent()
+{
+	AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyCombatSystem::StaticClass());
+	AMyCombatSystem* CombatSystem = Cast<AMyCombatSystem>(Actor);
+	CombatSystem->ReSortEvent.AddUObject(this,&UBottomActionBar::OnActionBarChanged);
+	if(GetWorld() != nullptr && GetWorld()->GetFirstPlayerController() != nullptr)
+	{
+		APawn* CurPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
+		if(CurPawn == nullptr)return;
+		AMy_Pawn* MyPawn = Cast<AMy_Pawn>(CurPawn);
+		EventHandlerGrid = MyPawn->GetEventCenter()->EventOfChoseGrid.AddUObject(this,&UBottomActionBar::OnEventGrid);	
+		EventHandlerProcess = MyPawn->GetEventCenter()->EventOfProcessChanged.AddUObject(this,&UBottomActionBar::OnEventProcess);
+		EventHandleUnitSelected = MyPawn->GetEventCenter()->EventOfChosenUnit.AddUObject(this,&UBottomActionBar::OnEventUnitSelect);
+	}
 }
 
 void UBottomActionBar::ShowFocusUnit(FVector Location)

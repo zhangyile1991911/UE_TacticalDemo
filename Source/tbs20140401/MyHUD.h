@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "MyHUD.generated.h"
 
+class UGameSystemPanel;
 class UBottomActionBar;
 class UGameUI_BattleInfo;
 /**
@@ -21,6 +22,9 @@ protected:
 
 	UPROPERTY(BlueprintType,BlueprintReadWrite)
 	TObjectPtr<UGameUI_BattleInfo> BattleInfoUI;
+
+	UPROPERTY(BlueprintType,BlueprintReadWrite)
+	TObjectPtr<UGameSystemPanel> GameSystemPanel;
 public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowGameUI(bool IsShow);
@@ -33,6 +37,9 @@ public:
 
 	//战斗信息 伤害 躲闪 暴击
 	TObjectPtr<UGameUI_BattleInfo> GetBattleInfoUI()const{return BattleInfoUI;}
+
+	//系统相关 加载画面
+	TObjectPtr<UGameSystemPanel> GetGameSystemPanel()const{return GameSystemPanel;}
 
 	UFUNCTION(BlueprintCallable)
 	UGameUI_BattleInfo* GetBattleInfoUIForBP()const{return BattleInfoUI;}

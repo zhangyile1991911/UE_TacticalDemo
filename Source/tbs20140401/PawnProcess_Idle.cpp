@@ -141,7 +141,8 @@ void UPawnProcess_Idle::HandleConfirmInput()
 	}
 	else
 	{
-		PawnInstance->SwitchToBeforeTurn();
+		// PawnInstance->SwitchToBeforeTurn();
+		PawnInstance->SwitchToFinishTurn();
 	}
 }
 

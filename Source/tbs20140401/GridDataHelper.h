@@ -6,6 +6,9 @@
 #include "UObject/Object.h"
 #include "GridDataHelper.generated.h"
 
+class AGrid;
+class AMyCombatSystem;
+class AMy_Pawn;
 struct FGridInfoSave;
 /**
  * 
@@ -19,4 +22,6 @@ public:
 	static bool SaveGridToJson(const FGridInfoSave& GridData, const FString& FilePath);
 
 	static bool LoadGridFromJson(FGridInfoSave& GridData, const FString& FilePath);
+
+	static bool InstantiateGrid(const FGridInfoSave& MyGridData,AGrid*,AMyCombatSystem*,AMy_Pawn*);
 };

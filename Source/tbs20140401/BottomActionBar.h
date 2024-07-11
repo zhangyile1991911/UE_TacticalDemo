@@ -108,6 +108,7 @@ public:
 	TObjectPtr<UUGameUI_UnitBriefInfo> GetUnitBriefInfo()const{return UnitBriefInfo;}
 	TObjectPtr<UUnitInfoDetail> GetUnitDetailInfo()const{return UnitDetailInfoPanel;}
 
+	void RegisterEvent();
 	void ShowFocusUnit(FVector Location);
 	void HideFocus();
 	

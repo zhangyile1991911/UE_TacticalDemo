@@ -4,14 +4,18 @@
 #include "My_Pawn.h"
 
 #include "Action_AddTile.h"
+#include "BottomActionBar.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EventCenter.h"
+#include "GameSystemPanel.h"
+#include "GameUI_BattleInfo.h"
 #include "Grid.h"
 #include "MyAction.h"
 #include "MyCombatSystem.h"
+#include "MyGameMode.h"
 #include "MyGridPathfinding.h"
 #include "MyUnit.h"
 #include "PawnProcess.h"
@@ -19,11 +23,15 @@
 #include "UPawnProcess_Normal.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyHUD.h"
+#include "MyLevelLoading.h"
 #include "PathPointInst.h"
 #include "PawnProcess_BeforeTurn.h"
 #include "PawnProcess_CalcAnim.h"
 #include "PawnProcess_Idle.h"
 #include "PawnProcess_ChooseTarget.h"
+#include "PawnProcess_FinishTurn.h"
+#include "PawnProcess_LoadFailed.h"
+#include "PawnProcess_LoadStage.h"
 #include "PawnProcess_Move.h"
 #include "PawnProcess_Story.h"
 #include "StoryTeller.h"
@@ -123,6 +131,75 @@ AMy_Pawn::AMy_Pawn()
 	
 }
 
+void AMy_Pawn::DelayStartGame()
+{
+	GetWorld()->GetTimerManager().ClearTimer(TimerStartGameHandle);
+	// MyHUDInstance->ShowGameUI(true);
+	SetSelectedActions(nullptr,nullptr);
+	MyCombatSystem->ResetAllUnit();
+	MyGrid->RemoveStateAllTile(ETileState::Selected);
+	StartGame(true);
+	
+	auto GameSystemPanel = GetMyHUD()->GetGameSystemPanel();
+	GameSystemPanel->WaitingEnter();
+}
+
+void AMy_Pawn::Init()
+{
+	GetMyGrid();
+	// AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(),AGrid::StaticClass());
+	// MyGrid = Cast<AGrid>(actor);
+
+	GetMyCombatSystem();
+	// actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyCombatSystem::StaticClass());
+	// MyCombatSystem = Cast<AMyCombatSystem>(actor);
+	GetMyLevelLoading();
+	GetMyGridPathFinding();
+	
+	GetMyPathPointInst();
+
+	GetMyStoryTeller();
+	// actor = UGameplayStatics::GetActorOfClass(GetWorld(),AStoryTeller::StaticClass());
+	// MyStoryTeller = Cast<AStoryTeller>(actor);
+	// OnTileTYpeChanged.AddDynamic(this,&AMy_Pawn::SetCurrentTileType);
+
+	NormalProcess = NewObject<UUPawnProcess_Normal>(this);
+	CmdProcess = NewObject<UPawnProcess_CMD>(this);
+	BeforeTurnProcess = NewObject<UPawnProcess_BeforeTurn>(this);
+	IdleProcess = NewObject<UPawnProcess_Idle>(this);
+	ChooseTargetProcess = NewObject<UPawnProcess_ChooseTarget>(this);
+	MoveProcess = NewObject<UPawnProcess_Move>(this);
+	CalcAnimProcess = NewObject<UPawnProcess_CalcAnim>(this);
+	StoryProcess = NewObject<UPawnProcess_Story>(this);
+	LoadStageProcess = NewObject<UPawnProcess_LoadStage>(this);
+	LoadFailedProcess = NewObject<UPawnProcess_LoadFailed>(this);
+	FinishTurnProcess = NewObject<UPawnProcess_FinishTurn>(this);
+	
+	EventCenter = NewObject<UEventCenter>(this);
+	
+	CurrentProcess = nullptr;
+
+	// 获取当前的玩家控制器
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{// 获取当前的 HUD 实例
+		AHUD* HUD = PlayerController->GetHUD();
+		if (HUD)
+		{
+			MyHUDInstance = Cast<AMyHUD>(HUD);
+		}
+	}
+	AGameModeBase* CurrentGameMode = UGameplayStatics::GetGameMode(GetWorld());
+	AMyGameMode* My = Cast<AMyGameMode>(CurrentGameMode);
+	if(My != nullptr && My->IsGameDemo())
+	{
+		auto GameSystemPanel = GetMyHUD()->GetGameSystemPanel();
+		GameSystemPanel->ShowLoading();
+		GetWorld()->GetTimerManager().SetTimer(TimerStartGameHandle, this, &AMy_Pawn::DelayStartGame, 1.0f, false);
+	}
+	
+}
+
 // Called when the game starts or when spawned
 void AMy_Pawn::BeginPlay()
 {
@@ -136,48 +213,7 @@ void AMy_Pawn::BeginPlay()
 	m_locationDesired = GetActorLocation();
 	m_rotationDesired = GetActorRotation();
 
-	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(),AGrid::StaticClass());
-	MyGrid = Cast<AGrid>(actor);
-
-	actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyCombatSystem::StaticClass());
-	MyCombatSystem = Cast<AMyCombatSystem>(actor);
-
-	actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyGridPathfinding::StaticClass());
-	MyGridPathfinding = Cast<AMyGridPathfinding>(actor);
-
-	actor = UGameplayStatics::GetActorOfClass(GetWorld(),APathPointInst::StaticClass());
-	MyPathPointInst = Cast<APathPointInst>(actor);
-
-	actor = UGameplayStatics::GetActorOfClass(GetWorld(),AStoryTeller::StaticClass());
-	MyStoryTeller = Cast<AStoryTeller>(actor);
-	// OnTileTYpeChanged.AddDynamic(this,&AMy_Pawn::SetCurrentTileType);
-
-	NormalProcess = NewObject<UUPawnProcess_Normal>(this);
-	CmdProcess = NewObject<UPawnProcess_CMD>(this);
-	BeforeTurnProcess = NewObject<UPawnProcess_BeforeTurn>(this);
-	IdleProcess = NewObject<UPawnProcess_Idle>(this);
-	ChooseTargetProcess = NewObject<UPawnProcess_ChooseTarget>(this);
-	MoveProcess = NewObject<UPawnProcess_Move>(this);
-	CalcAnimProcess = NewObject<UPawnProcess_CalcAnim>(this);
-	StoryProcess = NewObject<UPawnProcess_Story>(this);
-	
-	
-	EventCenter = NewObject<UEventCenter>(this);
-	
-	CurrentProcess = nullptr;
-
-	// 获取当前的玩家控制器
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (PlayerController)
-	{// 获取当前的 HUD 实例
-		AHUD* HUD = PlayerController->GetHUD();
-		if (HUD)
-		{
-			// 检查 HUD 是否是你的自定义 HUD 类
-			MyHUDInstance = Cast<AMyHUD>(HUD);
-			
-		}
-	}
+	Init();
 	
 }
 
@@ -530,6 +566,82 @@ void AMy_Pawn::UpdateTileTypeUnderCursor(FIntPoint index)
 	MyGrid->SetTileTypeByIndex(index,CurSetTileType);
 }
 
+TObjectPtr<AStoryTeller> AMy_Pawn::GetMyStoryTeller()
+{
+	if(MyStoryTeller == nullptr)
+	{
+		return MyStoryTeller;
+	}
+	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(),AStoryTeller::StaticClass());
+	if(actor == nullptr)
+	{
+		actor = GetWorld()->SpawnActor(AStoryTeller::StaticClass());
+	}
+	MyStoryTeller = Cast<AStoryTeller>(actor);
+	return MyStoryTeller;
+}
+
+TObjectPtr<AGrid> AMy_Pawn::GetMyGrid()
+{
+	if(MyGrid != nullptr)
+	{
+		return MyGrid;
+	}
+	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(),AGrid::StaticClass());
+	if(actor == nullptr)
+	{
+		actor = GetWorld()->SpawnActor(AGrid::StaticClass());
+	}
+	MyGrid = Cast<AGrid>(actor);
+	
+	return MyGrid;
+}
+
+TObjectPtr<AMyCombatSystem> AMy_Pawn::GetMyCombatSystem()
+{
+	if(MyCombatSystem != nullptr)
+	{
+		return MyCombatSystem;
+	}
+	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyCombatSystem::StaticClass());
+	if(actor == nullptr)
+	{
+		actor = GetWorld()->SpawnActor(AMyCombatSystem::StaticClass());
+	}
+	MyCombatSystem = Cast<AMyCombatSystem>(actor);
+	return MyCombatSystem;
+}
+
+TObjectPtr<AMyGridPathfinding> AMy_Pawn::GetMyGridPathFinding()
+{
+	if(MyGridPathfinding != nullptr)
+	{
+		return MyGridPathfinding;
+	}
+	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyGridPathfinding::StaticClass());
+	if(actor == nullptr)
+	{
+		actor = GetWorld()->SpawnActor(AMyGridPathfinding::StaticClass());
+	}
+	MyGridPathfinding = Cast<AMyGridPathfinding>(actor);
+	return MyGridPathfinding;
+}
+
+TObjectPtr<AMyLevelLoading> AMy_Pawn::GetMyLevelLoading()
+{
+	if(MyLevelLoad == nullptr)
+	{
+		return MyLevelLoad;
+	}
+	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(),AMyLevelLoading::StaticClass());
+	if(actor == nullptr)
+	{
+		actor = GetWorld()->SpawnActor(AMyLevelLoading::StaticClass());
+	}
+	MyLevelLoad = Cast<AMyLevelLoading>(actor);
+	return MyLevelLoad;
+}
+
 TObjectPtr<AMyUnit> AMy_Pawn::GetUnitUnderCursor()
 {
 	FHitResult HitResult;
@@ -545,6 +657,22 @@ TObjectPtr<AMyUnit> AMy_Pawn::GetUnitUnderCursor()
 	return pData ? pData->UnitOnTile : nullptr;
 }
 
+TObjectPtr<APathPointInst> AMy_Pawn::GetMyPathPointInst()
+{
+	if(MyPathPointInst != nullptr)
+	{
+		return MyPathPointInst;
+	}
+	
+	AActor* actor = UGameplayStatics::GetActorOfClass(GetWorld(),APathPointInst::StaticClass());
+	if(actor == nullptr)
+	{
+		actor = GetWorld()->SpawnActor(APathPointInst::StaticClass());
+	}
+	MyPathPointInst = Cast<APathPointInst>(actor);
+	return MyPathPointInst;
+}
+
 void AMy_Pawn::LookAtGrid(const FIntPoint& index)
 {
 	auto pData = MyGrid->GetTileDataByIndex(index);
@@ -558,13 +686,21 @@ void AMy_Pawn::LookAtUnit(TObjectPtr<AMyUnit> Unit)
 	LookAtGrid(Unit->GetGridIndex());
 }
 
-void AMy_Pawn::StartGame()
+void AMy_Pawn::StartGame(bool bIsDemo)
 {
 	IsStartGame = true;
-	
-	MyGrid->RemoveStateFromTile(HoveredTile,ETileState::Hovered);
 
-	SwitchProcess(BeforeTurnProcess);
+	GetMyHUD()->GetGameUI()->RegisterEvent();
+	MyGrid->RemoveStateFromTile(HoveredTile,ETileState::Hovered);
+	if(bIsDemo)
+	{
+		SwitchProcess(LoadStageProcess);
+	}
+	else
+	{
+		SwitchProcess(BeforeTurnProcess);	
+	}
+	
 }
 
 void AMy_Pawn::SwitchToCmdInput()
@@ -606,5 +742,20 @@ void AMy_Pawn::SwitchToCalcAnim()
 void AMy_Pawn::SwitchToTellStory()
 {
 	SwitchProcess(StoryProcess);
+}
+
+void AMy_Pawn::SwitchToLoadStage()
+{
+	SwitchProcess(LoadStageProcess);
+}
+
+void AMy_Pawn::SwitchToLoadFailed()
+{
+	SwitchProcess(LoadFailedProcess);
+}
+
+void AMy_Pawn::SwitchToFinishTurn()
+{
+	SwitchProcess(FinishTurnProcess);
 }
 

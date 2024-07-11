@@ -43,8 +43,10 @@ void UUPawnProcess_Normal::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	}
 	
 	//展示UI信息
+	PawnInstance->GetMyHUD()->ShowGameUI(true);
 	UnitBottomActionBar = PawnInstance->GetMyHUD()->GetGameUI();
-	UnitBottomActionBar->SetVisibility(ESlateVisibility::Visible);
+	// PawnInstance->GetMyHUD()->ShowGameUI(true);
+	// UnitBottomActionBar->SetVisibility(ESlateVisibility::Visible);
 	UnitBriefInfoPtr = UnitBottomActionBar->GetUnitBriefInfo();
 	ShowTargetUnitBriefInfo(CurrentCursor);
 	UnitDetailInfoPtr = UnitBottomActionBar->GetUnitDetailInfo();
