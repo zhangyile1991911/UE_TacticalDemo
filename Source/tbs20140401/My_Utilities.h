@@ -7,6 +7,7 @@
 #include "GridShapeData.h"
 #include "UnitData.h"
 
+struct FStageData;
 /**
  * 
  */
@@ -28,3 +29,4 @@ FGridShapeData* GetShapeData(EGridShape shapeName);
 FWeaponData* GetWeaponData(FName WeaponId);
 bool IsTileTypeWalkable(ETileType);
 FUnitColorDataAsset* GetUnitDataColor(const ETBSUnitType unitType);
+FStageData* GetStageData(int i);

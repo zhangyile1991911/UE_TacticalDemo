@@ -3,13 +3,12 @@
 
 #include "My_Utilities.h"
 
-#include <ThirdParty/SPIRV-Reflect/SPIRV-Reflect/include/spirv/unified1/spirv.h>
 
 #include "Grid.h"
 #include "UnitData.h"
+#include "FStageData.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
-#include "MyUnit.h"
 
 My_Utilities::My_Utilities()
 {
@@ -149,6 +148,21 @@ FUnitColorDataAsset* GetUnitDataColor(const ETBSUnitType unitType)
 		row = LoadedDataTable->FindRow<FUnitColorDataAsset>(FName(TEXT("EnemyBat")),"");
 		break;
 	}
+	return row;
+}
+
+FStageData* GetStageData(int i)
+{
+	static UDataTable* LoadedDataTable = nullptr;
+	if(LoadedDataTable == nullptr)
+	{
+		FSoftObjectPath MyAssetPath(TEXT("DataTable'/Game/Demo/DT_StageData.DT_StageData'"));
+		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+		LoadedDataTable = Cast<UDataTable>(Streamable.LoadSynchronous(MyAssetPath));
+	}
+
+	FString RowName = FString::Format(TEXT("{0}"),{i});
+	FStageData* row = LoadedDataTable->FindRow<FStageData>(FName(RowName),"");
 	return row;
 }
 

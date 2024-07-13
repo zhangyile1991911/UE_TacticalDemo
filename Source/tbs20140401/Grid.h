@@ -130,6 +130,8 @@ public:
 	bool TileGridHasUnit(const FIntPoint& index);
 
 	int CalcHighDisparity(FIntPoint a,FIntPoint b);
+
+	void ClearGrid();
 };
 
 

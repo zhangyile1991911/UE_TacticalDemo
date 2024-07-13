@@ -201,10 +201,10 @@ void UBottomActionBar::HideFocus()
 
 void UBottomActionBar::PlayHideBattleUI()
 {
-	PlayAnimation(StartBattleHideUI);
+	PlayAnimation(StartBattleHideUI,0,1);
 }
 
 void UBottomActionBar::PlayShowBattleUI()
 {
-	PlayAnimation(FinishBattleShowUI);
+	PlayAnimation(FinishBattleShowUI,0,1);
 }

@@ -11,7 +11,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "EventCenter.h"
 #include "GameSystemPanel.h"
-#include "GameUI_BattleInfo.h"
 #include "Grid.h"
 #include "MyAction.h"
 #include "MyCombatSystem.h"
@@ -139,9 +138,6 @@ void AMy_Pawn::DelayStartGame()
 	MyCombatSystem->ResetAllUnit();
 	MyGrid->RemoveStateAllTile(ETileState::Selected);
 	StartGame(true);
-	
-	auto GameSystemPanel = GetMyHUD()->GetGameSystemPanel();
-	GameSystemPanel->WaitingEnter();
 }
 
 void AMy_Pawn::Init()
@@ -671,6 +667,13 @@ TObjectPtr<APathPointInst> AMy_Pawn::GetMyPathPointInst()
 	}
 	MyPathPointInst = Cast<APathPointInst>(actor);
 	return MyPathPointInst;
+}
+
+void AMy_Pawn::ClearCurTurnData()
+{
+	HoveredUnit = nullptr;
+	SelectedUnit = nullptr;
+	
 }
 
 void AMy_Pawn::LookAtGrid(const FIntPoint& index)

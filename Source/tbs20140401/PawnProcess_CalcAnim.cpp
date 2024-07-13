@@ -137,7 +137,7 @@ bool UPawnProcess_CalcAnim::CheckCooperation()
 {
 	// const FBattleReport& Report = ReportList[ReportIndex];
 	if(Report.Cooperator != nullptr)
-	{//夹击
+	{//挟み撃ち
 		ChosenAbilityAnim = Report.Cooperator->GetCooperationAbilityAnim();
 		// FIntPoint TargetLocation = Report.Defender[0]->GetGridIndex();
 		// TArray<TObjectPtr<AMyUnit>> TargetUnits = ChosenAbilityAnim->TakeTargets(TargetLocation,PawnInstance->GetMyGrid());
@@ -154,10 +154,11 @@ bool UPawnProcess_CalcAnim::CheckCooperation()
 			auto LastReport = Report.HitInfoList[i];
 			if(LastReport.Cooperator == nullptr)continue;
 			ChosenAbilityAnim = LastReport.Cooperator->GetCooperationAbilityAnim();
-			auto CoReport = ChosenAbilityAnim->DoCalculation(LastReport.CooperatorTarget,PawnInstance->GetMyGrid(),false);
+			const auto CoReport = ChosenAbilityAnim->DoCalculation(LastReport.CooperatorTarget,PawnInstance->GetMyGrid(),false);
 			ChosenAbilityAnim->CompletedCallback.BindUObject(this,&UPawnProcess_CalcAnim::AbilityCompleted);
 			ChosenAbilityAnim->DoAnimation(CoReport,PawnInstance);
-			Report.HitInfoList.RemoveAt(i);	
+			Report.HitInfoList.RemoveAt(i);
+			return false;
 		}
 	}
 	return true;
@@ -168,7 +169,13 @@ void UPawnProcess_CalcAnim::AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Abilit
 	UnitInstance->AttackDone();
 	
 	CheckFlow(IDLE);
-	PawnInstance->GetMyHUD()->GetGameUI()->PlayShowBattleUI();
+	CastNum -= 1;
+	if(CastNum <= 0)
+	{
+		PawnInstance->GetMyHUD()->ShowGameUI(true);
+		PawnInstance->GetMyHUD()->GetGameUI()->PlayShowBattleUI();
+	}
+	
 	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_CalcAnim::AbilityCompleted"))
 }
 
@@ -199,12 +206,27 @@ void UPawnProcess_CalcAnim::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	
 	//计算战报
 	Report = ChosenAbilityAnim->DoCalculation(TargetUnits,PawnInstance->GetMyGrid(),true);
+	if(Report.HitInfoList.IsEmpty())
+	{
+		CastNum = 1;
+		CastNum += Report.Cooperator != nullptr ? 1 : 0;	
+	}
+	else
+	{
+		CastNum = 1;
+		for(const auto& one : Report.HitInfoList)
+		{
+			CastNum += one.Cooperator != nullptr ? 1 : 0;
+		}
+	}
+	
 	// ReportIndex = 0;
 	//消耗AP
 	UnitInstance->ConsumeAP(ChosenAbilityAnim->GetCost());
 	//进入演出环节
 	ChosenAbilityAnim->DoAnimation(Report,PawnInstance);
 	PawnInstance->GetMyHUD()->ShowBattleInfoUI(true);
+	PawnInstance->GetMyHUD()->ShowGameUI(true);
 	PawnInstance->GetMyHUD()->GetGameUI()->PlayHideBattleUI();
 }
 
@@ -236,5 +258,6 @@ void UPawnProcess_CalcAnim::ExitProcess()
 	// ReportList.Empty();
 	ChosenAbilityAnim->CompletedCallback.Unbind();
 	ChosenAbilityAnim->CompletedEvent.Clear();
+	PawnInstance->GetMyHUD()->ShowGameUI(false);
 	PawnInstance->GetMyHUD()->ShowBattleInfoUI(false);
 }

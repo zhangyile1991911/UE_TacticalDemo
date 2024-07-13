@@ -15,7 +15,9 @@ void UGameSystemPanel::ShowLoading()
 void UGameSystemPanel::HideLoading()
 {
 	GameLoading->SetVisibility(ESlateVisibility::Hidden);
-	GameLoading->StopAllAnimations();
+	GameLoading->StopBlink();
+	GameLoading->StopLoading();
+	// GameLoading->StopAllAnimations();
 	this->SetVisibility(ESlateVisibility::Hidden);
 }
 

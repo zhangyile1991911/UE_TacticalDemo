@@ -128,8 +128,10 @@ protected:
 
 	ETileType CurSetTileType = ETileType::Normal;
 
+	UPROPERTY()
 	TObjectPtr<AMyUnit> HoveredUnit;
 
+	UPROPERTY()
 	TObjectPtr<AMyUnit> SelectedUnit;
 
 	UPROPERTY()
@@ -276,6 +278,8 @@ public:
 		m_curArmLength = FMathf::Clamp(val,MaxMin_ArmLength.X,MaxMin_ArmLength.Y);
 	}
 
+	void ClearCurTurnData();
+	
 	bool ReadStory()const{return bHasReadStory;}
 	void SetReadStory(){bHasReadStory = true;}
 	

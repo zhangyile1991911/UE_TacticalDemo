@@ -155,6 +155,19 @@ TArray<TObjectPtr<AMyUnit>> AMyCombatSystem::GetOneSideTeam(int UnitSide)
 	return Result;
 }
 
+void AMyCombatSystem::ClearAllUnit()
+{
+	FirstUnit = nullptr;
+
+	UnitsActionPriority.Empty();
+	HideUnitThreaten();
+	for(const auto& Pair : UnitsInCombat)
+	{
+		Pair.Value->Destroy();
+	}
+	UnitsInCombat.Empty();
+}
+
 // Called every frame
 void AMyCombatSystem::Tick(float DeltaTime)
 {

@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "GameLoadingWidget.generated.h"
 
+class UImage;
+class UTextBlock;
 /**
  * 
  */
@@ -15,7 +17,21 @@ class TBS20140401_API UGameLoadingWidget : public UUserWidget
 	GENERATED_BODY()
 
 protected:
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UTextBlock> LoadTxt;
 
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UTextBlock> CompleteTxt;
+
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UImage> PA;
+
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UImage> PB;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UImage> PC;
+	
 	UPROPERTY(Transient,meta=(BindWidgetAnim))
 	TObjectPtr<UWidgetAnimation> Loading;
 

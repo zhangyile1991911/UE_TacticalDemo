@@ -1,9 +1,10 @@
 ﻿#pragma once
 
+#include "CoreMinimal.h"
 #include "FStageData.generated.h"
 
 USTRUCT(BlueprintType)
-struct FStageData
+struct FStageData:public FTableRowBase
 {
 	GENERATED_BODY()
 	

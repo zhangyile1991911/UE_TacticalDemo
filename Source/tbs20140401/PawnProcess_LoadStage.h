@@ -14,10 +14,16 @@ UCLASS()
 class TBS20140401_API UPawnProcess_LoadStage : public UPawnProcess
 {
 	GENERATED_BODY()
+
+protected:
 	bool bIsLoaded;
 
 	UPROPERTY()
 	TObjectPtr<UGameSystemPanel> GameSystemPanel;
+
+	void InstantiateGrid();
+	UFUNCTION()
+	void OnLevelLoaded();
 public:
 	virtual void HandleConfirmInput() override;
 	virtual void EnterProcess(TObjectPtr<AMy_Pawn> Pawn) override;

@@ -182,7 +182,7 @@ bool UGameUI_BattleInfo::UpdateWidgetPosition(FVector WorldLocation)
 		auto TextSize = TipsGroupSlot->GetSize();
 		TextSize /= 2;
 		TextSize /= Scale;
-		ScreenPosition.X -= TextSize.X;
+		ScreenPosition.X += TextSize.X;
 		ScreenPosition.Y -= TextSize.Y;
 		TipsGroupSlot->SetPosition(ScreenPosition);
 	}

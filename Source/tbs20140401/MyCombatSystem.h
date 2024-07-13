@@ -80,4 +80,5 @@ public:
 	void ShowUnitThreaten(TArray<FThreatenInfo> Infos);
 	void HideUnitThreaten();
 	TArray<TObjectPtr<AMyUnit>> GetOneSideTeam(int UnitSide);
+	void ClearAllUnit();
 };

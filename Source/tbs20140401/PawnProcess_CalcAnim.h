@@ -30,7 +30,7 @@ protected:
 	// TArray<FBattleReport> ReportList;
 	// int ReportIndex;
 	int DeathNum;
-	int HitNum;
+	int CastNum;
 	FBattleReport Report;
 	void AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Ability);
 	void OnDeathCompleted();

@@ -190,7 +190,7 @@ protected:
 	// void FinishRotationAlpha();
 public:
 	virtual void OnConstruction(const FTransform& Transform) override;
-	virtual void BeginDestroy() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

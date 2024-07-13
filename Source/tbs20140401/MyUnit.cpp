@@ -96,15 +96,14 @@ void AMyUnit::OnConstruction(const FTransform& Transform)
 		MyDirection = Cast<AIdleDirection>(Actor);
 		MyDirectionActor->SetVisibility(false);
 		MyDirection->HideArrow();
-		MyDirectionActor->SetRelativeLocation(FVector(0,0,100));
+		MyDirectionActor->SetRelativeLocation(FVector(0,0,200));
 		// MyDirectionActor->SetRelativeRotation(FRotator(0,0,0));
 		// MyShadowUnit->SetHidden(true);
 	});
 }
 
-void AMyUnit::BeginDestroy()
+void AMyUnit::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::BeginDestroy();
 	//todo 清理一些资源
 	MyGrid = nullptr;
 	My_Pawn = nullptr;
@@ -112,6 +111,8 @@ void AMyUnit::BeginDestroy()
 	OwnAbilityAnimList.Empty();
 	WalkPath.Empty();
 	WalkableTiles.Empty();
+	AttackRanges.Empty();
+	
 
 	MySkeletalMeshComponent = nullptr;
 	MyChildActor = nullptr;
@@ -124,6 +125,12 @@ void AMyUnit::BeginDestroy()
 	JumpCurve = nullptr;
 	DodgeCurve = nullptr;
 	DeathCurve = nullptr;
+
+	MyAnimInstance = nullptr;
+	PathCompleted.Unbind();
+	DeathCompleted.Unbind();
+
+	Super::EndPlay(EndPlayReason);
 }
 
 // Called when the game starts or when spawned
@@ -507,6 +514,10 @@ void AMyUnit::StartWalkPath(FPathCompleted Completed)
 	StartRotateAngles = GetActorForwardVector().Rotation();
 	float fAngleDegrees = CalculateRotationAngleToTarget(GetActorLocation(),TileDataPtr->Transform.GetLocation());
 	FinishRotateAngles.Yaw = fAngleDegrees - 90;
+
+	StartHeight = GetActorLocation().Z;
+	TargetHeight = TileDataPtr->Transform.GetLocation().Z;
+	
 	IIMyUnitAnimation::Execute_SetUnitAnimationState(MyAnimInstance,EUnitAnimation::Walk);
 	UnitMovement.PlayFromStart();
 	if(TileDataPtr->UnitOnTile != nullptr)
@@ -545,8 +556,19 @@ void AMyUnit::HandleLocationAlpha(float Value)
 	if(NextData == nullptr)return;
 
 	const FTileData* CurData = MyGrid->GetTileDataByIndex(MoveIndex);
-	// UE_LOG(LogTemp,Log,TEXT(" cur = %s next = %s"),CurData->Transform.GetLocation().ToString(),NextData->Transform.GetLocation().ToString());
+	// FVector A = CurData->Transform.GetLocation();
+	// FVector B = NextData->Transform.GetLocation();
+	// A.Z = GetActorLocation().Z;
+	// B.Z = GetActorLocation().Z;
 	FVector tmp = FMath::Lerp(CurData->Transform.GetLocation(),NextData->Transform.GetLocation(),Value);
+	// UE_LOG(LogTemp,Log,TEXT("HandleLocationAlpha cur = %s next = %s tmp = %s"),
+	// 	*CurData->Transform.GetLocation().ToString(),
+	// 	*NextData->Transform.GetLocation().ToString(),
+	// 	*tmp.ToString());
+
+	StartHeight = CurData->Transform.GetLocation().Z;
+	TargetHeight = NextData->Transform.GetLocation().Z;
+	
 	SetActorLocation(tmp);
 }
 

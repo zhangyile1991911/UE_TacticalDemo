@@ -703,3 +703,15 @@ int AGrid::CalcHighDisparity(FIntPoint a, FIntPoint b)
 	return FMathf::Floor(Disparity/CurGridTileSize.Z);
 }
 
+void AGrid::ClearGrid()
+{
+	for(auto& Pair : GridTiles)
+	{
+		Pair.Value.UnitOnTile = nullptr;
+		Pair.Value.States.Empty();
+	}
+	GridTiles.Empty();
+
+	GridVisual->DestroyGridVisual();
+}
+
