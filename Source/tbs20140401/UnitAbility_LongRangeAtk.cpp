@@ -125,10 +125,10 @@ FBattleReport AUnitAbility_LongRangeAtk::DoCalculation(const TArray<TObjectPtr<A
 		else
 		{
 			HitInfo.IsHit = true;
-			float atk = OwnerInstance->GetRuntimeProperty().Power;
-			float def = OneTarget->GetRuntimeProperty().PhysicDefend;
-			float per = FMath::FRandRange(0.8,1.0f);
-			HitInfo.Damage = 10;
+			// float atk = OwnerInstance->GetRuntimeProperty().Power;
+			// float def = OneTarget->GetRuntimeProperty().PhysicDefend;
+			// float per = FMath::FRandRange(0.8,1.0f);
+			HitInfo.Damage = UBattleFunc::CalculateDamage(OwnerInstance,Targets[i],MyGrid,10,HitInfo.IsCritical,HitInfo.IsBackAtk);
 			OneTarget->AddHP(HitInfo.Damage);
 		}
 		Report.HitInfoList.Add(HitInfo);

@@ -81,4 +81,6 @@ public:
 	void HideUnitThreaten();
 	TArray<TObjectPtr<AMyUnit>> GetOneSideTeam(int UnitSide);
 	void ClearAllUnit();
+
+	TObjectPtr<AMyUnit> GetUnitByType(ETBSUnitType EtbsUnit);
 };

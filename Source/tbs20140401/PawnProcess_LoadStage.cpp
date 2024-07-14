@@ -7,7 +7,9 @@
 #include "GameSystemPanel.h"
 #include "GridDataHelper.h"
 #include "GridInfoSave.h"
+#include "MyCombatSystem.h"
 #include "MyHUD.h"
+#include "MyUnit.h"
 #include "My_Pawn.h"
 #include "My_Utilities.h"
 #include "Kismet/GameplayStatics.h"
@@ -25,7 +27,7 @@ void UPawnProcess_LoadStage::InstantiateGrid()
 		UE_LOG(LogTemp,Log,TEXT("%s | %s is failed"),*FPaths::ProjectDir(),*Path)
 		return;
 	}
-	//实例化 网格
+	//实例化 网格和单位
 	const bool bInstantiate = UGridDataHelper::InstantiateGrid(MyGridData,
 		PawnInstance->GetMyGrid(),
 		PawnInstance->GetMyCombatSystem(),
@@ -34,6 +36,13 @@ void UPawnProcess_LoadStage::InstantiateGrid()
 	{
 		PawnInstance->SwitchToLoadFailed();
 	}
+	for(auto Pair : StageData->UnitPriorityCorrection)
+	{
+		auto MyUnit =	PawnInstance->GetMyCombatSystem()->GetUnitByType(Pair.Key);	
+		if(MyUnit == nullptr)continue;
+		MyUnit->SetAgilityCorrection(Pair.Value);
+	}
+	
 	bIsLoaded = true;
 }
 

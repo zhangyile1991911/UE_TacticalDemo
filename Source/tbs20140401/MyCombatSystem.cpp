@@ -168,6 +168,18 @@ void AMyCombatSystem::ClearAllUnit()
 	UnitsInCombat.Empty();
 }
 
+TObjectPtr<AMyUnit> AMyCombatSystem::GetUnitByType(ETBSUnitType EtbsUnit)
+{
+	for(auto one : UnitsInCombat)
+	{
+		if(one.Value->GetUnitType() == EtbsUnit)
+		{
+			return one.Value;
+		}
+	}
+	return nullptr;
+}
+
 // Called every frame
 void AMyCombatSystem::Tick(float DeltaTime)
 {

@@ -159,7 +159,7 @@ FBattleReport AUnitAbility_AreaAtk::DoCalculation(const TArray<TObjectPtr<AMyUni
 		float atk = OwnerInstance->GetRuntimeProperty().Power;
 		float def = OneTarget->GetRuntimeProperty().PhysicDefend;
 		float per = FMath::FRandRange(0.8,1.0f);
-		HitInfo.Damage = 10;
+		HitInfo.Damage = UBattleFunc::CalculateDamage(OwnerInstance,Targets[i],MyGrid,10,HitInfo.IsCritical,false);
 		OneTarget->AddHP(HitInfo.Damage);
 		
 		Result.HitInfoList.Add(HitInfo);

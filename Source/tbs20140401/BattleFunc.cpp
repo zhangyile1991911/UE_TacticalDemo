@@ -169,4 +169,17 @@ int UBattleFunc::CalculateHitRate(AMyUnit* Attacker,AMyUnit* Defender,AGrid* MyG
 	return HitResult;
 }
 
+int UBattleFunc::CalculateDamage(AMyUnit* Attacker, AMyUnit* Defender, AGrid* MyGrid,int BaseDamage,bool bIsCritical,bool bIsBackAtk)
+{
+	const FIntPoint AttackerIndex = Attacker->GetGridIndex();
+	const FIntPoint DefenderIndex = Defender->GetGridIndex();
+
+	const int AttackerHeight = MyGrid->GetTileDataByIndex(AttackerIndex)->Height;
+	const int DefenderHeight = MyGrid->GetTileDataByIndex(DefenderIndex)->Height;
+	BaseDamage = bIsCritical ? BaseDamage + 5 : BaseDamage;
+	BaseDamage = BaseDamage + (bIsBackAtk ? 5 : 0);
+	const int Damage = BaseDamage + 2 * (AttackerHeight - DefenderHeight);
+	return Damage;
+}
+
 

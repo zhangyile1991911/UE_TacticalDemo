@@ -153,6 +153,7 @@ protected:
 	int WalkNum;
 	int AtkNum;
 	int MaxAtkRange = 0;
+	int AgilityCorrection = 0;//行動優先度補正
 	
 
 	FPathCompleted PathCompleted;
@@ -226,7 +227,7 @@ public:
 	int DistanceToAction()const{return CurrentDistanceToAction/MyProperty.DistanceToAction;}
 	int GetCurrentDistanceToAction()const{return CurrentDistanceToAction;}
 	void ResetCurrentDistanceToAction(){CurrentDistanceToAction = 0;}
-	void AddCurrentDistanceToAction(){CurrentDistanceToAction += MyProperty.Agility;}
+	void AddCurrentDistanceToAction(){CurrentDistanceToAction += (MyProperty.Agility + AgilityCorrection);}
 	ETBSUnitType GetUnitType()const{return UnitType;}
 
 	void MoveShadowOnTile(const FVector& location);
@@ -311,5 +312,9 @@ public:
 	void TurnToTarget(AMyUnit* Unit);
 
 	int GetHeightTolerance()const{return MyProperty.HeightTolerance;}
+	void SetAgilityCorrection(int val)
+	{
+		AgilityCorrection = val;
+	}
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

@@ -94,7 +94,8 @@ FBattleReport AUnitAbilityAnim_Throw::DoCalculation(TObjectPtr<AMyUnit> Target, 
 	}
 
 	Report.IsHit = true;
-	Report.Damage = 10;
+	
+	Report.Damage = UBattleFunc::CalculateDamage(OwnerInstance,Target,MyGrid,10,Report.IsCritical,Report.IsBackAtk);
 	//扣除血量
 	Target->AddHP(Report.Damage);
 

@@ -33,6 +33,8 @@ public:
 	
 	// UFUNCTION(BlueprintCallable)
 	// static int CalculateDamage(AMyUnit* Attacker,AMyUnit* Defender,AGrid* MyGrid,bool HasWrap,bool IsBackAtk);
+	UFUNCTION(BlueprintCallable)
+	static int CalculateDamage(AMyUnit* Attacker,AMyUnit* Defender,AGrid* MyGrid,int BaseDamage,bool bIsCritical,bool bIsBackAtk);
 	
 };
 

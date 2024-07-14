@@ -140,5 +140,11 @@ void UMyTab_Game::OnLoadGirdDataClicked()
     }
 
 	UGridDataHelper::InstantiateGrid(MyGridData,MyGridPtr,MyCombatPtr,MyPawn);
-	
+
+	// for(auto Pair : StageData->UnitPriorityCorrection)
+	// {
+	// 	auto MyUnit =	MyPawn->GetMyCombatSystem()->GetUnitByType(Pair.Key);	
+	// 	if(MyUnit == nullptr)continue;
+	// 	MyUnit->SetAgilityCorrection(Pair.Value);
+	// }
 }
