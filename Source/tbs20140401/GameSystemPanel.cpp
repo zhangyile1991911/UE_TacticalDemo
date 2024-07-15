@@ -4,6 +4,7 @@
 #include "GameSystemPanel.h"
 
 #include "GameLoadingWidget.h"
+#include "GameOverWidget.h"
 
 void UGameSystemPanel::ShowLoading()
 {
@@ -27,4 +28,12 @@ void UGameSystemPanel::WaitingEnter()
 	GameLoading->SetVisibility(ESlateVisibility::Visible);
 	GameLoading->StopLoading();
 	GameLoading->PlayBlink();
+}
+
+void UGameSystemPanel::ShowGameOver()
+{
+	this->SetVisibility(ESlateVisibility::Visible);
+	GameLoading->SetVisibility(ESlateVisibility::Hidden);
+	GameOver->SetVisibility(ESlateVisibility::Visible);
+	GameOver->ShowGameOver();
 }

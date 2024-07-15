@@ -97,7 +97,7 @@ FBattleReport AUnitAbilityAnim_Throw::DoCalculation(TObjectPtr<AMyUnit> Target, 
 	
 	Report.Damage = UBattleFunc::CalculateDamage(OwnerInstance,Target,MyGrid,10,Report.IsCritical,Report.IsBackAtk);
 	//扣除血量
-	Target->AddHP(Report.Damage);
+	Target->AddHP(0-Report.Damage);
 
 	//把人往后扔
 	FIntPoint StandIndex = OwnerInstance->GetGridIndex();

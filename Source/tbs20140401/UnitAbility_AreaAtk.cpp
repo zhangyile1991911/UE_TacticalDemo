@@ -61,16 +61,19 @@ TArray<FIntPoint> AUnitAbility_AreaAtk::Range(const FIntPoint& Point)
 			Discovered.Add(UP);
 			ArrayOfRange.Add(UP);
 		}
+		Dist = FMathf::Abs(RIGHT.X - Point.X) + FMathf::Abs(RIGHT.Y - Point.Y);
 		if(Discovered.Contains(RIGHT) == false && Dist <= SkillData.Range.Y)
 		{
 			Discovered.Add(RIGHT);
 			ArrayOfRange.Add(RIGHT);
 		}
+		Dist = FMathf::Abs(DOWN.X - Point.X) + FMathf::Abs(DOWN.Y - Point.Y);
 		if(Discovered.Contains(DOWN) == false && Dist <= SkillData.Range.Y)
 		{
 			Discovered.Add(DOWN);
 			ArrayOfRange.Add(DOWN);
 		}
+		Dist = FMathf::Abs(LEFT.X - Point.X) + FMathf::Abs(LEFT.Y - Point.Y);
 		if(Discovered.Contains(LEFT) == false && Dist <= SkillData.Range.Y)
 		{
 			Discovered.Add(LEFT);
@@ -160,7 +163,7 @@ FBattleReport AUnitAbility_AreaAtk::DoCalculation(const TArray<TObjectPtr<AMyUni
 		float def = OneTarget->GetRuntimeProperty().PhysicDefend;
 		float per = FMath::FRandRange(0.8,1.0f);
 		HitInfo.Damage = UBattleFunc::CalculateDamage(OwnerInstance,Targets[i],MyGrid,10,HitInfo.IsCritical,false);
-		OneTarget->AddHP(HitInfo.Damage);
+		OneTarget->AddHP(0-HitInfo.Damage);
 		
 		Result.HitInfoList.Add(HitInfo);
 	}

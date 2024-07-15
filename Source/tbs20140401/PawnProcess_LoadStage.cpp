@@ -42,6 +42,13 @@ void UPawnProcess_LoadStage::InstantiateGrid()
 		if(MyUnit == nullptr)continue;
 		MyUnit->SetAgilityCorrection(Pair.Value);
 	}
+	for(auto Pair : StageData->UnitAPCorrection)
+	{
+		auto MyUnit =	PawnInstance->GetMyCombatSystem()->GetUnitByType(Pair.Key);	
+		if(MyUnit == nullptr)continue;
+		MyUnit->SetAPCorrection(Pair.Value);
+	}
+	
 	
 	bIsLoaded = true;
 }

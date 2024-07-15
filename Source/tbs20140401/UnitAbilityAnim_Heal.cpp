@@ -6,7 +6,6 @@
 #include "BattleReport.h"
 #include "MyUnit.h"
 #include "Grid.h"
-#include "IContentBrowserSingleton.h"
 
 // Sets default values
 AUnitAbilityAnim_Heal::AUnitAbilityAnim_Heal()
@@ -145,6 +144,8 @@ TArray<TObjectPtr<AMyUnit>> AUnitAbilityAnim_Heal::TakeTargets(const FIntPoint& 
 FBattleReport AUnitAbilityAnim_Heal::DoCalculation(const TArray<TObjectPtr<AMyUnit>>& Targets, AGrid* MyGrid,
 	bool NeedCooperator)
 {
+
+
 	return DoCalculation(Targets[0], MyGrid, NeedCooperator);
 }
 
@@ -163,7 +164,7 @@ FBattleReport AUnitAbilityAnim_Heal::DoCalculation(TObjectPtr<AMyUnit> Target, A
 	Report.IsHit = true;
 	Report.Damage = -10;
 	//扣除血量
-	Target->AddHP(Report.Damage);
+	Target->AddHP(0-Report.Damage);
 	
 	return MoveTemp(Report);
 }

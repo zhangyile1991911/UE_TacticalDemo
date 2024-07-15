@@ -135,7 +135,17 @@ void UPawnProcess_ChooseTarget::CheckBackAttack(TObjectPtr<AMyUnit> TempTarget)
 {
 	do
 	{//背击判断
-		if(ChosenAbilityPtr->IsArea())break;
+		if(ChosenAbilityPtr->IsHeal())
+		{
+			BattleInfoInstance->HideBackAtkTips();
+			break;
+		}
+		
+		if(ChosenAbilityPtr->IsArea())
+		{
+			BattleInfoInstance->HideBackAtkTips();
+			break;
+		}
 		
 		bIsBackAttack = false;
 		if(TempTarget == nullptr)
@@ -169,7 +179,17 @@ void UPawnProcess_ChooseTarget::CheckCooperateAttack(TObjectPtr<AMyUnit> TempTar
 {
 	do
 	{//夹击判断
-		if(ChosenAbilityPtr->IsArea())break;
+		if(ChosenAbilityPtr->IsHeal())
+		{
+			BattleInfoInstance->HideCooperatorTips();
+			break;
+		}
+		if(ChosenAbilityPtr->IsArea())
+		{
+			BattleInfoInstance->HideCooperatorTips();
+			break;
+		}
+			
 		bIsWrapAttack = false;
 		if(TempTarget == nullptr)
 		{
@@ -291,17 +311,16 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		next.Y = CurrentCursor.Y - Input.Y;
 		break;
 	}
-	
 
-	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(next);
-	if(TileDataPtr != nullptr)
-	{
-		PawnInstance->GetEventCenter()->EventOfChoseGrid.Broadcast(TileDataPtr);
-	}
 	//先清理掉上一次 指示器范围
 	//前回のインジケーターをクリアする
 	ClearIndicatorRange();
+
+	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(next);
+	if(TileDataPtr == nullptr)
+		return;
 	
+	PawnInstance->GetEventCenter()->EventOfChoseGrid.Broadcast(TileDataPtr);
 	
 	PawnInstance->GetMyGrid()->RemoveStateFromTile(CurrentCursor,ETileState::Selected);
 	//是否在施法范围

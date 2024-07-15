@@ -93,7 +93,7 @@ TArray<TObjectPtr<AMyUnit>> AUnitAbility_LongRangeAtk::TakeTargets(const FIntPoi
 		if(TileDataPtr == nullptr)continue;
 		if(TileDataPtr->UnitOnTile == nullptr)continue;
 		if(!CheckTileDataHeight(TileDataPtr,MyGrid))continue;
-		
+		if(TileDataPtr->UnitOnTile->IsFriend(OwnerInstance->GetUnitSide()))continue;
 		Targets.Add(TileDataPtr->UnitOnTile);
 	}
 	return MoveTemp(Targets);
@@ -129,7 +129,7 @@ FBattleReport AUnitAbility_LongRangeAtk::DoCalculation(const TArray<TObjectPtr<A
 			// float def = OneTarget->GetRuntimeProperty().PhysicDefend;
 			// float per = FMath::FRandRange(0.8,1.0f);
 			HitInfo.Damage = UBattleFunc::CalculateDamage(OwnerInstance,Targets[i],MyGrid,10,HitInfo.IsCritical,HitInfo.IsBackAtk);
-			OneTarget->AddHP(HitInfo.Damage);
+			OneTarget->AddHP(0-HitInfo.Damage);
 		}
 		Report.HitInfoList.Add(HitInfo);
 	}

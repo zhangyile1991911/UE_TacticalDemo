@@ -45,7 +45,7 @@ public:
 	ButtonActionCB ButtonActionCB;
 	bool IsSelected(){return selected;}
 	void SetUnSelected();
-#ifdef UE_EDITOR
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 	

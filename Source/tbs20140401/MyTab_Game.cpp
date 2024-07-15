@@ -88,6 +88,8 @@ void UMyTab_Game::OnSaveGridDataClicked()
 	const TMap<FIntPoint,FTileData>&  GridData = MyGridPtr->GetGridTiles();
 	for(const auto& Pair : GridData)
 	{
+		if(Pair.Value.TileType == ETileType::None)continue;
+		
 		FTileInfoSave one;
 		one.CellIndex = Pair.Key;
 		one.CellTransform = Pair.Value.Transform;

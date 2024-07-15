@@ -41,7 +41,7 @@ void UMyButtonAction::OnButtonClick()
 	ButtonActionCB.Broadcast();
 }
 
-#ifdef UE_EDITOR
+
 void UMyButtonAction::SetUnSelected()
 {
 	selected = false;
@@ -49,7 +49,7 @@ void UMyButtonAction::SetUnSelected()
 	myButton->SetBackgroundColor(FLinearColor::Gray);
 	
 }
-
+#if WITH_EDITOR
 void UMyButtonAction::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	UE_LOG(LogTemp,Log,TEXT("UMyButtonAction::PostEditChangeProperty()"))

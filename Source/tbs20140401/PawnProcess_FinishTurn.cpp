@@ -17,7 +17,6 @@ void UPawnProcess_FinishTurn::ClearCurrentStage()
 {
 	PawnInstance->GetMyGrid()->ClearGrid();
 	PawnInstance->GetMyCombatSystem()->ClearAllUnit();
-	PawnInstance->ClearCurTurnData();
 	
 	int LevelNum = PawnInstance->GetStageLevelNum();
 	
@@ -34,7 +33,15 @@ void UPawnProcess_FinishTurn::ClearCurrentStage()
 void UPawnProcess_FinishTurn::OnLevelUnloaded()
 {
 	PawnInstance->NextStageLevel();
-	PawnInstance->SwitchToLoadStage();
+	if(PawnInstance->GetStageLevelNum() > MaxLevelNum)
+	{//游戏结束
+		PawnInstance->SwitchToGameOver();
+	}
+	else
+	{
+		PawnInstance->SwitchToLoadStage();	
+	}
+	
 }
 
 void UPawnProcess_FinishTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)

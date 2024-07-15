@@ -26,7 +26,7 @@ void UHitInfoFlow::StartHitNum(FVector2D Start,FVector2D Finish,float Scale,int 
 		FSlateColor NewColor;
 		if(Num < 0)
 		{
-			HitNumTextBlock->SetText(FText::Format(NSLOCTEXT("","","+{0}"),Num));
+			HitNumTextBlock->SetText(FText::Format(NSLOCTEXT("","","+{0}"),FMathf::Abs(Num)));
 			NewColor = FSlateColor(FLinearColor(0.15f, 0.61f, 0.10f, 1.0f));
 		}
 		else

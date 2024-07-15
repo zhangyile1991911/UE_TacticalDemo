@@ -55,12 +55,12 @@ bool UGameUI_BattleInfo::LocationToScreenPosition(FVector UnitLocation,FVector2D
 		PlayerControllerPtr = GetWorld()->GetFirstPlayerController();
 	}
 	
-	const bool Result = PlayerControllerPtr->ProjectWorldLocationToScreen(UnitLocation,ScreenLocation,true);
-	if(Result)
-	{
-		Scale = UWidgetLayoutLibrary::GetViewportScale(PlayerControllerPtr);
-		ScreenLocation /= Scale;
-	}
+	const bool Result = PlayerControllerPtr->ProjectWorldLocationToScreen(UnitLocation,ScreenLocation,false);
+	// if(Result)
+	// {
+	Scale = UWidgetLayoutLibrary::GetViewportScale(PlayerControllerPtr);
+	// 	ScreenLocation /= Scale;
+	// }
 	return Result;
 }
 
@@ -81,7 +81,8 @@ void UGameUI_BattleInfo::StartHitNumFlowAnim(AMyUnit* Unit,int Num,bool bIsHit,b
 	{
 		FVector2D StartFlowPosition;
 		FVector2D FinishFlowPosition;
-		
+
+		ScreenLocation /= Scale;
 		StartFlowPosition = ScreenLocation;
 		ScreenLocation.Y -= 100;
 		FinishFlowPosition = ScreenLocation;
@@ -179,11 +180,12 @@ bool UGameUI_BattleInfo::UpdateWidgetPosition(FVector WorldLocation)
 	const bool bShow = LocationToScreenPosition(WorldLocation,ScreenPosition,Scale);
 	if(bShow)
 	{
-		auto TextSize = TipsGroupSlot->GetSize();
-		TextSize /= 2;
-		TextSize /= Scale;
-		ScreenPosition.X += TextSize.X;
-		ScreenPosition.Y -= TextSize.Y;
+		// auto TextSize = TipsGroupSlot->GetSize();
+		// TextSize /= 2;
+		// TextSize /= Scale;
+		// ScreenPosition.X += TextSize.X;
+		// ScreenPosition.Y -= TextSize.Y;
+		ScreenPosition /= Scale;
 		TipsGroupSlot->SetPosition(ScreenPosition);
 	}
 	return bShow;

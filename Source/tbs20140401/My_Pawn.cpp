@@ -29,6 +29,7 @@
 #include "PawnProcess_Idle.h"
 #include "PawnProcess_ChooseTarget.h"
 #include "PawnProcess_FinishTurn.h"
+#include "PawnProcess_GameOver.h"
 #include "PawnProcess_LoadFailed.h"
 #include "PawnProcess_LoadStage.h"
 #include "PawnProcess_Move.h"
@@ -170,6 +171,7 @@ void AMy_Pawn::Init()
 	LoadStageProcess = NewObject<UPawnProcess_LoadStage>(this);
 	LoadFailedProcess = NewObject<UPawnProcess_LoadFailed>(this);
 	FinishTurnProcess = NewObject<UPawnProcess_FinishTurn>(this);
+	GameOverProcess = NewObject<UPawnProcess_GameOver>(this);
 	
 	EventCenter = NewObject<UEventCenter>(this);
 	
@@ -289,7 +291,7 @@ void AMy_Pawn::UpdateTileUnderCursor()
 		HoveredTile = index;
 	}
 
-	if(HoveredUnit)
+	if(HoveredUnit.IsValid())
 	{
 		HoveredUnit->SetHovered(false);
 	}
@@ -314,7 +316,7 @@ void AMy_Pawn::UpdateTileStatusByIndex(const FIntPoint& index, ETileState state)
 	}
 	const auto TileDataPtr = MyGrid->GetTileDataByIndex(index);
 
-	if(SelectedUnit)SelectedUnit->SetSelected(false);
+	if(SelectedUnit.IsValid())SelectedUnit->SetSelected(false);
 	if(TileDataPtr == nullptr)return;
 	if(TileDataPtr->UnitOnTile == nullptr)return;
 
@@ -669,10 +671,17 @@ TObjectPtr<APathPointInst> AMy_Pawn::GetMyPathPointInst()
 	return MyPathPointInst;
 }
 
-void AMy_Pawn::ClearCurTurnData()
+void AMy_Pawn::OnRemoveUnit(TObjectPtr<AMyUnit> UnitObj)
 {
-	HoveredUnit = nullptr;
-	SelectedUnit = nullptr;
+	if(HoveredUnit.IsValid() == false)
+		HoveredUnit = nullptr;
+	else if( HoveredUnit == UnitObj)
+		HoveredUnit = nullptr;
+	
+	if(SelectedUnit.IsValid() == false)
+		SelectedUnit = nullptr;
+	else if(SelectedUnit == UnitObj)
+		SelectedUnit = nullptr;
 	
 }
 
@@ -760,5 +769,10 @@ void AMy_Pawn::SwitchToLoadFailed()
 void AMy_Pawn::SwitchToFinishTurn()
 {
 	SwitchProcess(FinishTurnProcess);
+}
+
+void AMy_Pawn::SwitchToGameOver()
+{
+	SwitchProcess(GameOverProcess);
 }
 

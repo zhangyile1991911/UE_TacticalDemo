@@ -160,10 +160,17 @@ bool UUnitPathComponent::CanDiagonal(const FIntPoint& ParentIndex,const FIntPoin
 			const auto UpUnit = ParentPtr->MyGrid->GetUnitOnTile(Up);
 			bool RightCanWalk = true;
 			bool UpCanWalk = true;
+
 			if(RightUnit != nullptr)
 				RightCanWalk = RightUnit->IsFriend(UnitSide);
+			else
+				RightCanWalk = false;
+			
 			if(UpUnit != nullptr)
 				UpCanWalk = UpUnit->IsFriend(UnitSide);
+			else
+				UpCanWalk = false;
+			
 			if(RightCanWalk && UpCanWalk)return true;
 		}
 		else if(deltaX > 0 && deltaY < 0)
@@ -174,8 +181,13 @@ bool UUnitPathComponent::CanDiagonal(const FIntPoint& ParentIndex,const FIntPoin
 			const auto UpUnit = ParentPtr->MyGrid->GetUnitOnTile(Up);
 			bool LeftCanWalk = true;
 			bool UpCanWalk = true;
+
 			if(LeftUnit)LeftCanWalk = LeftUnit->IsFriend(UnitSide);
+			else LeftCanWalk = false;
+
 			if(UpUnit)UpCanWalk = UpUnit->IsFriend(UnitSide);
+			else UpCanWalk = false;
+			
 			if(LeftCanWalk && UpCanWalk)return true;
 		}
 		else if(deltaX < 0 && deltaY < 0)
@@ -187,7 +199,11 @@ bool UUnitPathComponent::CanDiagonal(const FIntPoint& ParentIndex,const FIntPoin
 			bool LeftCanWalk = true;
 			bool DownCanWalk = true;
 			if(LeftUnit)LeftCanWalk = LeftUnit->IsFriend(UnitSide);
+			else LeftCanWalk = false;
+			
 			if(DownUnit)DownCanWalk = DownUnit->IsFriend(UnitSide);
+			else DownCanWalk = false;
+			
 			if(LeftCanWalk && DownCanWalk)return true;
 		}
 		else if(deltaX < 0 && deltaY > 0)
@@ -199,7 +215,10 @@ bool UUnitPathComponent::CanDiagonal(const FIntPoint& ParentIndex,const FIntPoin
 			bool RightCanWalk = true;
 			bool DownCanWalk = true;
 			if(RightUnit)RightCanWalk = RightUnit->IsFriend(UnitSide);
+			else RightCanWalk = false;
+			
 			if(DownUnit)DownCanWalk = DownUnit->IsFriend(UnitSide);
+			else DownCanWalk = false;
 			if(RightCanWalk && DownCanWalk)return true;
 		}
 	}

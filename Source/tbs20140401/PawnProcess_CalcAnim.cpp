@@ -76,9 +76,13 @@ void UPawnProcess_CalcAnim::CheckFlow(FlowControl Control)
 
 void UPawnProcess_CalcAnim::OnDeathCompleted()
 {
-	if(Report.Defender!=nullptr)
+	DeathNum -= 1;
+	if(DeathNum > 0)return;
+	
+	if(Report.Defender != nullptr)
 	{
 		PawnInstance->GetMyCombatSystem()->RemoveUnitInCombat(Report.Defender);
+		PawnInstance->OnRemoveUnit(Report.Defender);
 	}
 
 	if(!Report.HitInfoList.IsEmpty())
@@ -86,9 +90,10 @@ void UPawnProcess_CalcAnim::OnDeathCompleted()
 		for(int i = 0;i < Report.HitInfoList.Num();i++)
 		{
 			PawnInstance->GetMyCombatSystem()->RemoveUnitInCombat(Report.HitInfoList[i].Defender);
+			PawnInstance->OnRemoveUnit(Report.HitInfoList[i].Defender);
 		}
 	}
-		
+	
 	CheckFlow(DEATH);
 }
 
@@ -118,6 +123,7 @@ bool UPawnProcess_CalcAnim::CheckDeath()
 		DeathCompleted.BindUObject(this,&UPawnProcess_CalcAnim::OnDeathCompleted);
 		Report.Defender->DoDeadAnim(DeathCompleted);
 		HasDead = true;
+		DeathNum = 1;
 	}
 	if(!Report.HitInfoList.IsEmpty())
 	{
@@ -128,6 +134,7 @@ bool UPawnProcess_CalcAnim::CheckDeath()
 			DeathCompleted.BindUObject(this,&UPawnProcess_CalcAnim::OnDeathCompleted);
 			Report.HitInfoList[i].Defender->DoDeadAnim(DeathCompleted);
 			DeathNum++;
+			HasDead = true;
 		}
 	}
 	return !HasDead;
@@ -168,14 +175,13 @@ void UPawnProcess_CalcAnim::AbilityCompleted(TObjectPtr<AUnitAbilityAnim> Abilit
 {
 	UnitInstance->AttackDone();
 	
-	CheckFlow(IDLE);
 	CastNum -= 1;
 	if(CastNum <= 0)
 	{
 		PawnInstance->GetMyHUD()->ShowGameUI(true);
 		PawnInstance->GetMyHUD()->GetGameUI()->PlayShowBattleUI();
 	}
-	
+	CheckFlow(IDLE);
 	UE_LOG(LogTemp,Log,TEXT("UPawnProcess_CalcAnim::AbilityCompleted"))
 }
 

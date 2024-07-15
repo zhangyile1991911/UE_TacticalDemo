@@ -105,6 +105,7 @@ void AMyUnit::OnConstruction(const FTransform& Transform)
 void AMyUnit::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	//todo 清理一些资源
+	My_Pawn->OnRemoveUnit(this);
 	MyGrid = nullptr;
 	My_Pawn = nullptr;
 	OwnAbilityActorComponents.Empty();
@@ -787,13 +788,21 @@ void AMyUnit::FinishTurn(bool bAsync)
 
 bool AMyUnit::HasEnoughAP(int AP)const
 {
-	return MyRuntimeProperty.ActionPoint >= AP;
+	return (MyRuntimeProperty.ActionPoint + APCorrection) >= AP;
 }
 
 bool AMyUnit::ConsumeAP(int AP)
 {
-	if(MyRuntimeProperty.ActionPoint >= AP)
+	if((MyRuntimeProperty.ActionPoint + APCorrection) >= AP)
 	{
+		if(APCorrection >= AP)
+		{
+			APCorrection -= AP;
+			return true;
+		}
+		
+		AP -= APCorrection;
+		APCorrection = 0;
 		MyRuntimeProperty.ActionPoint -= AP;
 		return true;
 	}
@@ -898,7 +907,7 @@ void AMyUnit::DoDeadAnim(FDeathCompleted Completed)
 
 void AMyUnit::AddHP(int HP)
 {
-	MyRuntimeProperty.HP -= HP;
+	MyRuntimeProperty.HP += HP;
 	MyRuntimeProperty.HP = FMathf::Clamp(MyRuntimeProperty.HP,0,MyProperty.HP);
 }
 

@@ -1,9 +1,7 @@
 ﻿#include "BattleFunc.h"
 
-#include "Command.h"
 #include "MyUnit.h"
 #include "Grid.h"
-#include "InputBehavior.h"
 #include "UnitAbilityAnim.h"
 
 // bool UBattleFunc::IsWrapAttack(AMyUnit* Attacker,AMyUnit* Defender,AMyUnit* Cooperator)

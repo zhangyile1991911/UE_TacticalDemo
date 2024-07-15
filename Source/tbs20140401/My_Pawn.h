@@ -11,6 +11,7 @@
 
 #include "My_Pawn.generated.h"
 
+class UPawnProcess_GameOver;
 class UPawnProcess_FinishTurn;
 class ADemoControl;
 class UPawnProcess_LoadFailed;
@@ -129,10 +130,10 @@ protected:
 	ETileType CurSetTileType = ETileType::Normal;
 
 	UPROPERTY()
-	TObjectPtr<AMyUnit> HoveredUnit;
-
+	TWeakObjectPtr<AMyUnit> HoveredUnit;
+	
 	UPROPERTY()
-	TObjectPtr<AMyUnit> SelectedUnit;
+	TWeakObjectPtr<AMyUnit> SelectedUnit;
 
 	UPROPERTY()
 	TObjectPtr<UPawnProcess_Move> MoveProcess;
@@ -156,6 +157,8 @@ protected:
 	TObjectPtr<UPawnProcess_LoadFailed> LoadFailedProcess;
 	UPROPERTY()
 	TObjectPtr<UPawnProcess_FinishTurn> FinishTurnProcess;
+	UPROPERTY()
+	TObjectPtr<UPawnProcess_GameOver> GameOverProcess;
 	UPROPERTY()
 	TObjectPtr<UPawnProcess> CurrentProcess;
 
@@ -258,7 +261,7 @@ public:
 	
 	TObjectPtr<AMyUnit> GetUnitUnderCursor();
 
-	TObjectPtr<AMyUnit> GetSelectedUnit()const{return SelectedUnit;}
+	TWeakObjectPtr<AMyUnit> GetSelectedUnit()const{return SelectedUnit;}
 	TObjectPtr<APathPointInst> GetMyPathPointInst();
 
 	TObjectPtr<UEventCenter> GetEventCenter()const{return EventCenter;}
@@ -278,7 +281,7 @@ public:
 		m_curArmLength = FMathf::Clamp(val,MaxMin_ArmLength.X,MaxMin_ArmLength.Y);
 	}
 
-	void ClearCurTurnData();
+	void OnRemoveUnit(TObjectPtr<AMyUnit>);
 	
 	bool ReadStory()const{return bHasReadStory;}
 	void SetReadStory(){bHasReadStory = true;}
@@ -297,6 +300,7 @@ public:
 	void SwitchToLoadStage();
 	void SwitchToLoadFailed();
 	void SwitchToFinishTurn();
+	void SwitchToGameOver();
 	
 	FCameraEvent OnCameraActing;
 };

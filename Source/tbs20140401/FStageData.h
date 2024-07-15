@@ -18,4 +18,8 @@ struct FStageData:public FTableRowBase
 	//行動優先度補正
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TMap<ETBSUnitType,int> UnitPriorityCorrection;
+
+	//スキルポイント補正
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TMap<ETBSUnitType,int> UnitAPCorrection;
 };

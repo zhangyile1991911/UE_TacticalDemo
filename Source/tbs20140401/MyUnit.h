@@ -154,7 +154,7 @@ protected:
 	int AtkNum;
 	int MaxAtkRange = 0;
 	int AgilityCorrection = 0;//行動優先度補正
-	
+	int APCorrection = 0;//スキルポイント補正
 
 	FPathCompleted PathCompleted;
 	FDeathCompleted DeathCompleted;
@@ -315,6 +315,10 @@ public:
 	void SetAgilityCorrection(int val)
 	{
 		AgilityCorrection = val;
+	}
+	void SetAPCorrection(int val)
+	{
+		APCorrection = val;
 	}
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

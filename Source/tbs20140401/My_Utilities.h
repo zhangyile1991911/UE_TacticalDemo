@@ -30,3 +30,4 @@ FWeaponData* GetWeaponData(FName WeaponId);
 bool IsTileTypeWalkable(ETileType);
 FUnitColorDataAsset* GetUnitDataColor(const ETBSUnitType unitType);
 FStageData* GetStageData(int i);
+constexpr int MaxLevelNum = 3;

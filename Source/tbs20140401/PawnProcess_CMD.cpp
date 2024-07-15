@@ -58,10 +58,14 @@ void UPawnProcess_CMD::ShowBriefInfo()
 		//已经有目标就跳过
 		if(TargetUnit != nullptr)continue;
 
-		if(TileDataPtr->UnitOnTile == nullptr)continue;
-
-		if(!TileDataPtr->UnitOnTile->IsFriend(UnitInstance->GetUnitSide()))
+		if(ChosenAbilityPtr->IsValidTarget(TileDataPtr,PawnInstance->GetMyGrid()))
+		{
 			TargetUnit = TileDataPtr->UnitOnTile;
+		}
+		// if(TileDataPtr->UnitOnTile == nullptr)continue;
+		//
+		// if(!TileDataPtr->UnitOnTile->IsFriend(UnitInstance->GetUnitSide()))
+		// 	TargetUnit = TileDataPtr->UnitOnTile;
 	}
 
 	for(const FIntPoint& one : InvalidIndex)

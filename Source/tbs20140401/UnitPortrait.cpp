@@ -14,6 +14,10 @@ void UUnitPortrait::RefreshUnitIcon(TObjectPtr<AMyUnit> Unit)
 		UE_LOG(LogTemp,Error,TEXT("%d data is null"),Unit->GetUnitType());
 		return;
 	}
+	if(pData->Assets.Icon.IsValid() == false)
+	{
+		pData->Assets.Icon.LoadSynchronous();
+	}
 	Portrait->SetBrushFromTexture(pData->Assets.Icon.Get(),false);
 
 	for(auto one : APs)

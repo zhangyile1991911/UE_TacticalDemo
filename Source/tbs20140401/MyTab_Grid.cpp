@@ -3,8 +3,6 @@
 
 #include "MyTab_Grid.h"
 
-#include "AsyncTreeDifferences.h"
-#include "IContentBrowserSingleton.h"
 #include "MyButtonAction.h"
 #include "MySpinBox_WithName.h"
 #include "My_Pawn.h"

@@ -4,7 +4,6 @@
 #include "MyGridMeshInst.h"
 
 #include "GridShapeData.h"
-#include "IContentBrowserSingleton.h"
 #include "Components/InstancedStaticMeshComponent.h"
 
 // Sets default values
