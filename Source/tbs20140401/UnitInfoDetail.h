@@ -14,6 +14,7 @@ class UProgressBar;
 class UTextBlock;
 class UImage;
 class UUnitInfoDetailPortrait;
+class UMyGameInstance;
 /**
  * 
  */
@@ -186,6 +187,7 @@ protected:
 	void ShowUnitDetailInfo(AMyUnit*);
 
 	int FocusIndex;
+
 public:
 	void ShowUnitTeamInfo(TArray<TObjectPtr<AMyUnit>> UnitTeam,TObjectPtr<AMyUnit> FocusUnit);
 	void HideUnitTeamInfo();

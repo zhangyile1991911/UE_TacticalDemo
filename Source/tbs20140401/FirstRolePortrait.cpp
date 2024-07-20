@@ -5,17 +5,26 @@
 
 #include "MyUnit.h"
 #include "My_Utilities.h"
+#include "MyGameInstance.h"
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 
 void UFirstRolePortrait::RefreshByUnit(TObjectPtr<AMyUnit> Unit)
 {
-	auto pData = GetUnitData(Unit->GetUnitType());
+	if(GameInstance == nullptr)
+	{
+		GameInstance = Cast<UMyGameInstance>(GetWorld()->GetGameInstance());
+	}
+	auto pData = GameInstance->GetUnitData(Unit->GetUnitType());
 	if(pData == nullptr)
 	{
 		UE_LOG(LogTemp,Error,TEXT("%d data is null"),Unit->GetUnitType());
 		return;
+	}
+	if(!pData->Assets.Icon.IsValid())
+	{
+		pData->Assets.Icon.LoadSynchronous();
 	}
 	Portrait->SetBrushFromTexture(pData->Assets.Icon.Get(),false);
 

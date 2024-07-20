@@ -160,13 +160,15 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UPawnProcess_GameOver> GameOverProcess;
 	UPROPERTY()
-	TObjectPtr<UPawnProcess> CurrentProcess;
+	TObjectPtr<UPawnProcess> CurrentProcess;//状態遷移図
 
 	ECameraDirectType CameraDirect = ECameraDirectType::FORWARD;
 	
 	bool bHasReadStory = false;
 
 	int StageLevelNum = 1;
+
+	bool bIsDelayStartGame = false;
 
 	FTimerHandle TimerStartGameHandle;
 	

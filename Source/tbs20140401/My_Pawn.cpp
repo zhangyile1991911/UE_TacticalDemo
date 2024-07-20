@@ -133,7 +133,24 @@ AMy_Pawn::AMy_Pawn()
 
 void AMy_Pawn::DelayStartGame()
 {
+	
+	if(bIsDelayStartGame)
+	{
+		UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::DelayStartGame() executed"))
+		return;
+	}
+	auto GameSystemPanel = MyHUDInstance->GetGameSystemPanel();
+	if(GameSystemPanel == nullptr)
+	{
+		return;
+	}
+	bIsDelayStartGame = true;
+	
+	UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::DelayStartGame() clear TimerStartGameHandle %s"),*TimerStartGameHandle.ToString())
 	GetWorld()->GetTimerManager().ClearTimer(TimerStartGameHandle);
+	
+	GameSystemPanel->ShowLoading();
+	
 	// MyHUDInstance->ShowGameUI(true);
 	SetSelectedActions(nullptr,nullptr);
 	MyCombatSystem->ResetAllUnit();
@@ -187,13 +204,19 @@ void AMy_Pawn::Init()
 			MyHUDInstance = Cast<AMyHUD>(HUD);
 		}
 	}
+	
 	AGameModeBase* CurrentGameMode = UGameplayStatics::GetGameMode(GetWorld());
 	AMyGameMode* My = Cast<AMyGameMode>(CurrentGameMode);
 	if(My != nullptr && My->IsGameDemo())
 	{
-		auto GameSystemPanel = GetMyHUD()->GetGameSystemPanel();
-		GameSystemPanel->ShowLoading();
-		GetWorld()->GetTimerManager().SetTimer(TimerStartGameHandle, this, &AMy_Pawn::DelayStartGame, 1.0f, false);
+		//这里为了拿到HUD 所以做了定时任务
+		//最好的做法是 自己构建一个module初始化流程控制模块
+		//通过模块注册顺序 控制pawn类和hud类的初始化时机
+		//现在的处理方法 其实是临时的，并不是很完善
+		bIsDelayStartGame = false;
+		GetWorld()->GetTimerManager().SetTimer(TimerStartGameHandle, this, &AMy_Pawn::DelayStartGame, 0.5f, true);
+		UE_LOG(LogTemp,Log,TEXT("Start TimerStartGameHandle %s"),*TimerStartGameHandle.ToString())
+
 	}
 	
 }
@@ -248,7 +271,6 @@ void AMy_Pawn::Tick(float DeltaTime)
 		SetActorRotation(FMath::RInterpTo(GetActorRotation(),m_rotationDesired,DeltaTime,Rotation_Interp));
 		OnCameraActing.Broadcast();
 	}
-	
 
 	if(!IsStartGame)UpdateTileUnderCursor();
 	if(CurrentProcess)CurrentProcess->TickProcess();
@@ -262,6 +284,8 @@ void AMy_Pawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	
 	if(UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
+		UE_LOG(LogTemp, Log, TEXT("PackageGameDebug AMy_Pawn::SetupPlayerInputComponent UEnhancedInputComponent Success"));
+
 		// UE_LOG(LogTemp,Log,TEXT("BindActiion MouseZoomAction"))
 		// EnhancedInputComponent->BindAction(MouseZoomAction,ETriggerEvent::Ongoing,this,&AMy_Pawn::MouseZooming);
 		EnhancedInputComponent->BindAction(MouseZoomAction,ETriggerEvent::Triggered,this,&AMy_Pawn::MouseZooming);

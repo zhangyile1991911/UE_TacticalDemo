@@ -8,23 +8,23 @@
 #include "GridDataHelper.h"
 #include "GridInfoSave.h"
 #include "MyCombatSystem.h"
+#include "MyGameInstance.h"
 #include "MyHUD.h"
 #include "MyUnit.h"
 #include "My_Pawn.h"
-#include "My_Utilities.h"
 #include "Kismet/GameplayStatics.h"
 
 void UPawnProcess_LoadStage::InstantiateGrid()
 {
 	int LevelNum = PawnInstance->GetStageLevelNum();
-	FStageData* StageData = GetStageData(LevelNum);
+	FStageData* StageData = GameInstance->GetStageData(LevelNum);
 	const FString Path = FString::Format(TEXT("{0}{1}"),
 	{FPaths::ProjectDir(),StageData->StageDataPath.ToString()});
 	FGridInfoSave MyGridData;
 	const bool bIsSuccess = UGridDataHelper::LoadGridFromJson(MyGridData, Path);
 	if(!bIsSuccess)
 	{
-		UE_LOG(LogTemp,Log,TEXT("%s | %s is failed"),*FPaths::ProjectDir(),*Path)
+		UE_LOG(LogTemp,Log,TEXT("PackageGameDebug %s | %s is failed"),*FPaths::ProjectDir(),*Path)
 		return;
 	}
 	//实例化 网格和单位
@@ -55,12 +55,16 @@ void UPawnProcess_LoadStage::InstantiateGrid()
 
 void UPawnProcess_LoadStage::OnLevelLoaded()
 {
+	UE_LOG(LogTemp,Log,TEXT("PackageGameDebug UPawnProcess_LoadStage::OnLevelLoaded"))
+
 	InstantiateGrid();
 	GameSystemPanel->WaitingEnter();
 }
 
 void UPawnProcess_LoadStage::HandleConfirmInput()
 {
+	UE_LOG(LogTemp,Log,TEXT("PackageGameDebug UPawnProcess_LoadStage::HandleConfirmInput bIsLoaded = %d"),bIsLoaded)
+
 	if(bIsLoaded)
 	{
 		GameSystemPanel->HideLoading();
@@ -73,6 +77,8 @@ void UPawnProcess_LoadStage::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
 	Super::EnterProcess(Pawn);
 
+	UE_LOG(LogTemp,Log,TEXT("PackageGameDebug UPawnProcess_LoadStage::EnterProcess"))
+	GameInstance = Cast<UMyGameInstance>(GetWorld()->GetGameInstance());
 	GameSystemPanel = PawnInstance->GetMyHUD()->GetGameSystemPanel();
 	GameSystemPanel->ShowLoading();
 	
@@ -85,7 +91,7 @@ void UPawnProcess_LoadStage::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	LatentInfo.ExecutionFunction = FName("OnLevelLoaded");
 	LatentInfo.Linkage = 0;
 	LatentInfo.UUID = __LINE__; // 确保每次调用都有唯一的UUID
-	FStageData* Data = GetStageData(LevelNum);
+	FStageData* Data = GameInstance->GetStageData(LevelNum);
 	UGameplayStatics::LoadStreamLevel(GetWorld(),
 		FName(Data->StageLevelName.ToString()),
 		true,
@@ -102,6 +108,6 @@ void UPawnProcess_LoadStage::TickProcess()
 
 void UPawnProcess_LoadStage::ExitProcess()
 {
-	
+	GameInstance = nullptr;
 	GameSystemPanel = nullptr;
 }

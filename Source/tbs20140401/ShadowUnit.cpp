@@ -3,6 +3,7 @@
 
 #include "ShadowUnit.h"
 
+#include "MyGameInstance.h"
 #include "MyUnit.h"
 #include "My_Utilities.h"
 
@@ -32,7 +33,7 @@ void AShadowUnit::RefreshUnit(TObjectPtr<AMyUnit> Master,UClass* AnimBP,FUnitCol
 {
 	MyMaster = Master;
 	ETBSUnitType UnitType = MyMaster->GetUnitType();
-	auto pData = GetUnitData(UnitType);
+	auto pData = Master->GetGameInstance()->GetUnitData(UnitType);
 	if(pData == nullptr)
 	{
 		UE_LOG(LogTemp,Error,TEXT("%d data is null"),UnitType);

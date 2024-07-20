@@ -7,6 +7,7 @@
 #include "GameSystemPanel.h"
 #include "Grid.h"
 #include "MyCombatSystem.h"
+#include "MyGameInstance.h"
 #include "MyHUD.h"
 #include "MyUnit.h"
 #include "My_Pawn.h"
@@ -26,7 +27,7 @@ void UPawnProcess_FinishTurn::ClearCurrentStage()
 	LatentInfo.Linkage = 0;
 	LatentInfo.UUID = __LINE__; // 确保每次调用都有唯一的UUID
 	
-	FStageData* Data = GetStageData(LevelNum);
+	FStageData* Data = GameInstance->GetStageData(LevelNum);
 	UGameplayStatics::UnloadStreamLevel(GetWorld(),FName(Data->StageLevelName.ToString()),LatentInfo,false);
 }
 
@@ -47,6 +48,8 @@ void UPawnProcess_FinishTurn::OnLevelUnloaded()
 void UPawnProcess_FinishTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 {
 	Super::EnterProcess(Pawn);
+	
+	GameInstance =  Cast<UMyGameInstance>(GetWorld()->GetGameInstance());	
 	//1 判断是否有一方队伍 战斗单位都死了
 	auto AllUnit = PawnInstance->GetMyCombatSystem()->GetAllUnits();
 	TSet<int> UnitSide;
@@ -76,6 +79,7 @@ void UPawnProcess_FinishTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 void UPawnProcess_FinishTurn::ExitProcess()
 {
 	Super::ExitProcess();
+	GameInstance = nullptr;
 }
 
 void UPawnProcess_FinishTurn::HandleConfirmInput()

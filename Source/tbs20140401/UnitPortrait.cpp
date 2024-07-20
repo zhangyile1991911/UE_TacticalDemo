@@ -2,13 +2,19 @@
 
 
 #include "UnitPortrait.h"
+
+#include "MyGameInstance.h"
 #include "My_Utilities.h"
 #include "MyUnit.h"
 #include "Components/Image.h"
 
 void UUnitPortrait::RefreshUnitIcon(TObjectPtr<AMyUnit> Unit)
 {
-	auto pData = GetUnitData(Unit->GetUnitType());
+	if(GameInstance == nullptr)
+	{
+		GameInstance = Cast<UMyGameInstance>(GetWorld()->GetGameInstance());	
+	}	
+	auto pData = GameInstance->GetUnitData(Unit->GetUnitType());
 	if(pData == nullptr)
 	{
 		UE_LOG(LogTemp,Error,TEXT("%d data is null"),Unit->GetUnitType());

@@ -13,7 +13,10 @@ UCLASS(Blueprintable)
 class TBS20140401_API AMyGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+protected:
+	// virtual void BeginPlay() override;
 public:
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	bool IsGameDemo();
 };

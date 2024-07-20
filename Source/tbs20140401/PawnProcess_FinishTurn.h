@@ -7,6 +7,7 @@
 #include "PawnProcess_FinishTurn.generated.h"
 
 class UGameSystemPanel;
+class UMyGameInstance;
 /**
  * 
  */
@@ -17,6 +18,9 @@ class TBS20140401_API UPawnProcess_FinishTurn : public UPawnProcess
 protected:
 	UPROPERTY()
 	TObjectPtr<UGameSystemPanel> GameSystemPanel;
+
+	UPROPERTY()
+	UMyGameInstance* GameInstance;
 	
 	void ClearCurrentStage();
 	UFUNCTION()

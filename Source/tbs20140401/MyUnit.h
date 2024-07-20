@@ -22,6 +22,7 @@ class AShadowUnit;
 class AMy_Pawn;
 class AGrid;
 class AMyUnit;
+class UMyGameInstance;
 DECLARE_DELEGATE(FPathCompleted)
 DECLARE_DELEGATE(FDeathCompleted)
 
@@ -158,6 +159,9 @@ protected:
 
 	FPathCompleted PathCompleted;
 	FDeathCompleted DeathCompleted;
+
+	UPROPERTY()
+	UMyGameInstance* GameInstance;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -320,5 +324,7 @@ public:
 	{
 		APCorrection = val;
 	}
+
+	UMyGameInstance* GetGameInstance();
 };
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection);

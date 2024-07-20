@@ -41,60 +41,60 @@ bool IsIntEven(int i)
 }
 
 
-FUnitData* GetUnitData(const ETBSUnitType unitType)
-{
-	static UDataTable* LoadedDataTable = nullptr;
-	if(LoadedDataTable == nullptr)
-	{
-		FSoftObjectPath MyAssetPath(TEXT("DataTable'/Game/Art/Units/DT_DefaultUnitDataPerType.DT_DefaultUnitDataPerType'"));
-		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-		LoadedDataTable = Cast<UDataTable>(Streamable.LoadSynchronous(MyAssetPath));
-	}
-	FUnitData* row = nullptr;
-	switch (unitType)
-	{
-	case ETBSUnitType::Warrior:
-		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Warrior")),"");
-		break;
-	case ETBSUnitType::Slime:
-		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Slime")),"");
-		break;
-	case ETBSUnitType::Ranger:
-		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Ranger")),"");
-		break;
-	case ETBSUnitType::Priest:
-		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Priest")),"");
-		break;
-	case ETBSUnitType::Chicken:
-		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Chicken")),"");
-		break;
-	case ETBSUnitType::Bat:
-		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Bat")),"");
-		break;
-	case ETBSUnitType::EnemyWarrior:
-		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyWarrior")),"");
-		break;
-	case ETBSUnitType::EnemySlime:
-		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemySlime")),"");
-		break;
-	case ETBSUnitType::EnemyRanger:
-		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyRanger")),"");
-		break;
-	case ETBSUnitType::EnemyTank:
-		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyTank")),"");
-		break;
-	case ETBSUnitType::EnemyBat:
-		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyBat")),"");
-		break;
-	case ETBSUnitType::EnemyChicken:
-		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyChicken")),"");
-		break;
-	case ETBSUnitType::EnemyPriest:
-		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyPriest")),"");
-		break;
-	}
-	return row;
-}
+// FUnitData* GetUnitData(const ETBSUnitType unitType)
+// {
+// 	static UDataTable* LoadedDataTable = nullptr;
+// 	if(LoadedDataTable == nullptr)
+// 	{
+// 		FSoftObjectPath MyAssetPath(TEXT("DataTable'/Game/Art/Units/DT_DefaultUnitDataPerType.DT_DefaultUnitDataPerType'"));
+// 		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+// 		LoadedDataTable = Cast<UDataTable>(Streamable.LoadSynchronous(MyAssetPath));
+// 	}
+// 	FUnitData* row = nullptr;
+// 	switch (unitType)
+// 	{
+// 	case ETBSUnitType::Warrior:
+// 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Warrior")),"");
+// 		break;
+// 	case ETBSUnitType::Slime:
+// 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Slime")),"");
+// 		break;
+// 	case ETBSUnitType::Ranger:
+// 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Ranger")),"");
+// 		break;
+// 	case ETBSUnitType::Priest:
+// 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Priest")),"");
+// 		break;
+// 	case ETBSUnitType::Chicken:
+// 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Chicken")),"");
+// 		break;
+// 	case ETBSUnitType::Bat:
+// 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("Bat")),"");
+// 		break;
+// 	case ETBSUnitType::EnemyWarrior:
+// 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyWarrior")),"");
+// 		break;
+// 	case ETBSUnitType::EnemySlime:
+// 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemySlime")),"");
+// 		break;
+// 	case ETBSUnitType::EnemyRanger:
+// 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyRanger")),"");
+// 		break;
+// 	case ETBSUnitType::EnemyTank:
+// 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyTank")),"");
+// 		break;
+// 	case ETBSUnitType::EnemyBat:
+// 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyBat")),"");
+// 		break;
+// 	case ETBSUnitType::EnemyChicken:
+// 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyChicken")),"");
+// 		break;
+// 	case ETBSUnitType::EnemyPriest:
+// 		row = LoadedDataTable->FindRow<FUnitData>(FName(TEXT("EnemyPriest")),"");
+// 		break;
+// 	}
+// 	return row;
+// }
 
 FUnitColorDataAsset* GetUnitDataColor(const ETBSUnitType unitType)
 {
@@ -151,20 +151,20 @@ FUnitColorDataAsset* GetUnitDataColor(const ETBSUnitType unitType)
 	return row;
 }
 
-FStageData* GetStageData(int i)
-{
-	static UDataTable* LoadedDataTable = nullptr;
-	if(LoadedDataTable == nullptr)
-	{
-		FSoftObjectPath MyAssetPath(TEXT("DataTable'/Game/Demo/DT_StageData.DT_StageData'"));
-		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-		LoadedDataTable = Cast<UDataTable>(Streamable.LoadSynchronous(MyAssetPath));
-	}
-
-	FString RowName = FString::Format(TEXT("{0}"),{i});
-	FStageData* row = LoadedDataTable->FindRow<FStageData>(FName(RowName),"");
-	return row;
-}
+// FStageData* GetStageData(int i)
+// {
+// 	static UDataTable* LoadedDataTable = nullptr;
+// 	if(LoadedDataTable == nullptr)
+// 	{
+// 		FSoftObjectPath MyAssetPath(TEXT("DataTable'/Game/Demo/DT_StageData.DT_StageData'"));
+// 		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+// 		LoadedDataTable = Cast<UDataTable>(Streamable.LoadSynchronous(MyAssetPath));
+// 	}
+//
+// 	FString RowName = FString::Format(TEXT("{0}"),{i});
+// 	FStageData* row = LoadedDataTable->FindRow<FStageData>(FName(RowName),"");
+// 	return row;
+// }
 
 FGridShapeData* GetShapeData(const EGridShape shape)
 {
@@ -193,18 +193,18 @@ FGridShapeData* GetShapeData(const EGridShape shape)
 	return row;
 }
 
-FWeaponData* GetWeaponData(FName WeaponId)
-{
-	static UDataTable* LoadedDataTable = nullptr;
-	if(LoadedDataTable == nullptr)
-	{
-		FSoftObjectPath MyAssetPath(TEXT("DataTable'/Game/Art/Units/DT_WeaponData.DT_WeaponData'"));
-		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
-		LoadedDataTable = Cast<UDataTable>(Streamable.LoadSynchronous(MyAssetPath));
-	}
-	FWeaponData* row = LoadedDataTable->FindRow<FWeaponData>(WeaponId,"");
-	return row;
-}
+// FWeaponData* GetWeaponData(FName WeaponId)
+// {
+// 	static UDataTable* LoadedDataTable = nullptr;
+// 	if(LoadedDataTable == nullptr)
+// 	{
+// 		FSoftObjectPath MyAssetPath(TEXT("DataTable'/Game/Art/Units/DT_WeaponData.DT_WeaponData'"));
+// 		FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+// 		LoadedDataTable = Cast<UDataTable>(Streamable.LoadSynchronous(MyAssetPath));
+// 	}
+// 	FWeaponData* row = LoadedDataTable->FindRow<FWeaponData>(WeaponId,"");
+// 	return row;
+// }
 
 bool IsTileTypeWalkable(ETileType  type)
 {

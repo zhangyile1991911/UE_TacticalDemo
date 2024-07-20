@@ -8,6 +8,7 @@
 enum class ETBSUnitType:uint8;
 class UImage;
 class UBorder;
+class UMyGameInstance;
 /**
  * 
  */
@@ -27,6 +28,9 @@ protected:
 	
 	UPROPERTY(Transient,meta=(BindWidgetAnim))
 	TObjectPtr<UWidgetAnimation> UnHighlight;
+
+	UPROPERTY()
+	UMyGameInstance* GameInstance;
 public:
 	void ShowUnitPortrait(ETBSUnitType UnitType);
 	void HideUnitPortrait();

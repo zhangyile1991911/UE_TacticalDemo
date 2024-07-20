@@ -24,10 +24,13 @@ AMy_PC::AMy_PC()
 void AMy_PC::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	FInputModeGameOnly InputMode;
+	SetInputMode(InputMode);
 	SetShowMouseCursor(true);
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
-		UE_LOG(LogTemp, Log, TEXT("AMy_PC::BeginPlay()"));
+		UE_LOG(LogTemp, Log, TEXT("PackageGameDebug AMy_PC::BeginPlay() GetSubsystem<UEnhancedInputLocalPlayerSubsystem> Success"));
 		// add the mapping context so we get controls
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}

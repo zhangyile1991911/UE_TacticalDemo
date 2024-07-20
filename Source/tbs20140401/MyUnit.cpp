@@ -6,6 +6,7 @@
 #include "Grid.h"
 #include "IdleDirection.h"
 #include "IMyUnitAnimation.h"
+#include "MyGameInstance.h"
 #include "MyGridPathfinding.h"
 #include "My_Pawn.h"
 #include "My_Utilities.h"
@@ -134,6 +135,15 @@ void AMyUnit::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+UMyGameInstance* AMyUnit::GetGameInstance()
+{
+	if(GameInstance == nullptr)
+	{
+		GameInstance = Cast<UMyGameInstance>(GetWorld()->GetGameInstance());	
+	}
+	return GameInstance;
+}
+
 // Called when the game starts or when spawned
 void AMyUnit::BeginPlay()
 {
@@ -249,7 +259,8 @@ void AMyUnit::RefreshUnit(TObjectPtr<AMy_Pawn> Pawn,TObjectPtr<AGrid> grid,const
 
 void AMyUnit::RefreshUnit(ETBSUnitType UType)
 {
-	const FUnitData* UnitData = GetUnitData(UType);
+	
+	const FUnitData* UnitData = GetGameInstance()->GetUnitData(UType);
 	if(UnitData == nullptr)
 	{
 		UE_LOG(LogTemp,Error,TEXT("%d data is null"),UType);
@@ -342,7 +353,7 @@ void AMyUnit::RefreshUnit(ETBSUnitType UType)
 	}
 	// MaxAtkRange += MyRuntimeProperty.Move;
 
-	FUnitColorDataAsset* Color = GetUnitDataColor(UnitType);
+	FUnitColorDataAsset* Color = GetGameInstance()->GetUnitDataColor(UnitType);
 	if(!Color->Slot1.IsValid())
 	{
 		auto m1 = Color->Slot1.LoadSynchronous();

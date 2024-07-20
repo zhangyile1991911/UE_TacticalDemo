@@ -3,6 +3,7 @@
 
 #include "ButtonUnit.h"
 
+#include "MyGameInstance.h"
 #include "My_Utilities.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
@@ -21,9 +22,21 @@ void UButtonUnit::NativeConstruct()
 	UnitButton->OnClicked.AddDynamic(this,&UButtonUnit::OnUnitButtonClicked);
 }
 
-void UButtonUnit::RefreshButtonStyle()const
+void UButtonUnit::NativeDestruct()
 {
-	auto pData = GetUnitData(UnitType);
+	Super::NativeDestruct();
+	
+}
+
+void UButtonUnit::RefreshButtonStyle()
+{
+	if(GameInstance == nullptr)
+		GameInstance = Cast<UMyGameInstance>(GetWorld()->GetGameInstance());	
+
+	if(GameInstance == nullptr)
+		return;
+	
+	auto pData = GameInstance->GetUnitData(UnitType);
 	if(pData == nullptr)
 	{
 		UE_LOG(LogTemp,Error,TEXT("%d is nullptr"),UnitType);

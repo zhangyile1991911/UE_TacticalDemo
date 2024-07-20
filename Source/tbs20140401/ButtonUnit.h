@@ -8,7 +8,7 @@
 #include "ButtonUnit.generated.h"
 
 
-
+class UMyGameInstance;
 class UBorder;
 class UImage;
 class UButton;
@@ -37,12 +37,15 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	bool IsSelected = false;
+
+	UPROPERTY()
+	UMyGameInstance* GameInstance;
 protected:
 	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	
-	
-	void RefreshButtonStyle()const;
+	void RefreshButtonStyle();
 	UFUNCTION()
 	void OnUnitButtonClicked();
 public:

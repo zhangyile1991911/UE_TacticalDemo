@@ -10,6 +10,7 @@ class AMyUnit;
 class UProgressBar;
 class UTextBlock;
 class UImage;
+class UMyGameInstance;
 /**
  * 
  */
@@ -44,6 +45,9 @@ protected:
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UImage> AP3;
+
+	UPROPERTY()
+	UMyGameInstance* GameInstance;
 
 	TArray<TObjectPtr<UImage>> APs;
 

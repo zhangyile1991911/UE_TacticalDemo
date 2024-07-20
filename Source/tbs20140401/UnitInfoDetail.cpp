@@ -3,6 +3,7 @@
 
 #include "UnitInfoDetail.h"
 
+#include "MyGameInstance.h"
 #include "MyUnit.h"
 #include "My_Utilities.h"
 #include "UnitAbilityAnim.h"
@@ -132,7 +133,7 @@ void UUnitInfoDetail::ShowUnitDetailInfo(AMyUnit* MyUnit)
 	HPTxt->SetText(FText::Format(NSLOCTEXT("","","{0}/{1}"),RuntimeProperty.HP,TableProperty.HP));
 
 	//武器
-	const auto WeaponDataPtr = GetWeaponData(TableProperty.WeaponId);
+	const auto WeaponDataPtr = MyUnit->GetGameInstance()->GetWeaponData(TableProperty.WeaponId);
 	WeaponName->SetText(FText::FromName(WeaponDataPtr->WeaponName));
 	
 	AccessoryImgA->SetVisibility(ESlateVisibility::Hidden);
@@ -172,7 +173,7 @@ void UUnitInfoDetail::ShowUnitDetailInfo(AMyUnit* MyUnit)
 	EsotericImg->SetVisibility(ESlateVisibility::Collapsed);
 	EsotericName->SetVisibility(ESlateVisibility::Collapsed);
 
-	const FUnitData* UnitData = GetUnitData(MyUnit->GetUnitType());
+	const FUnitData* UnitData = MyUnit->GetGameInstance()->GetUnitData(MyUnit->GetUnitType());
 	HalfPortrait->SetBrushFromTexture(UnitData->Assets.Icon.Get());
 	
 }

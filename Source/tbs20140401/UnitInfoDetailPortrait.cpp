@@ -4,10 +4,15 @@
 #include "UnitInfoDetailPortrait.h"
 #include "My_Utilities.h"
 #include "Components/Image.h"
+#include "MyGameInstance.h"
 
 void UUnitInfoDetailPortrait::ShowUnitPortrait(ETBSUnitType UnitType)
 {
-	const FUnitData* UnitData = GetUnitData(UnitType);
+	if(GameInstance == nullptr)
+	{
+		GameInstance = Cast<UMyGameInstance>(GetWorld()->GetGameInstance());	
+	}
+	const FUnitData* UnitData = GameInstance->GetUnitData(UnitType);
 	if(UnitData == nullptr)
 	{
 		UE_LOG(LogTemp,Error,TEXT("%d data is null"),UnitType);

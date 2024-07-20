@@ -9,6 +9,7 @@
 class AMyUnit;
 class UTextBlock;
 class UImage;
+class UMyGameInstance;
 /**
  * 
  */
@@ -38,6 +39,9 @@ protected:
 
 	UPROPERTY(Transient,meta=(BindWidgetAnim))
 	TObjectPtr<UWidgetAnimation> Restore;
+
+	UPROPERTY()
+	UMyGameInstance* GameInstance;
 	
 	TArray<TObjectPtr<UImage>> APs;
 

@@ -7,6 +7,7 @@
 #include "PawnProcess_LoadStage.generated.h"
 
 class UGameSystemPanel;
+class UMyGameInstance;
 /**
  * 
  */
@@ -20,6 +21,9 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UGameSystemPanel> GameSystemPanel;
+
+	UPROPERTY()
+	UMyGameInstance* GameInstance;
 
 	void InstantiateGrid();
 	UFUNCTION()

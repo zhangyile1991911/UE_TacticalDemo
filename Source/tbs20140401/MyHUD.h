@@ -25,6 +25,7 @@ protected:
 
 	UPROPERTY(BlueprintType,BlueprintReadWrite)
 	TObjectPtr<UGameSystemPanel> GameSystemPanel;
+
 public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowGameUI(bool IsShow);
