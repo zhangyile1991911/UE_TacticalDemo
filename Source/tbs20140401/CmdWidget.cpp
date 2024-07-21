@@ -69,7 +69,7 @@ void UCmdWidget::SelectCmd(int index)
 		DamageTitle->SetText(FText::FromString(TEXT("威力")));
 		RangeTitle->SetText(FText::FromString(TEXT("射程")));
 		DamageNum->SetText(FText::Format(NSLOCTEXT("","","{0}"),10));
-		RangeNum->SetText(FText::Format(NSLOCTEXT("","","{0}~{1} (高度-{2}~+{3})}"),
+		RangeNum->SetText(FText::Format(NSLOCTEXT("","","{0}~{1} (高度-{2}~+{3})"),
 			ArrayOfAbility[index]->GetSkillData().Range.X,
 			ArrayOfAbility[index]->GetSkillData().Range.Y,
 			ArrayOfAbility[index]->GetSkillData().AllowableDeviation,

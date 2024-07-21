@@ -25,6 +25,9 @@ struct FUnitProperty
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FText UnitName;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FName JobName;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int Level;

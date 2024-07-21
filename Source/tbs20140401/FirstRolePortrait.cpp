@@ -28,18 +28,20 @@ void UFirstRolePortrait::RefreshByUnit(TObjectPtr<AMyUnit> Unit)
 	}
 	Portrait->SetBrushFromTexture(pData->Assets.Icon.Get(),false);
 
-	switch (Unit->GetUnitType())
-	{
-	case ETBSUnitType::Warrior:
-		Name->SetText(FText::FromName(TEXT("战士")));
-		break;
-	case ETBSUnitType::Slime:
-		Name->SetText(FText::FromName(TEXT("史莱姆")));
-		break;
-	case ETBSUnitType::Ranger:
-		Name->SetText(FText::FromName(TEXT("游侠")));
-		break;
-	}
+	Name->SetText(pData->Property.UnitName);
+	JobText->SetText(FText::FromName(pData->Property.JobName));
+	// switch (Unit->GetUnitType())
+	// {
+	// case ETBSUnitType::Warrior:
+	// 	Name->SetText(FText::FromName(TEXT("战士")));
+	// 	break;
+	// case ETBSUnitType::Slime:
+	// 	Name->SetText(FText::FromName(TEXT("史莱姆")));
+	// 	break;
+	// case ETBSUnitType::Ranger:
+	// 	Name->SetText(FText::FromName(TEXT("游侠")));
+	// 	break;
+	// }
 	
 	for(auto one : APs)
 	{

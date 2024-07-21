@@ -204,7 +204,7 @@ public:
 	void Init();
 
 	ETBSUnitType CurrentSelectedUnitType;
-
+	UPROPERTY(BlueprintReadOnly)
 	bool IsStartGame = false;
 	int GetStageLevelNum()const{return StageLevelNum;}
 	void NextStageLevel(){StageLevelNum++;}
