@@ -113,7 +113,12 @@ FBattleReport AUnitAbility_NormalAtk::DoCalculation(TObjectPtr<AMyUnit> Target, 
 	// float atk = OwnerInstance->GetRuntimeProperty().Power;
 	// float def = Target->GetRuntimeProperty().PhysicDefend;
 	// float per = FMath::FRandRange(0.8,1.0f);
-	Report.Damage = UBattleFunc::CalculateDamage(OwnerInstance,Target,MyGrid,10,Report.IsCritical,Report.IsBackAtk);//FMathf::Clamp(atk * per - def,0,999999999);
+	Report.Damage = UBattleFunc::CalculateDamage(OwnerInstance,
+		Target,
+		MyGrid,
+		10,
+		Report.IsCritical,
+		Report.IsBackAtk);//FMathf::Clamp(atk * per - def,0,999999999);
 	//扣除血量
 	Target->AddHP(0-Report.Damage);
 	

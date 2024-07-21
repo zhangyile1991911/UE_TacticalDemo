@@ -49,7 +49,7 @@ void UFirstRolePortrait::RefreshByUnit(TObjectPtr<AMyUnit> Unit)
 	}
 
 	FSlateColor bright(FLinearColor(0.904661f,0.806952f,0.078187f,1.0f));
-	for(int i = 0;i < Unit->GetRuntimeProperty().ActionPoint;i++)
+	for(int i = 0;i < Unit->GetAP();i++)
 	{
 		APs[i]->SetBrushTintColor(bright);
 	}

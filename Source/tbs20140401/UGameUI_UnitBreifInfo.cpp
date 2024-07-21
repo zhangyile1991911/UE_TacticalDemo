@@ -38,40 +38,46 @@ void UUGameUI_UnitBriefInfo::RefreshUnitBaseBriefInfo(TObjectPtr<AMyUnit> Unit)
 	FText TmpLevel = FText::Format(FText::FromString("LV.{0}"), FText::AsNumber(1));
 	LevelText->SetText(TmpLevel);
 	//Job
-	switch (Unit->GetUnitType())
-	{
-	case ETBSUnitType::Warrior:
-	case ETBSUnitType::EnemyWarrior:
-		UnitNameText->SetText(FText::FromName(TEXT("戦士")));
-		break;
-	case ETBSUnitType::Slime:
-	case ETBSUnitType::EnemySlime:
-		UnitNameText->SetText(FText::FromName(TEXT("スライム")));
-		break;
-	case ETBSUnitType::Ranger:
-	case ETBSUnitType::EnemyRanger:
-		UnitNameText->SetText(FText::FromName(TEXT("レンジャー")));
-		break;
-	case ETBSUnitType::Bat:
-	case ETBSUnitType::EnemyBat:
-		UnitNameText->SetText(FText::FromName(TEXT("バット")));
-		break;
-	case ETBSUnitType::Chicken:
-	case ETBSUnitType::EnemyChicken:
-		UnitNameText->SetText(FText::FromName(TEXT("鳥")));
-		break;
-	case ETBSUnitType::Priest:
-	case ETBSUnitType::EnemyPriest:
-		UnitNameText->SetText(FText::FromName(TEXT("司祭")));
-		break;
-	case ETBSUnitType::EnemyTank:
-		UnitNameText->SetText(FText::FromName(TEXT("タンク")));
-		break;
-	}
+	UnitNameText->SetText(Unit->GetProperty().UnitName);
+	// switch (Unit->GetUnitType())
+	// {
+	// case ETBSUnitType::Warrior:
+	// case ETBSUnitType::EnemyWarrior:
+	// 	UnitNameText->SetText(FText::FromName(TEXT("戦士")));
+	// 	break;
+	// case ETBSUnitType::Slime:
+	// case ETBSUnitType::EnemySlime:
+	// 	UnitNameText->SetText(FText::FromName(TEXT("スライム")));
+	// 	break;
+	// case ETBSUnitType::Ranger:
+	// case ETBSUnitType::EnemyRanger:
+	// 	UnitNameText->SetText(FText::FromName(TEXT("レンジャー")));
+	// 	break;
+	// case ETBSUnitType::Bat:
+	// case ETBSUnitType::EnemyBat:
+	// 	UnitNameText->SetText(FText::FromName(TEXT("バット")));
+	// 	break;
+	// case ETBSUnitType::Chicken:
+	// case ETBSUnitType::EnemyChicken:
+	// 	UnitNameText->SetText(FText::FromName(TEXT("鳥")));
+	// 	break;
+	// case ETBSUnitType::Priest:
+	// case ETBSUnitType::EnemyPriest:
+	// 	UnitNameText->SetText(FText::FromName(TEXT("司祭")));
+	// 	break;
+	// case ETBSUnitType::EnemyTank:
+	// 	UnitNameText->SetText(FText::FromName(TEXT("タンク")));
+	// 	break;
+	// }
 	//AP
-	for(int  i = 0;i < 3;i++)
+	int i = 0;
+	for(;i < Unit->GetAP();i++)
 	{
 		APList[i]->SetVisibility(ESlateVisibility::Visible);
+	}
+	for(;i < 3;i++)
+	{
+		APList[i]->SetVisibility(ESlateVisibility::Hidden);
 	}
 	//HP
 	const float fHP = Unit->GetRuntimeProperty().HP;

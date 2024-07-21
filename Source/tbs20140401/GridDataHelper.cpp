@@ -44,6 +44,7 @@ bool UGridDataHelper::InstantiateGrid(const FGridInfoSave& MyGridData,AGrid* MyG
 	for (const FTileInfoSave& Tile : MyGridData.Tiles)
 	{
 		// UE_LOG(LogTemp,Log,TEXT("%d %d"),Tile.CellIndex.X,Tile.CellIndex.Y)
+		if(Tile.TypeOfCell == 0)continue;
 		FTileData NewTileData;
 		NewTileData.Index = Tile.CellIndex;
 		NewTileData.Height = Tile.Height;

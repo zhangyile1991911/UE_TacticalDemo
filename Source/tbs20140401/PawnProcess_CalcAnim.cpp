@@ -89,8 +89,12 @@ void UPawnProcess_CalcAnim::OnDeathCompleted()
 	{
 		for(int i = 0;i < Report.HitInfoList.Num();i++)
 		{
-			PawnInstance->GetMyCombatSystem()->RemoveUnitInCombat(Report.HitInfoList[i].Defender);
-			PawnInstance->OnRemoveUnit(Report.HitInfoList[i].Defender);
+			auto one = Report.HitInfoList[i].Defender;
+			if(one->IsDead())
+			{
+				PawnInstance->GetMyCombatSystem()->RemoveUnitInCombat(one);
+				PawnInstance->OnRemoveUnit(one);	
+			}
 		}
 	}
 	
@@ -135,6 +139,7 @@ bool UPawnProcess_CalcAnim::CheckDeath()
 			Report.HitInfoList[i].Defender->DoDeadAnim(DeathCompleted);
 			DeathNum++;
 			HasDead = true;
+			UE_LOG(LogTemp,Log,TEXT("UPawnProcess_CalcAnim::CheckDeath() %s"),*Report.HitInfoList[i].Defender->GetProperty().UnitName.ToString())
 		}
 	}
 	return !HasDead;

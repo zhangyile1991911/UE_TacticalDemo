@@ -804,7 +804,8 @@ bool AMyUnit::HasEnoughAP(int AP)const
 
 bool AMyUnit::ConsumeAP(int AP)
 {
-	if((MyRuntimeProperty.ActionPoint + APCorrection) >= AP)
+	const int TotalAP = MyRuntimeProperty.ActionPoint + APCorrection;
+	if(TotalAP >= AP)
 	{
 		if(APCorrection >= AP)
 		{

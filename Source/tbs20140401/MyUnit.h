@@ -324,6 +324,7 @@ public:
 	{
 		APCorrection = val;
 	}
+	int GetAP()const{return MyRuntimeProperty.ActionPoint + APCorrection;}
 
 	UMyGameInstance* GetGameInstance();
 };

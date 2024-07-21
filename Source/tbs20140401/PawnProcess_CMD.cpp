@@ -119,6 +119,7 @@ void UPawnProcess_CMD::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	CmdIndex = 0;
 	UnitInstance = PawnInstance->GetMyCombatSystem()->GetFirstUnit();
 	//GameUIの事例を取得します
+	PawnInstance->GetMyHUD()->ShowGameUI(true);
 	BottomActionBarInstance = PawnInstance->GetMyHUD()->GetGameUI();
 	//命令パネルを表示します
 	CmdWidgetInstance = BottomActionBarInstance->ShowCmdPanel(UnitInstance,CmdIndex);
