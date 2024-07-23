@@ -5,6 +5,7 @@
 
 #include "UnitData.h"
 #include "MyButtonList_Units.h"
+#include "MyGameInstance.h"
 #include "Components/TextBlock.h"
 #include "MyUnit.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
@@ -39,7 +40,40 @@ void UUGameUI_UnitBriefInfo::RefreshUnitBaseBriefInfo(TObjectPtr<AMyUnit> Unit)
 	LevelText->SetText(TmpLevel);
 	//Job
 	UnitNameText->SetText(Unit->GetProperty().UnitName);
-	// switch (Unit->GetUnitType())
+	
+	//AP
+	int i = 0;
+	for(;i < Unit->GetAP();i++)
+	{
+		APList[i]->SetVisibility(ESlateVisibility::Visible);
+	}
+	for(;i < 3;i++)
+	{
+		APList[i]->SetVisibility(ESlateVisibility::Hidden);
+	}
+	//HP
+	const float fHP = Unit->GetRuntimeProperty().HP;
+	const float fHPConfig = Unit->GetProperty().HP;
+	HPBar->SetPercent(fHP/fHPConfig);
+	
+	CurHPText->SetText(FText::FromString(FString::FormatAsNumber(fHP)));
+	MaxHPText->SetText(FText::FromString(FString::FormatAsNumber(fHPConfig)));
+}
+
+
+void UUGameUI_UnitBriefInfo::RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Defender,float HitPercent)
+{
+	FText TmpLevel = FText::Format(FText::FromString("LV.{0}"), FText::AsNumber(1));
+	LevelText->SetText(TmpLevel);
+	
+	UnitNameText->SetText(Defender->GetProperty().UnitName);
+	const FUnitData* UnitData = Defender->GetGameInstance()->GetUnitData(Defender->GetUnitType());
+	if(UnitData->Assets.JobIcon.IsValid() == false)
+	{
+		UnitData->Assets.JobIcon.LoadSynchronous();
+	}
+	UnitIcon->SetBrushFromTexture(UnitData->Assets.JobIcon.Get());
+	// switch (Defender->GetUnitType())
 	// {
 	// case ETBSUnitType::Warrior:
 	// case ETBSUnitType::EnemyWarrior:
@@ -68,63 +102,8 @@ void UUGameUI_UnitBriefInfo::RefreshUnitBaseBriefInfo(TObjectPtr<AMyUnit> Unit)
 	// case ETBSUnitType::EnemyTank:
 	// 	UnitNameText->SetText(FText::FromName(TEXT("タンク")));
 	// 	break;
+	// 	
 	// }
-	//AP
-	int i = 0;
-	for(;i < Unit->GetAP();i++)
-	{
-		APList[i]->SetVisibility(ESlateVisibility::Visible);
-	}
-	for(;i < 3;i++)
-	{
-		APList[i]->SetVisibility(ESlateVisibility::Hidden);
-	}
-	//HP
-	const float fHP = Unit->GetRuntimeProperty().HP;
-	const float fHPConfig = Unit->GetProperty().HP;
-	HPBar->SetPercent(fHP/fHPConfig);
-	
-	CurHPText->SetText(FText::FromString(FString::FormatAsNumber(fHP)));
-	MaxHPText->SetText(FText::FromString(FString::FormatAsNumber(fHPConfig)));
-}
-
-
-void UUGameUI_UnitBriefInfo::RefreshUnitBriefInfo(TObjectPtr<AMyUnit> Defender,float HitPercent)
-{
-	FText TmpLevel = FText::Format(FText::FromString("LV.{0}"), FText::AsNumber(1));
-	LevelText->SetText(TmpLevel);
-
-	switch (Defender->GetUnitType())
-	{
-	case ETBSUnitType::Warrior:
-	case ETBSUnitType::EnemyWarrior:
-		UnitNameText->SetText(FText::FromName(TEXT("戦士")));
-		break;
-	case ETBSUnitType::Slime:
-	case ETBSUnitType::EnemySlime:
-		UnitNameText->SetText(FText::FromName(TEXT("スライム")));
-		break;
-	case ETBSUnitType::Ranger:
-	case ETBSUnitType::EnemyRanger:
-		UnitNameText->SetText(FText::FromName(TEXT("レンジャー")));
-		break;
-	case ETBSUnitType::Bat:
-	case ETBSUnitType::EnemyBat:
-		UnitNameText->SetText(FText::FromName(TEXT("バット")));
-		break;
-	case ETBSUnitType::Chicken:
-	case ETBSUnitType::EnemyChicken:
-		UnitNameText->SetText(FText::FromName(TEXT("鳥")));
-		break;
-	case ETBSUnitType::Priest:
-	case ETBSUnitType::EnemyPriest:
-		UnitNameText->SetText(FText::FromName(TEXT("司祭")));
-		break;
-	case ETBSUnitType::EnemyTank:
-		UnitNameText->SetText(FText::FromName(TEXT("タンク")));
-		break;
-		
-	}
 	
 	for(int  i = 0;i < 3;i++)
 	{

@@ -43,7 +43,7 @@ protected:
 	virtual void NativeDestruct() override;
 
 public:
-	void RefreshCell(const FText& Name,int Cost,bool CanExecute);
+	void RefreshCell(const FText& Name,int Cost,bool CanExecute, const TSoftObjectPtr<UTexture2D>& Icon);
 	void DoSelected();
 	void DoUnSelected();
 	void HideContent();

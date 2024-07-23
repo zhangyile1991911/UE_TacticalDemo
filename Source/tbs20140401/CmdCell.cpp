@@ -26,7 +26,7 @@ void UCmdCell::NativeDestruct()
 	
 }
 
-void UCmdCell::RefreshCell(const FText& Name,int Cost,bool CanExecute)
+void UCmdCell::RefreshCell(const FText& Name,int Cost,bool CanExecute, const TSoftObjectPtr<UTexture2D>& Icon)
 {
 	for(TObjectPtr<UImage> ap : APList)
 	{
@@ -40,8 +40,13 @@ void UCmdCell::RefreshCell(const FText& Name,int Cost,bool CanExecute)
 	
 	AbilityName->SetText(Name);
 	AbilityName->SetVisibility(ESlateVisibility::Visible);
+	if(Icon.IsValid() == false)
+	{
+		Icon.LoadSynchronous();
+	}
 	AbilityIcon->SetVisibility(ESlateVisibility::Visible);
-
+	AbilityIcon->SetBrushFromTexture(Icon.Get());
+	
 	FSlateColor FontColor = FSlateColor(FLinearColor(1.0f,1.0f,1.0f));
 	if(!CanExecute)
 	{

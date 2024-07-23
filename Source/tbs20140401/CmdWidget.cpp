@@ -30,11 +30,11 @@ void UCmdWidget::RefreshUnitCmd(TObjectPtr<AMyUnit> Unit,bool bShowIdle)
 	{
 		if(ArrayOfAbility[i]->IsShowOnCmd() == false)continue;
 		if(ArrayOfAbility[i]->IsIdle() && !bShowIdle)continue;
-
+		
 		const bool bCanExecute = Unit->HasEnoughAP(ArrayOfAbility[i]->GetCost());
 		AbilityList[i]->RefreshCell(ArrayOfAbility[i]->GetAbilityName(),
 			ArrayOfAbility[i]->GetCost(),
-			bCanExecute);
+			bCanExecute,ArrayOfAbility[i]->GetSkillData().Icon);
 		AbilityList[i]->SetVisibility(ESlateVisibility::Visible);
 		AbilityNum++;
 	}

@@ -17,4 +17,7 @@ struct FUnitDataAsset:public FTableRowBase
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSoftObjectPtr<UTexture2D> Icon;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TSoftObjectPtr<UTexture2D> JobIcon;
 };

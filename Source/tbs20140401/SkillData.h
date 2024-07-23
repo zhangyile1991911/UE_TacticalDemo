@@ -35,4 +35,7 @@ struct FSkillData
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FText Description;//技能描述
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TSoftObjectPtr<UTexture2D> Icon;
 };

@@ -98,7 +98,8 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UCurveFloat> DeathCurve;
 
-	FUnitData MyData;
+	// UPROPERTY()
+	// FUnitData  MyData;
 	//属性相关
 	FUnitData_Stats MyStats;
 	FUnitProperty MyProperty;
