@@ -25,8 +25,8 @@ void AMy_PC::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	FInputModeGameOnly InputMode;
-	SetInputMode(InputMode);
+	// FInputModeGameOnly InputMode;
+	// SetInputMode(InputMode);
 	SetShowMouseCursor(true);
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{

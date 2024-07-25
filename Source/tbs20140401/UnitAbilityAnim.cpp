@@ -3,6 +3,7 @@
 
 #include "UnitAbilityAnim.h"
 #include "BattleReport.h"
+#include "Command.h"
 #include "Grid.h"
 #include "MyGridPathfinding.h"
 #include "MyUnit.h"
@@ -38,6 +39,15 @@ bool AUnitAbilityAnim::CheckTileDataHeight(const FTileData* TileDataPtr, AGrid* 
 void AUnitAbilityAnim::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+FRotator AUnitAbilityAnim::RotateAttackerToDefender(const FTransform& Attacker,const FTransform& Defender)
+{
+	FVector DefenderDir = Defender.GetLocation() - Attacker.GetLocation();
+	DefenderDir.Normalize();
+	const FRotator Rotator = DefenderDir.ToOrientationRotator();
+	UE_LOG(LogTemp,Log,TEXT("RotateAttackerToDefender %s"),*Rotator.ToString())
+	return Rotator;
 }
 
 

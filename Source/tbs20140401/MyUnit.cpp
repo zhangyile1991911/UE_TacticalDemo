@@ -826,62 +826,62 @@ int AMyUnit::AP() const
 	return MyRuntimeProperty.ActionPoint;
 }
 
-void AMyUnit::RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex)
-{
-	//计算方向 需要旋转角度
-	int DeltaX = FMath::Abs(StandIndex.X) - FMath::Abs(TargetIndex.X);
-	int DeltaY = FMath::Abs(StandIndex.Y) - FMath::Abs(TargetIndex.Y);
-	if(DeltaX == 0)
-	{//左右问题
-		if(NeedToMove())
-		{
-			StandIndex.Y < TargetIndex.Y ? TurnShadowRight() : TurnShadowLeft();
-		}
-		else
-		{
-			StandIndex.Y < TargetIndex.Y ? TurnRight() : TurnLeft();	
-		}
-		
-	}
-	else if(DeltaY == 0)
-	{//上下问题
-		if(NeedToMove())
-		{
-			StandIndex.X < TargetIndex.X ? TurnShadowForward() : TurnShadowBack();	
-		}
-		else
-		{
-			StandIndex.X < TargetIndex.X ? TurnForward() : TurnBack();
-		}
-		
-	}
-	else
-	{
-		if(DeltaX > DeltaY)
-		{//上下问题
-			if(NeedToMove())
-			{
-				StandIndex.X < TargetIndex.X ? TurnShadowForward() : TurnShadowBack();	
-			}
-			else
-			{
-				StandIndex.X < TargetIndex.X ? TurnForward() : TurnBack();
-			}
-			
-		}
-		else
-		{//左右问题
-			if(NeedToMove())
-			{
-				StandIndex.Y < TargetIndex.Y ? TurnShadowRight() : TurnShadowLeft();	
-			}
-			else
-			{
-				StandIndex.Y < TargetIndex.Y ? TurnRight() : TurnLeft();	
-			}
-		}
-	}
-}
+// void AMyUnit::RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex)
+// {
+// 	//计算方向 需要旋转角度
+// 	int DeltaX = FMath::Abs(StandIndex.X) - FMath::Abs(TargetIndex.X);
+// 	int DeltaY = FMath::Abs(StandIndex.Y) - FMath::Abs(TargetIndex.Y);
+// 	if(DeltaX == 0)
+// 	{//左右问题
+// 		if(NeedToMove())
+// 		{
+// 			StandIndex.Y < TargetIndex.Y ? TurnShadowRight() : TurnShadowLeft();
+// 		}
+// 		else
+// 		{
+// 			StandIndex.Y < TargetIndex.Y ? TurnRight() : TurnLeft();	
+// 		}
+// 		
+// 	}
+// 	else if(DeltaY == 0)
+// 	{//上下问题
+// 		if(NeedToMove())
+// 		{
+// 			StandIndex.X < TargetIndex.X ? TurnShadowForward() : TurnShadowBack();	
+// 		}
+// 		else
+// 		{
+// 			StandIndex.X < TargetIndex.X ? TurnForward() : TurnBack();
+// 		}
+// 		
+// 	}
+// 	else
+// 	{
+// 		if(DeltaX > DeltaY)
+// 		{//上下问题
+// 			if(NeedToMove())
+// 			{
+// 				StandIndex.X < TargetIndex.X ? TurnShadowForward() : TurnShadowBack();	
+// 			}
+// 			else
+// 			{
+// 				StandIndex.X < TargetIndex.X ? TurnForward() : TurnBack();
+// 			}
+// 			
+// 		}
+// 		else
+// 		{//左右问题
+// 			if(NeedToMove())
+// 			{
+// 				StandIndex.Y < TargetIndex.Y ? TurnShadowRight() : TurnShadowLeft();	
+// 			}
+// 			else
+// 			{
+// 				StandIndex.Y < TargetIndex.Y ? TurnRight() : TurnLeft();	
+// 			}
+// 		}
+// 	}
+// }
 
 void AMyUnit::DoDodgeAnim(const FIntPoint& FromIndex)
 {
@@ -943,6 +943,60 @@ int AMyUnit::GetMaxAtkDeviation() const
 }
 
 
+void AMyUnit::RotateTargetDirectType(EUnitDirectType DType)
+{
+	switch (DType)
+	{
+	case EUnitDirectType::LEFT:
+		if(NeedToMove())
+		{
+			TurnShadowLeft();
+		}
+		else
+		{
+			TurnLeft();
+		}
+		break;
+	case EUnitDirectType::RIGHT:
+		if(NeedToMove())
+		{
+			TurnShadowRight();
+		}
+		else
+		{
+			TurnRight();	
+		}
+		break;
+	case EUnitDirectType::FORWARD:
+		if(NeedToMove())
+		{
+			TurnShadowForward();
+		}
+		else
+		{
+			TurnForward();	
+		}
+		
+		break;
+	case EUnitDirectType::BACKWARD:
+		if(NeedToMove())
+		{
+			TurnShadowRight();
+		}
+		else
+		{
+			TurnBack();	
+		}
+		break;
+	case EUnitDirectType::INVALID:
+		if(NeedToMove())
+			TurnRight();
+		else
+			TurnShadowRight();
+		break;
+	}
+}
+
 void AMyUnit::TurnToTarget(AMyUnit* TargetUnit)
 {
 	if(TargetUnit == nullptr)return;
@@ -971,6 +1025,36 @@ void AMyUnit::TurnToTarget(AMyUnit* TargetUnit)
 		}
 	}
 }
+
+void AMyUnit::FaceToTarget(FVector WorldLocation)
+{
+	if(NeedToMove())
+	{
+		FVector Dir = WorldLocation - MyShadowUnit->GetActorLocation();
+		Dir.Normalize();
+		FRotator Rotator = Dir.ToOrientationRotator();
+		Rotator.Yaw -= 90;
+		Rotator.Pitch = 0;
+		Rotator.Roll = 0;
+		MyShadowUnit->SetActorRotation(Rotator);
+	}
+	else
+	{
+		FVector Dir = WorldLocation - GetActorLocation();
+		Dir.Normalize();
+		FRotator Rotator = Dir.ToOrientationRotator();
+		Rotator.Yaw -= 90;
+		Rotator.Pitch = 0;
+		Rotator.Roll = 0;
+		MySkeletalMeshComponent->SetRelativeRotation(Rotator);	
+	}
+	
+}
+
+// void AMyUnit::RotateUnit(FRotator Rotator)
+// {
+// 	MySkeletalMeshComponent->SetRelativeRotation(Rotator);
+// }
 
 float CalculateRotationAngle(FVector CurrentForward,FVector InitialDirection,FVector TargetDirection)
 {

@@ -81,6 +81,9 @@ public:
 	FAbilityComplete CompletedCallback;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintCallable)
+	FRotator RotateAttackerToDefender(const FTransform& Attacker,const FTransform& Defender);
 	//blueprintで実現する 
 	UFUNCTION(BlueprintImplementableEvent)
 	void DoAnimation(const FBattleReport& Report,AMy_Pawn* MyPawn);

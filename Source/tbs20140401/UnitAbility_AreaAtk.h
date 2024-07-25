@@ -11,6 +11,7 @@ class TBS20140401_API AUnitAbility_AreaAtk : public AUnitAbilityAnim
 {
 	GENERATED_BODY()
 
+	FVector TargetLocation;
 	// UPROPERTY()
 	// TObjectPtr<AMyGridPathfinding> MyGridPathfinding;
 public:

@@ -86,6 +86,11 @@ void UPawnProcess_CMD::ShowBriefInfo()
 		UnitBriefInfoPtr->ShowDetailInfoOnly(UnitInstance);
 		return;	
 	}
+	if(TargetUnit != nullptr)
+	{
+		UnitInstance->FaceToTarget(TargetUnit->GetActorLocation());	
+	}
+	
 	
 	const bool bHasWrap = UBattleFunc::HasWrapAttackUnit(UnitInstance,TargetUnit,PawnInstance->GetMyGrid()) != nullptr;
 	const bool bIsBack = UBattleFunc::IsBackAttack(UnitInstance,TargetUnit,
@@ -212,9 +217,16 @@ void UPawnProcess_CMD::ExitProcess()
 	
 	UnitBriefInfoPtr->SetVisibility(ESlateVisibility::Hidden);
 	BottomActionBarInstance = nullptr;
+
+	UnitInstance->RotateTargetDirectType(UnitInstance->GetUnitDirect());
+	if(!UnitInstance->NeedToMove())
+	{
+		UnitInstance->HideShadowUnit();	
+	}
 	
-	UnitInstance->HideShadowUnit();
 	UnitInstance = nullptr;
 
 	ClearAbilityRange();
+
+	
 }

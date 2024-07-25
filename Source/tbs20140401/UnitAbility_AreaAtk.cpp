@@ -100,11 +100,13 @@ TArray<FIntPoint> AUnitAbility_AreaAtk::Indicator(const FIntPoint& Index)
 bool AUnitAbility_AreaAtk::IsValidTarget(const FTileData* TileData,AGrid* MyGrid)
 {
 	if(TileData == nullptr)return false;
-	//スキルの範囲ないで、敵がなかったら　実行できない
+	//スキルの範囲内で、敵がなかったら　実行できない
+	if(TileData->UnitOnTile == nullptr)return false;
 	
 	const FIntPoint& StandIndex = OwnerInstance->GetStandGridIndex();
 	const FTileData* StandTileData = MyGrid->GetTileDataByIndex(StandIndex);
 	const bool bIsDeviation = CheckDeviation(TileData->Height,StandTileData->Height);
+	TargetLocation = TileData->Transform.GetLocation();
 	return bIsDeviation;
 }
 
@@ -149,7 +151,7 @@ FBattleReport AUnitAbility_AreaAtk::DoCalculation(const TArray<TObjectPtr<AMyUni
 {
 	FBattleReport Result;
 	Result.Attacker = OwnerInstance;
-	
+	Result.TargetLocation = TargetLocation;
 	for(int i = 0;i < Targets.Num();i++)
 	{
 		FHitInfo HitInfo;

@@ -71,6 +71,9 @@ struct FBattleReport
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int Damage;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	FVector TargetLocation;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FVector FirstIndex;

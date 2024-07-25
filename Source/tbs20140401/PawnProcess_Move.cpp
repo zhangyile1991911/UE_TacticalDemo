@@ -18,7 +18,13 @@
 void UPawnProcess_Move::UnitMoveToTarget()
 {
 	UnitInstance->WalkDone();
-	UnitInstance->RotateSelfByDestination(UnitInstance->GetGridIndex(),UnitInstance->GetAbilityTargetGridIndex());
+	// UnitInstance->RotateSelfByDestination(UnitInstance->GetGridIndex(),UnitInstance->GetAbilityTargetGridIndex());
+	FIntPoint TargetGridIndex = UnitInstance->GetAbilityTargetGridIndex();
+	const FTileData* TileDataP = PawnInstance->GetMyGrid()->GetTileDataByIndex(TargetGridIndex);
+	if(TileDataP != nullptr)
+	{
+		UnitInstance->FaceToTarget(TileDataP->Transform.GetLocation());
+	}
 	//计算转向
 	// const FIntPoint& TargetGridIndex = UnitInstance->GetAbilityTargetGridIndex();
 	// const FIntPoint& UnitGridIndex = UnitInstance->GetGridIndex();

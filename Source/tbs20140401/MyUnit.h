@@ -294,7 +294,7 @@ public:
 	bool ConsumeAP(int AP);
 	int AP()const;
 
-	void RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex);
+	// void RotateSelfByDestination(const FIntPoint& StandIndex,const FIntPoint& TargetIndex);
 
 	void DoDodgeAnim(const FIntPoint& FromIndex);
 	void DoDeadAnim(FDeathCompleted Completed);
@@ -316,6 +316,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TurnToTarget(AMyUnit* Unit);
 
+	UFUNCTION(BlueprintCallable)
+	void FaceToTarget(FVector WorldLocation);
+
+	void RotateTargetDirectType(EUnitDirectType DType);
+	// UFUNCTION(BlueprintCallable)
+	// void RotateUnit(FRotator Rotator);
+	
 	int GetHeightTolerance()const{return MyProperty.HeightTolerance;}
 	void SetAgilityCorrection(int val)
 	{

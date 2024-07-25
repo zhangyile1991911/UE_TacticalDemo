@@ -229,7 +229,7 @@ void UPawnProcess_ChooseTarget::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	const int StandHeight = PawnInstance->GetMyGrid()->GetTileDataByIndex(StandIndex)->Height;
 	CurrentCursor = PawnInstance->GetSelectedTile();
 
-	UnitInstance->RotateSelfByDestination(UnitInstance->GetTempDestinationGridIndex(),CurrentCursor);
+	// UnitInstance->RotateSelfByDestination(UnitInstance->GetTempDestinationGridIndex(),CurrentCursor);
 	
 	//显示攻击范围
 	ArrayOfAbilityRange = ChosenAbilityPtr->Range(UnitInstance->GetStandGridIndex());
@@ -360,14 +360,21 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 	}
 	CurrentCursor = next;
 		
-	UnitInstance->RotateSelfByDestination(UnitInstance->GetTempDestinationGridIndex(),CurrentCursor);
+	// UnitInstance->RotateSelfByDestination(UnitInstance->GetTempDestinationGridIndex(),CurrentCursor);
 	const TObjectPtr<AMyUnit> TempTarget = PawnInstance->GetMyGrid()->GetUnitOnTile(CurrentCursor);
 
 	CheckBackAttack(TempTarget);
 	CheckCooperateAttack(TempTarget);
-	
-	
 
+	if(TempTarget != nullptr)
+	{
+		UnitInstance->FaceToTarget(TempTarget->GetActorLocation());
+	}
+	else
+	{
+		UnitInstance->FaceToTarget(TileDataPtr->Transform.GetLocation());
+	}
+	
 	ShowTargetUnitBriefInfo(CurrentCursor);
 }
 
@@ -445,6 +452,9 @@ void UPawnProcess_ChooseTarget::ExitProcess()
 	bIsTab = false;
 	
 	PawnInstance->OnCameraActing.RemoveDynamic(this,&UPawnProcess_ChooseTarget::SubscribeCameraActing);
+
+	
+	UnitInstance->RotateTargetDirectType(UnitInstance->GetUnitDirect());
 }
 
 void UPawnProcess_ChooseTarget::HandleLeftInput()
