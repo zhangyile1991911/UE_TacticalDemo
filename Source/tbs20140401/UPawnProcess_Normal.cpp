@@ -135,6 +135,7 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 		FUnitPathFindingCompleted Completed;
 		Completed.BindUObject(this,&UUPawnProcess_Normal::ShowWalkPath);
 		UnitInstance->GetPathComponent()->UnitFindPathAsync(CurrentCursor,Completed);
+		
 	}
 	else
 	{
@@ -142,7 +143,7 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 	}
 	//更新威胁格子
 	CheckMoveToDangerousRange(Previous,CurrentCursor);
-
+	
 	ShowOtherUnitRange(Next);
 	
 	ShowTargetUnitBriefInfo(CurrentCursor);
@@ -394,7 +395,7 @@ void UUPawnProcess_Normal::CheckMoveToDangerousRange(const FIntPoint& Previous,c
 	if(Previous == Current)return;
 	if(UnitInstance->GetPathComponent()->IsMoveInReachableTiles(Current))
 	{
-		//今回の移動は敵の移動範囲を踏むと　敵の移動範囲をやり直す
+		//今回の移動は敵の移動範囲を踏むと　敵の移動範囲を計算し直す
 		for(int i = 0;i < ThreatenEnemies.Num();i++)
 		{
 			const auto EnemyPtr = ThreatenEnemies[i];
@@ -408,34 +409,42 @@ void UUPawnProcess_Normal::CheckMoveToDangerousRange(const FIntPoint& Previous,c
 				EnemyPtr->GetPathComponent()->UnitWalkablePathAsync(UnitInstance->GetUniqueID(),Cal);
 			}
 		}
-		bIsRestore = false;
+		// bIsRestore = false;
 	}
 	else
 	{
-		if(bIsRestore)return;
-		//当选择的格子走出了 可移动范围，那么威胁格子就还原成最初的范围
-		ThreatenEnemies = PawnInstance->GetMyCombatSystem()->GetThreatenEnemies(UnitInstance);
-	
+		ClearDangerousTiles();
 		for(int i = 0;i < ThreatenEnemies.Num();i++)
 		{
 			const auto Enemy = ThreatenEnemies[i];
-		
-			const auto& r = Enemy->GetPathComponent()->GetTurnReachableTiles();
-			DangerousTiles.Append(r.Intersect(UnitInstance->GetPathComponent()->GetReachableTiles()));	
-		
-			const auto& a = Enemy->GetPathComponent()->GetTurnAssaultRangeTiles();
-			DangerousTiles.Append(a.Intersect(UnitInstance->GetPathComponent()->GetReachableTiles()));	
+			Enemy->GetPathComponent()->ResetReachableTiles();
 		}
-
-		for(const auto& one : DangerousTiles)
-		{
-			PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::DangerousRange);
-		}
-		bIsRestore = true;
+		CheckDangerousRange();
+		// if(bIsRestore)return;
+		// //当选择的格子走出了 可移动范围，那么威胁格子就还原成最初的范围
+		// ThreatenEnemies = PawnInstance->GetMyCombatSystem()->GetThreatenEnemies(UnitInstance);
+		//
+		// for(int i = 0;i < ThreatenEnemies.Num();i++)
+		// {
+		// 	const auto Enemy = ThreatenEnemies[i];
+		//
+		// 	const auto& r = Enemy->GetPathComponent()->GetTurnReachableTiles();
+		// 	DangerousTiles.Append(r.Intersect(UnitInstance->GetPathComponent()->GetReachableTiles()));	
+		//
+		// 	const auto& a = Enemy->GetPathComponent()->GetTurnAssaultRangeTiles();
+		// 	DangerousTiles.Append(a.Intersect(UnitInstance->GetPathComponent()->GetReachableTiles()));	
+		// }
+		//
+		// for(const auto& one : DangerousTiles)
+		// {
+		// 	PawnInstance->GetMyGrid()->AddStateToTile(one,ETileState::DangerousRange);
+		// }
+		// bIsRestore = true;
+		if(Calucating <= 0)
+			CheckDangerousLine();
 	}
 	
-	if(Calucating <= 0)
-		CheckDangerousLine();
+	
 }
 
 void UUPawnProcess_Normal::WaitCalculating()
@@ -571,9 +580,20 @@ void UUPawnProcess_Normal::CheckDangerousLine()
 			Infos.Add(FThreatenInfo{Enemy->GetActorLocation(),TileDataPtr->Transform.GetLocation()});
 			continue;
 		}
+		const auto& r2 = Enemy->GetPathComponent()->GetReachableTiles();
+		if(r2.Contains(CurrentCursor))
+		{
+			Infos.Add(FThreatenInfo{Enemy->GetActorLocation(),TileDataPtr->Transform.GetLocation()});
+			continue;
+		}
 		
 		const auto& a = Enemy->GetPathComponent()->GetTurnAssaultRangeTiles();
 		if(a.Contains(CurrentCursor))
+		{
+			Infos.Add(FThreatenInfo{Enemy->GetActorLocation(),TileDataPtr->Transform.GetLocation()});
+		}
+		const auto& a2 = Enemy->GetPathComponent()->GetAssaultRangeTiles();
+		if(a2.Contains(CurrentCursor))
 		{
 			Infos.Add(FThreatenInfo{Enemy->GetActorLocation(),TileDataPtr->Transform.GetLocation()});
 		}

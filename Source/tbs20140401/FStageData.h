@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Dialogue.h"
 #include "UnitData.h"
 #include "FStageData.generated.h"
 
@@ -15,6 +16,8 @@ struct FStageData:public FTableRowBase
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FText StageLevelName;
 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TSoftObjectPtr<UDialogue> ResOfDialogue;
 	//行動優先度補正
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TMap<ETBSUnitType,int> UnitPriorityCorrection;

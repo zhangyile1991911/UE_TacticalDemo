@@ -678,6 +678,17 @@ void AMyUnit::SetChosenAbility(int ChosenIndex)
 	ChosenAbilityIndex = FMathf::Clamp(ChosenIndex,0,OwnAbilityAnimList.Num()-1);
 }
 
+void AMyUnit::SetChosenIdleAbility()
+{
+	for(int i = 0;i < OwnAbilityAnimList.Num();i++)
+	{
+		if(OwnAbilityAnimList[i]->IsIdle())
+		{
+			ChosenAbilityIndex = i;
+		}
+	}
+}
+
 TObjectPtr<AUnitAbilityAnim> AMyUnit::GetCooperationAbilityAnim()
 {
 	for(auto one : OwnAbilityAnimList)
@@ -781,11 +792,13 @@ void AMyUnit::BeforeStartTurn()
 	MyRuntimeProperty.ActionPoint = FMathf::Clamp(MyRuntimeProperty.ActionPoint,0,3);
 }
 
-void AMyUnit::FinishTurn(bool bAsync)
+void AMyUnit::FinishTurn()
 {
 	CurrentDistanceToAction = 0;
-	//提前计算 单位的攻击范围 因为当前单位已经不会在移动了所以 攻击范围就是固定的
-	//このオブジェクトも移動できないんです、だから　攻撃の範囲は決めつけてて非同期で計算しておきます
+}
+
+void AMyUnit::CalcUnitArea(bool bAsync)
+{
 	if(bAsync)
 	{
 		FUnitWalkRangeCompleted xxx;
@@ -885,27 +898,42 @@ int AMyUnit::AP() const
 
 void AMyUnit::DoDodgeAnim(const FIntPoint& FromIndex)
 {
-	DodgeIndex = GridIndex;
-	DodgeIndex = GridIndex;
-	int DeltaX = GridIndex.X - FromIndex.X;
-	int DeltaY = GridIndex.Y - FromIndex.Y;
-	bool IsUpDown = FMath::RandBool();
-	if(DeltaX == 0)
+	FIntPoint Tmp = GridIndex;
+	FIntPoint PassByDir = GridIndex - FromIndex;
+	TArray<FIntPoint> Direction{{1,0},{0,-1},{-1,0},{0,1}};
+	Direction.Remove(PassByDir);
+	
+	for(int i = 0; i < Direction.Num();i++)
 	{
-		if(IsUpDown)DodgeIndex.X += 1;
-		else DodgeIndex.X -= 1;
+		Tmp = GridIndex+Direction[i];
+		if(Tmp == FromIndex)continue;
+
+		const auto TileDataP = MyGrid->GetTileDataByIndex(Tmp);
+		if(TileDataP == nullptr)continue;
 		
+		DodgeIndex = Tmp;
+		break;
 	}
-	else if(DeltaY == 0)
-	{
-		if(IsUpDown)DodgeIndex.Y += 1;
-		else DodgeIndex.Y -= 1;
-	}
-	else if(DeltaX > 0)
-	{
-		if(IsUpDown)DodgeIndex.X += 1;
-		else DodgeIndex.X -= 1;
-	}
+	// DodgeIndex = GridIndex;
+	// int DeltaX = GridIndex.X - FromIndex.X;
+	// int DeltaY = GridIndex.Y - FromIndex.Y;
+	// bool IsUpDown = FMath::RandBool();
+	// if(DeltaX == 0)
+	// {
+	// 	if(IsUpDown)DodgeIndex.X += 1;
+	// 	else DodgeIndex.X -= 1;
+	// 	
+	// }
+	// else if(DeltaY == 0)
+	// {
+	// 	if(IsUpDown)DodgeIndex.Y += 1;
+	// 	else DodgeIndex.Y -= 1;
+	// }
+	// else if(DeltaX > 0)
+	// {
+	// 	if(IsUpDown)DodgeIndex.X += 1;
+	// 	else DodgeIndex.X -= 1;
+	// }
 	UE_LOG(LogTemp,Log,TEXT("DodgeMovement.PlayFromStart()"))
 	DodgeMovement.PlayFromStart();
 }

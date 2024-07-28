@@ -6,11 +6,15 @@
 #include "GameLoadingWidget.h"
 #include "GameOverWidget.h"
 
-void UGameSystemPanel::ShowLoading()
+void UGameSystemPanel::ShowLoading(int LevelNum)
 {
 	this->SetVisibility(ESlateVisibility::Visible);
 	GameLoading->SetVisibility(ESlateVisibility::Visible);
 	GameLoading->PlayLoading();
+	if(LevelNum == 1)
+	{
+		GameLoading->ShowTutorial();
+	}
 }
 
 void UGameSystemPanel::HideLoading()
@@ -18,6 +22,7 @@ void UGameSystemPanel::HideLoading()
 	GameLoading->SetVisibility(ESlateVisibility::Hidden);
 	GameLoading->StopBlink();
 	GameLoading->StopLoading();
+	GameLoading->HideTutorial();
 	// GameLoading->StopAllAnimations();
 	this->SetVisibility(ESlateVisibility::Hidden);
 }

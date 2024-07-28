@@ -429,7 +429,10 @@ void UUnitPathComponent::UnitWalkablePath(uint32 CurrentTurnUnitUniqueId,bool bI
 				auto c = AddPathFindingData(&CenterDataRef,Element);
 				if(c.CostFromStart <= ParentPtr->GetMove()*GridCost)
 				{
-					// UE_LOG(LogTemp,Log,TEXT("添加格子 X = %d Y = %d"),center.X,center.Y);
+					if(ParentPtr->GetUnitType() == ETBSUnitType::Warrior)
+					{
+						UE_LOG(LogTemp,Log,TEXT("ETBSUnitType::Warrior add cell X = %d Y = %d"),Element.X,Element.Y);	
+					}
 					ReachableTiles.Add(Element);
 					DiscoveredTileIndexes.Add(Element);
 				}
@@ -469,6 +472,7 @@ void UUnitPathComponent::UnitWalkablePathAsync(uint32 CurrentTurnUnitUniqueId,FU
 {
 	Async(EAsyncExecution::TaskGraphMainThread,[this,CurrentTurnUnitUniqueId,Completed]()
 	{
+		UE_LOG(LogTemp,Log,TEXT("UnitWalkablePathAsync %d"),this->ParentPtr->GetUnitType())
 		UnitWalkablePath(CurrentTurnUnitUniqueId,true);
 		if(Completed.IsBound())
 		{
@@ -496,6 +500,14 @@ bool UUnitPathComponent::IsAssaultRangeTiles(const FIntPoint& one) const
 	if(TurnAssaultRangeTiles.Contains(one))
 		return true;
 	return false;
+}
+
+void UUnitPathComponent::ResetReachableTiles()
+{
+	ReachableMap.Empty();
+	ReachableMap = TurnReachableMap;
+	AssaultRangeTiles.Empty();
+	AssaultRangeTiles = TurnAssaultRangeTiles;
 }
 
 void UUnitPathComponent::AddAssaultRange(const FIntPoint& Point,bool bIsTemp)

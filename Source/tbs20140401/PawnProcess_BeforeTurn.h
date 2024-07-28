@@ -6,6 +6,7 @@
 #include "PawnProcess.h"
 #include "PawnProcess_BeforeTurn.generated.h"
 
+class UMyGameInstance;
 /**
  * 
  */
@@ -14,6 +15,10 @@ class TBS20140401_API UPawnProcess_BeforeTurn : public UPawnProcess
 {
 	GENERATED_BODY()
 
+	UPROPERTY()
+	UMyGameInstance* GameInstance;
+
+	int ReadStoryNum = 0;
 public:
 
 protected:

@@ -16,7 +16,7 @@ struct FStageData;
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class TBS20140401_API UMyGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
@@ -38,5 +38,6 @@ public:
 	FUnitData* GetUnitData(const ETBSUnitType unitType);
 	FWeaponData* GetWeaponData(FName WeaponId);
 	FUnitColorDataAsset* GetUnitDataColor(const ETBSUnitType unitType);
-	FStageData* GetStageData(int i);
+	UFUNCTION(BlueprintCallable)
+	FStageData GetStageData(int i);
 };

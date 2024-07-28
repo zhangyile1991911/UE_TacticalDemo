@@ -41,7 +41,7 @@ protected:
 	int Calucating = 0;
 	int CmdIndex = 0;
 	bool bIsTab = false;
-	bool bIsRestore = false;
+	// bool bIsRestore = false;
 	bool bIsFocus = false;
 protected:
 	void ClearPathFinding();

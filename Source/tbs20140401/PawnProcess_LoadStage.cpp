@@ -17,9 +17,9 @@
 void UPawnProcess_LoadStage::InstantiateGrid()
 {
 	int LevelNum = PawnInstance->GetStageLevelNum();
-	FStageData* StageData = GameInstance->GetStageData(LevelNum);
+	FStageData StageData = GameInstance->GetStageData(LevelNum);
 	const FString Path = FString::Format(TEXT("{0}{1}"),
-	{FPaths::ProjectDir(),StageData->StageDataPath.ToString()});
+	{FPaths::ProjectDir(),StageData.StageDataPath.ToString()});
 	FGridInfoSave MyGridData;
 	const bool bIsSuccess = UGridDataHelper::LoadGridFromJson(MyGridData, Path);
 	if(!bIsSuccess)
@@ -36,13 +36,13 @@ void UPawnProcess_LoadStage::InstantiateGrid()
 	{
 		PawnInstance->SwitchToLoadFailed();
 	}
-	for(auto Pair : StageData->UnitPriorityCorrection)
+	for(auto Pair : StageData.UnitPriorityCorrection)
 	{
 		auto MyUnit =	PawnInstance->GetMyCombatSystem()->GetUnitByType(Pair.Key);	
 		if(MyUnit == nullptr)continue;
 		MyUnit->SetAgilityCorrection(Pair.Value);
 	}
-	for(auto Pair : StageData->UnitAPCorrection)
+	for(auto Pair : StageData.UnitAPCorrection)
 	{
 		auto MyUnit =	PawnInstance->GetMyCombatSystem()->GetUnitByType(Pair.Key);	
 		if(MyUnit == nullptr)continue;
@@ -68,7 +68,16 @@ void UPawnProcess_LoadStage::HandleConfirmInput()
 	if(bIsLoaded)
 	{
 		GameSystemPanel->HideLoading();
-		PawnInstance->SwitchToBeforeTurn();
+		// StageData.ResOfDialogue.LoadSynchronous();
+		// if(StageData.ResOfDialogue.IsValid())
+		// {
+		// 	PawnInstance->SwitchToTellStory();	
+		// }
+		// else
+		// {
+			PawnInstance->SwitchToBeforeTurn();	
+		// }
+		
 	}
 	
 }
@@ -80,9 +89,9 @@ void UPawnProcess_LoadStage::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	UE_LOG(LogTemp,Log,TEXT("PackageGameDebug UPawnProcess_LoadStage::EnterProcess"))
 	GameInstance = Cast<UMyGameInstance>(GetWorld()->GetGameInstance());
 	GameSystemPanel = PawnInstance->GetMyHUD()->GetGameSystemPanel();
-	GameSystemPanel->ShowLoading();
 	
 	int LevelNum = PawnInstance->GetStageLevelNum();
+	GameSystemPanel->ShowLoading(LevelNum);
 	
     bIsLoaded = false;
 	
@@ -91,9 +100,9 @@ void UPawnProcess_LoadStage::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	LatentInfo.ExecutionFunction = FName("OnLevelLoaded");
 	LatentInfo.Linkage = 0;
 	LatentInfo.UUID = __LINE__; // 确保每次调用都有唯一的UUID
-	FStageData* Data = GameInstance->GetStageData(LevelNum);
+	FStageData Data = GameInstance->GetStageData(LevelNum);
 	UGameplayStatics::LoadStreamLevel(GetWorld(),
-		FName(Data->StageLevelName.ToString()),
+		FName(Data.StageLevelName.ToString()),
 		true,
 		false
 		,LatentInfo);

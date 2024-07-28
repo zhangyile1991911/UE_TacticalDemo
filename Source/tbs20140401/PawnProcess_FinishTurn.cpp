@@ -27,8 +27,8 @@ void UPawnProcess_FinishTurn::ClearCurrentStage()
 	LatentInfo.Linkage = 0;
 	LatentInfo.UUID = __LINE__; // 确保每次调用都有唯一的UUID
 	
-	FStageData* Data = GameInstance->GetStageData(LevelNum);
-	UGameplayStatics::UnloadStreamLevel(GetWorld(),FName(Data->StageLevelName.ToString()),LatentInfo,false);
+	FStageData Data = GameInstance->GetStageData(LevelNum);
+	UGameplayStatics::UnloadStreamLevel(GetWorld(),FName(Data.StageLevelName.ToString()),LatentInfo,false);
 }
 
 void UPawnProcess_FinishTurn::OnLevelUnloaded()
@@ -67,7 +67,7 @@ void UPawnProcess_FinishTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	{//只剩下一個隊伍
 		UE_LOG(LogTemp,Log,TEXT("当前关卡结束"))
 		GameSystemPanel = PawnInstance->GetMyHUD()->GetGameSystemPanel();
-		GameSystemPanel->ShowLoading();
+		GameSystemPanel->ShowLoading(PawnInstance->GetStageLevelNum());
 		ClearCurrentStage();
 	}
 	else

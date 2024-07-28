@@ -133,7 +133,7 @@ void APathPointInst::ShowPathPoint(const TArray<FIntPoint>& Path, TObjectPtr<AGr
 			tf.SetScale3D(FVector(0.35f,0.35f,0.1f));
 			
 			int InstIndex = TakeMeshInstIndex();
-			UE_LOG(LogTemp,Log,TEXT("for(int p = 0;p < PointNum;p++) %s %d"),*Position.ToString(),InstIndex)
+			// UE_LOG(LogTemp,Log,TEXT("for(int p = 0;p < PointNum;p++) %s %d"),*Position.ToString(),InstIndex)
 			InstancedStaticMeshComponent->UpdateInstanceTransform(InstIndex,tf,true,false);	
 		}
 	}
@@ -142,7 +142,7 @@ void APathPointInst::ShowPathPoint(const TArray<FIntPoint>& Path, TObjectPtr<AGr
 	const FIntPoint& Last = Path.Last();
 	FVector Position = MyGrid->GetTileLocationFromGridIndex(Last);
 	Position.Z += 20;
-	UE_LOG(LogTemp,Log,TEXT("最後の道印を置く %s %d"),*Position.ToString(),InstIndex)
+	// UE_LOG(LogTemp,Log,TEXT("最後の道印を置く %s %d"),*Position.ToString(),InstIndex)
 	// Position += Dir * PointGap;
 	FTransform tf;
 	tf.SetLocation(Position);

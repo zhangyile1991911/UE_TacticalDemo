@@ -141,9 +141,12 @@ void UPawnProcess_Idle::HandleConfirmInput()
 	}
 	else
 	{
+		//清理掉当前选中的格子
+		PawnInstance->RemoveCurrentSelectedTile();
 		// PawnInstance->SwitchToBeforeTurn();
 		PawnInstance->SwitchToFinishTurn();
 	}
+
 }
 
 void UPawnProcess_Idle::ExitProcess()

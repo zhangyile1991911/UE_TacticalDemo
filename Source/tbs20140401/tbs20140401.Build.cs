@@ -8,9 +8,9 @@ public class tbs20140401 : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" ,"EnhancedInput","UMG","Slate", "SlateCore", "Json","JsonUtilities"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" ,"EnhancedInput","UMG","Slate", "SlateCore", "Json","JsonUtilities","DialogueTreeRuntime"});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "DialogueTreeRuntime" });
+		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

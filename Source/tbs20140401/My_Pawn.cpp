@@ -14,6 +14,7 @@
 #include "Grid.h"
 #include "MyAction.h"
 #include "MyCombatSystem.h"
+#include "MyGameInstance.h"
 #include "MyGameMode.h"
 #include "MyGridPathfinding.h"
 #include "MyUnit.h"
@@ -149,7 +150,7 @@ void AMy_Pawn::DelayStartGame()
 	UE_LOG(LogTemp,Log,TEXT("AMy_Pawn::DelayStartGame() clear TimerStartGameHandle %s"),*TimerStartGameHandle.ToString())
 	GetWorld()->GetTimerManager().ClearTimer(TimerStartGameHandle);
 	
-	GameSystemPanel->ShowLoading();
+	GameSystemPanel->ShowLoading(1);
 	
 	// MyHUDInstance->ShowGameUI(true);
 	SetSelectedActions(nullptr,nullptr);
@@ -351,6 +352,11 @@ void AMy_Pawn::UpdateTileStatusByIndex(const FIntPoint& index, ETileState state)
 void AMy_Pawn::RemoveTileStateByIndex(const FIntPoint& index, ETileState state)
 {
 	MyGrid->RemoveStateFromTile(index,state);
+}
+
+void AMy_Pawn::RemoveCurrentSelectedTile()
+{
+	RemoveTileStateByIndex(SelectedTile,ETileState::Selected);
 }
 
 void AMy_Pawn::SetSelectedActions(UClass* left, UClass* right)
@@ -590,7 +596,7 @@ void AMy_Pawn::UpdateTileTypeUnderCursor(FIntPoint index)
 
 TObjectPtr<AStoryTeller> AMy_Pawn::GetMyStoryTeller()
 {
-	if(MyStoryTeller == nullptr)
+	if(MyStoryTeller != nullptr)
 	{
 		return MyStoryTeller;
 	}

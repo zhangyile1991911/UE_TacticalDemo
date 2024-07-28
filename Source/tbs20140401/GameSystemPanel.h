@@ -22,7 +22,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UGameOverWidget> GameOver;
 public:
-	void ShowLoading();
+	void ShowLoading(int LevelNum);
 	void HideLoading();
 	void WaitingEnter();
 	void ShowGameOver();

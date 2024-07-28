@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FStageData.h"
 #include "PawnProcess.h"
 #include "PawnProcess_LoadStage.generated.h"
 
@@ -25,6 +26,7 @@ protected:
 	UPROPERTY()
 	UMyGameInstance* GameInstance;
 
+	// FStageData StageData;
 	void InstantiateGrid();
 	UFUNCTION()
 	void OnLevelLoaded();

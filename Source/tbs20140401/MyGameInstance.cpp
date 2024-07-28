@@ -131,7 +131,7 @@ FUnitColorDataAsset* UMyGameInstance::GetUnitDataColor(const ETBSUnitType unitTy
 	return row;
 }
 
-FStageData* UMyGameInstance::GetStageData(int i)
+FStageData UMyGameInstance::GetStageData(int i)
 {
 	if(LoadedStageDataTable == nullptr)
 	{
@@ -142,5 +142,5 @@ FStageData* UMyGameInstance::GetStageData(int i)
 
 	FString RowName = FString::Format(TEXT("{0}"),{i});
 	FStageData* row = LoadedStageDataTable->FindRow<FStageData>(FName(RowName),"");
-	return row;
+	return *row;
 }

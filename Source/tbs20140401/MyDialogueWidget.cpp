@@ -5,15 +5,16 @@
 
 #include "MyCombatSystem.h"
 #include "My_Pawn.h"
-#include "StoryTeller.h"
 
 AMyUnit* UMyDialogueWidget::GetSpeakerUnit()
 {
 	if(MyPawn == nullptr)
 	{
-		auto PlayerController = GetWorld()->GetFirstPlayerController();
-		auto Pawn = PlayerController->GetPawn();
+		const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		APawn* Pawn = PlayerController->GetPawnOrSpectator();
+		// APawn* Pawn = PlayerController->GetPawn();
 		MyPawn = Cast<AMy_Pawn>(Pawn);
+		// return MyPawn->GetMyCombatSystem()->GetFirstUnit();
 	}
 	return MyPawn->GetMyCombatSystem()->GetFirstUnit();
 }

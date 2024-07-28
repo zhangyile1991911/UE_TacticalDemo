@@ -201,6 +201,7 @@ void UPawnProcess_CMD::HandleConfirmInput()
 
 void UPawnProcess_CMD::HandleSpaceInput()
 {
+	UnitInstance->SetChosenIdleAbility();
 	PawnInstance->SwitchToIdle();
 }
 

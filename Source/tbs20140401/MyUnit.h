@@ -254,6 +254,7 @@ public:
 	const TArray<TObjectPtr<AUnitAbilityAnim>>& GetOwnAbilityList()const{return OwnAbilityAnimList;}
 	int GetSelectableAbilityNum();
 	void SetChosenAbility(int ChosenIndex);
+	void SetChosenIdleAbility();
 	// TObjectPtr<UUnitAbility> GetChosenAbility(){return OwnAbilityList[ChosenAbilityIndex];}
 	TObjectPtr<AUnitAbilityAnim> GetChosenAbilityAnim(){return OwnAbilityAnimList[ChosenAbilityIndex];}
 	
@@ -288,7 +289,8 @@ public:
 	bool HasAttackDone()const{return AtkNum != MyProperty.AtkCount;}
 	//タン始まる前に　計算やプロパティリなどセットする
 	void BeforeStartTurn();
-	void FinishTurn(bool bAsync);
+	void FinishTurn();
+	void CalcUnitArea(bool bAsync);
 
 	bool HasEnoughAP(int AP)const;
 	bool ConsumeAP(int AP);

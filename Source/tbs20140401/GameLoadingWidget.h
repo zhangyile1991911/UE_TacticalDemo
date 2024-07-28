@@ -31,15 +31,23 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UImage> PC;
+
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UImage> Tutorial;
 	
 	UPROPERTY(Transient,meta=(BindWidgetAnim))
 	TObjectPtr<UWidgetAnimation> Loading;
 
 	UPROPERTY(Transient,meta=(BindWidgetAnim))
 	TObjectPtr<UWidgetAnimation> Blink;
+protected:
+	virtual void NativeConstruct() override;
 public:
 	void PlayLoading();
 	void StopLoading();
 	void PlayBlink();
 	void StopBlink();
+	void ShowTutorial();
+	void HideTutorial();
+	
 };

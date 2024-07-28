@@ -165,7 +165,7 @@ protected:
 	ECameraDirectType CameraDirect = ECameraDirectType::FORWARD;
 	
 	bool bHasReadStory = false;
-
+	UPROPERTY(BlueprintReadOnly)
 	int StageLevelNum = 1;
 
 	bool bIsDelayStartGame = false;
@@ -206,6 +206,7 @@ public:
 	ETBSUnitType CurrentSelectedUnitType;
 	UPROPERTY(BlueprintReadOnly)
 	bool IsStartGame = false;
+	
 	int GetStageLevelNum()const{return StageLevelNum;}
 	void NextStageLevel(){StageLevelNum++;}
 protected:
@@ -237,6 +238,7 @@ public:
 	void RemoveTileStateByIndex(const FIntPoint& index,ETileState state);
 	const FIntPoint& GetHoveredTile() const {return HoveredTile;}
 	const FIntPoint& GetSelectedTile() const {return SelectedTile;}
+	void RemoveCurrentSelectedTile();
 	// void SetSelectedTile(const FIntPoint& point){SelectedTile = point;}
 	void SetSelectedActions(UClass* left,UClass* right);
 	void AddNewTileUnderCursor();

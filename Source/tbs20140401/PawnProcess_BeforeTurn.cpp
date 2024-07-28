@@ -2,9 +2,12 @@
 
 
 #include "PawnProcess_BeforeTurn.h"
+
+#include "FStageData.h"
 #include "My_Pawn.h"
 #include "MyCombatSystem.h"
 #include "MyUnit.h"
+#include "MyGameInstance.h"
 
 
 void UPawnProcess_BeforeTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
@@ -15,26 +18,58 @@ void UPawnProcess_BeforeTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	const auto MyCombatSystem = PawnInstance->GetMyCombatSystem();
 	// const auto MyPathFinding = PawnInstance->GetMyGridPathFinding();
 	const auto PreUnit = MyCombatSystem->GetFirstUnit();
-	if(PreUnit == nullptr)
-	{//PreUnitが何も指し示さない場合なら　始めてということ
-		//すべてのオブジェクトの攻撃の範囲計算しておこうと思うんです
-		auto AllUnit = MyCombatSystem->GetAllUnits();
-		for(auto one : AllUnit)
+	const bool IsFirstTurn = PreUnit == nullptr;
+
+	TArray<TObjectPtr<AMyUnit>> AllUnit = MyCombatSystem->GetAllUnits();
+	for(auto one : AllUnit)
+	{
+		if(one->IsDead() == false)
 		{
-			one->FinishTurn(false);
+			UE_LOG(LogTemp,Log,TEXT("UPawnProcess_BeforeTurn::EnterProcess %d"),one->GetUnitType());
+			one->CalcUnitArea(false);
 		}
 	}
-	else
+	if(!IsFirstTurn)
 	{
-		PreUnit->FinishTurn(true);
+		PreUnit->FinishTurn();
 	}
+	// if(PreUnit == nullptr)
+	// {//PreUnitが何も指し示さない場合なら　始めてということ
+	// 	//すべてのオブジェクトの攻撃の範囲計算しておこうと思うんです
+	// 	auto AllUnit = MyCombatSystem->GetAllUnits();
+	// 	for(auto one : AllUnit)
+	// 	{
+	// 		one->FinishTurn(false);
+	// 	}
+	// }
+	// else
+	// {
+	// 	PreUnit->FinishTurn(true);
+	// }
 	
 	auto Unit = MyCombatSystem->SortActionPriority();
 	if(Unit == nullptr)return;
 	Unit->BeforeStartTurn();
 	
 	PawnInstance->UpdateTileStatusByIndex(Unit->GetGridIndex(),ETileState::Selected);
-
+	
+	if(GameInstance == nullptr)
+	{
+		GameInstance = Cast<UMyGameInstance>(GetWorld()->GetGameInstance());
+	}
+	
+	int LevelNum = PawnInstance->GetStageLevelNum();
+	FStageData StageData = GameInstance->GetStageData(LevelNum);
+	StageData.ResOfDialogue.LoadSynchronous();
+	if(StageData.ResOfDialogue.IsValid() && ReadStoryNum != LevelNum)
+	{
+		ReadStoryNum = LevelNum;
+		PawnInstance->SwitchToTellStory();
+	}
+	else
+	{
+		PawnInstance->SwitchToNormal();
+	}
 	// if(PawnInstance->ReadStory())
 	// {
 	// 	PawnInstance->SwitchToNormal();		
@@ -43,7 +78,8 @@ void UPawnProcess_BeforeTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	// {
 	// 	PawnInstance->SwitchToTellStory();
 	// }
-	PawnInstance->SwitchToNormal();
+	
+	// PawnInstance->SwitchToNormal();
 }
 
 void UPawnProcess_BeforeTurn::TickProcess()

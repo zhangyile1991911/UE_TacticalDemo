@@ -17,7 +17,7 @@ class TBS20140401_API UMyDialogueWidget : public UUserWidget
 	GENERATED_BODY()
 protected:
 	UPROPERTY()
-	TObjectPtr<AMy_Pawn> MyPawn;
+	AMy_Pawn* MyPawn;
 
 	UFUNCTION(BlueprintCallable)
 	AMyUnit* GetSpeakerUnit();

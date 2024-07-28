@@ -69,6 +69,8 @@ public:
 	const TSet<FIntPoint>& GetTurnReachableTiles()const{return TurnReachableMap;}
 	bool IsMoveInReachableTiles(const FIntPoint& one)const;
 	bool IsAssaultRangeTiles(const FIntPoint& one)const;
+
+	void ResetReachableTiles();
 	UPROPERTY()
 	TObjectPtr<AMyUnit> ParentPtr;
 };
