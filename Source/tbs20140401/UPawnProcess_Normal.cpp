@@ -76,6 +76,7 @@ void UUPawnProcess_Normal::TickProcess()
 
 void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UUPawnProcess_Normal_HandleDirectionInput);
 	Super::HandleDirectionInput(Input);
 
 	if(bIsFocus)
@@ -119,18 +120,18 @@ void UUPawnProcess_Normal::HandleDirectionInput(const FVector2D& Input)
 	}
 
 	PawnInstance->LookAtGrid(CurrentCursor);
-	
-	if(PawnInstance->GetMyGrid()->IsValidGridIndex(Next))
-	{
-		PawnInstance->UpdateTileStatusByIndex(Next,ETileState::Selected);
-		CurrentCursor = Next;
-		UE_LOG(LogTemp,Log,TEXT(" HandleDirectionInput CurrentCursor (%d,%d)"),CurrentCursor.X,CurrentCursor.Y);
-	}
 
+	const FTileData* TileDataPtr = PawnInstance->GetMyGrid()->GetTileDataByIndex(Next);
+	if(TileDataPtr == nullptr)return;
+	
+	PawnInstance->UpdateTileStatusByIndex(Next,ETileState::Selected);
+	CurrentCursor = Next;
+	UE_LOG(LogTemp,Log,TEXT(" HandleDirectionInput CurrentCursor (%d,%d)"),CurrentCursor.X,CurrentCursor.Y);
 	
 	ClearPathFinding();
 	
-	if(UnitInstance->GetPathComponent()->IsMoveInReachableTiles(CurrentCursor))
+	if(UnitInstance->GetPathComponent()->IsMoveInReachableTiles(CurrentCursor)
+		&& TileDataPtr->UnitOnTile == nullptr)
 	{//今選んだ目的地は行けるなら　路線を計算する
 		FUnitPathFindingCompleted Completed;
 		Completed.BindUObject(this,&UUPawnProcess_Normal::ShowWalkPath);

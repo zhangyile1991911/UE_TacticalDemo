@@ -346,6 +346,7 @@ void UPawnProcess_ChooseTarget::HandleDirectionInput(const FVector2D& Input)
 		for(const auto& one : ArrayOfIndicatorRange)
 		{
 			const FTileData* OneTileData = PawnInstance->GetMyGrid()->GetTileDataByIndex(one);
+			if(OneTileData == nullptr)continue;
 			if(!ChosenAbilityPtr->CheckDeviation(OneTileData->Height,StandHeight))
 			{
 				continue;

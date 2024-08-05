@@ -297,8 +297,8 @@ void UUnitPathComponent::UnitFindPathAsync(const FIntPoint& Target, FUnitPathFin
 	TargetIndex = Target;
 	
 	
-	Async(EAsyncExecution::TaskGraphMainThread,[this,Completed,bDiagonal]()
-	{
+	// Async(EAsyncExecution::TaskGraph,[this,Completed,bDiagonal]()
+	// {
 		PathFindingMap.Empty();
 		DiscoveredTileIndexes.Empty();
 		AnalysedTileIndexes.Empty();
@@ -340,7 +340,7 @@ void UUnitPathComponent::UnitFindPathAsync(const FIntPoint& Target, FUnitPathFin
 			path.Add(TargetIndex);
 		}
 		Completed.Execute(MoveTemp(path));
-	});
+	// });
 }
 
 bool UUnitPathComponent::CheckIsBorder(const FIntPoint& Index,const TSet<FIntPoint>& DiscoveredTiles)
@@ -378,6 +378,7 @@ bool UUnitPathComponent::CheckIsBorder(const FIntPoint& Index,const TSet<FIntPoi
 
 void UUnitPathComponent::UnitWalkablePath(uint32 CurrentTurnUnitUniqueId,bool bIsTemp)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UUnitPathComponent_UnitWalkablePath);
 	PathFindingMap.Empty();
 
 	FIntPoint Start = ParentPtr->GridIndex;
@@ -393,11 +394,12 @@ void UUnitPathComponent::UnitWalkablePath(uint32 CurrentTurnUnitUniqueId,bool bI
 	{
 		if(ReachableTiles.IsEmpty() || ReachableIndex >= ReachableTiles.Num())break;
 		
-		const FIntPoint& center = ReachableTiles[ReachableIndex];
-		const FMyPathFindingData& CenterDataRef = PathFindingMap[center];
+		FIntPoint center = ReachableTiles[ReachableIndex];
+		// const FMyPathFindingData& CenterDataRef = PathFindingMap[center];
 		for(int i = 0;i < 4;i++)
 		{//广度优先
 			FIntPoint Element = center + Neighbors[i];
+			if(DiscoveredTileIndexes.Contains(Element))continue;
 			const auto TileDataPtr = ParentPtr->MyGrid->GetTileDataByIndex(Element);
 			if(TileDataPtr == nullptr)continue;
 			if(!IsTileTypeWalkable(TileDataPtr->TileType))continue;
@@ -424,15 +426,15 @@ void UUnitPathComponent::UnitWalkablePath(uint32 CurrentTurnUnitUniqueId,bool bI
 			bool bCanPass = ParentPtr->MyStats.ValidTileTypes.Contains(TileDataPtr->TileType);
 			if(!bCanPass)continue;
 			//添加格子
-			if(!DiscoveredTileIndexes.Contains(Element))
-			{
-				auto c = AddPathFindingData(&CenterDataRef,Element);
+			// if(!DiscoveredTileIndexes.Contains(Element))
+			// {
+				FMyPathFindingData c = AddPathFindingData(&PathFindingMap[center],Element);
 				if(c.CostFromStart <= ParentPtr->GetMove()*GridCost)
 				{
-					if(ParentPtr->GetUnitType() == ETBSUnitType::Warrior)
-					{
-						UE_LOG(LogTemp,Log,TEXT("ETBSUnitType::Warrior add cell X = %d Y = %d"),Element.X,Element.Y);	
-					}
+					// if(ParentPtr->GetUnitType() == ETBSUnitType::Warrior)
+					// {
+					// 	UE_LOG(LogTemp,Log,TEXT("ETBSUnitType::Warrior add cell X = %d Y = %d"),Element.X,Element.Y);	
+					// }
 					ReachableTiles.Add(Element);
 					DiscoveredTileIndexes.Add(Element);
 				}
@@ -442,7 +444,7 @@ void UUnitPathComponent::UnitWalkablePath(uint32 CurrentTurnUnitUniqueId,bool bI
 					next = false;
 					break;
 				}
-			}
+			// }
 		}
 	}
 
@@ -472,6 +474,7 @@ void UUnitPathComponent::UnitWalkablePathAsync(uint32 CurrentTurnUnitUniqueId,FU
 {
 	Async(EAsyncExecution::TaskGraphMainThread,[this,CurrentTurnUnitUniqueId,Completed]()
 	{
+		TRACE_CPUPROFILER_EVENT_SCOPE(UUnitPathComponent_UnitWalkablePathAsync);
 		UE_LOG(LogTemp,Log,TEXT("UnitWalkablePathAsync %d"),this->ParentPtr->GetUnitType())
 		UnitWalkablePath(CurrentTurnUnitUniqueId,true);
 		if(Completed.IsBound())
@@ -532,6 +535,7 @@ void UUnitPathComponent::AddAssaultRange(const FIntPoint& Point,bool bIsTemp)
 
 void UUnitPathComponent::UnitAssaultRange(bool bIsTemp)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UUnitPathComponent_UnitAssaultRange);
 	//检查是否为边界
 	TSet<FIntPoint> BorderTileIndexes;
 	for(auto& Pair : PathFindingMap)

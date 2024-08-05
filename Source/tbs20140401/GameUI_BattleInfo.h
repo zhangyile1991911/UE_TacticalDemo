@@ -66,6 +66,9 @@ public:
 	void UpdateHitNumFlowAnim(float Value);
 	UFUNCTION(BlueprintCallable)
 	void FinishHitNumFlowAnim();
+	
+	UFUNCTION(BlueprintCallable)
+	void FinishAllHitNumFlowAnim();
 
 	void ShowBackAtkTips(AMyUnit* Unit);
 	void HideBackAtkTips();

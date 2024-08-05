@@ -113,6 +113,19 @@ void UGameUI_BattleInfo::FinishHitNumFlowAnim()
 	One->SetVisibility(ESlateVisibility::Hidden);
 }
 
+void UGameUI_BattleInfo::FinishAllHitNumFlowAnim()
+{
+	for(int i = 0;i < UsingHitInfos.Num();i++)
+	{
+		auto One = UsingHitInfos[i];
+		One->FinishHitNumFlowAnim();
+		One->SetVisibility(ESlateVisibility::Hidden);
+		HitInfoPool.Add(One);
+	}
+	
+	UsingHitInfos.Empty();
+}
+
 void UGameUI_BattleInfo::ShowBackAtkTips(AMyUnit* Unit)
 {
 	const bool bShow = UpdateWidgetPosition(Unit->GetActorLocation());

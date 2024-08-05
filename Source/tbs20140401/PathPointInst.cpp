@@ -109,6 +109,7 @@ void APathPointInst::ShowPathPoint(const TArray<FIntPoint>& Path, TObjectPtr<AGr
 {
 	RecycleInstIndex();
 	if(Path.IsEmpty())return;
+	
 	for(int i = 0;i < Path.Num()-1;i++)
 	{
 		const FIntPoint& First = Path[i];

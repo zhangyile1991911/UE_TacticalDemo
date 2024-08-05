@@ -70,6 +70,7 @@ void UPawnProcess_BeforeTurn::EnterProcess(TObjectPtr<AMy_Pawn> Pawn)
 	{
 		PawnInstance->SwitchToNormal();
 	}
+	
 	// if(PawnInstance->ReadStory())
 	// {
 	// 	PawnInstance->SwitchToNormal();		

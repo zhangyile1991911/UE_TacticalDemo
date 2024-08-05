@@ -134,12 +134,16 @@ bool UPawnProcess_CalcAnim::CheckDeath()
 		for(int i = 0; i < Report.HitInfoList.Num();i++)
 		{
 			if(!Report.HitInfoList[i].Defender->IsDead())continue;
-			FDeathCompleted DeathCompleted;
-			DeathCompleted.BindUObject(this,&UPawnProcess_CalcAnim::OnDeathCompleted);
-			Report.HitInfoList[i].Defender->DoDeadAnim(DeathCompleted);
-			DeathNum++;
-			HasDead = true;
-			UE_LOG(LogTemp,Log,TEXT("UPawnProcess_CalcAnim::CheckDeath() %s"),*Report.HitInfoList[i].Defender->GetProperty().UnitName.ToString())
+			if(Report.HitInfoList[i].ProcessIndex == 1)
+			{
+				FDeathCompleted DeathCompleted;
+				DeathCompleted.BindUObject(this,&UPawnProcess_CalcAnim::OnDeathCompleted);
+				Report.HitInfoList[i].Defender->DoDeadAnim(DeathCompleted);
+				Report.HitInfoList[i].ProcessIndex = 2;
+				DeathNum++;
+				HasDead = true;
+				UE_LOG(LogTemp,Log,TEXT("UPawnProcess_CalcAnim::CheckDeath() %s"),*Report.HitInfoList[i].Defender->GetProperty().UnitName.ToString())	
+			}
 		}
 	}
 	return !HasDead;
@@ -161,16 +165,20 @@ bool UPawnProcess_CalcAnim::CheckCooperation()
 	}
 	if(!Report.HitInfoList.IsEmpty())
 	{
-		for(int i = Report.HitInfoList.Num() - 1;i >=0;i--)
+		for(int i = 0;i >=0;i--)
 		{
-			auto LastReport = Report.HitInfoList[i];
+			auto& LastReport = Report.HitInfoList[i];
 			if(LastReport.Cooperator == nullptr)continue;
-			ChosenAbilityAnim = LastReport.Cooperator->GetCooperationAbilityAnim();
-			const auto CoReport = ChosenAbilityAnim->DoCalculation(LastReport.CooperatorTarget,PawnInstance->GetMyGrid(),false);
-			ChosenAbilityAnim->CompletedCallback.BindUObject(this,&UPawnProcess_CalcAnim::AbilityCompleted);
-			ChosenAbilityAnim->DoAnimation(CoReport,PawnInstance);
-			Report.HitInfoList.RemoveAt(i);
-			return false;
+			if(LastReport.ProcessIndex == 0)
+			{
+				ChosenAbilityAnim = LastReport.Cooperator->GetCooperationAbilityAnim();
+				const auto CoReport = ChosenAbilityAnim->DoCalculation(LastReport.CooperatorTarget,PawnInstance->GetMyGrid(),false);
+				ChosenAbilityAnim->CompletedCallback.BindUObject(this,&UPawnProcess_CalcAnim::AbilityCompleted);
+				ChosenAbilityAnim->DoAnimation(CoReport,PawnInstance);
+				LastReport.ProcessIndex = 1;
+				// Report.HitInfoList.RemoveAt(i);
+				return false;	
+			}
 		}
 	}
 	return true;

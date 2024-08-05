@@ -35,6 +35,10 @@ struct FHitInfo
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	int Damage = 0;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	int ProcessIndex = 0;
+	
 };
 
 USTRUCT(BlueprintType)

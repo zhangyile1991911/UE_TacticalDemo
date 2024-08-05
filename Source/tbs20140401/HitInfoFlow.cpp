@@ -11,7 +11,7 @@
 void UHitInfoFlow::StartHitNum(FVector2D Start,FVector2D Finish,float Scale,int Num,bool bIsHit,bool bIsCritical,bool bIsBackAtk)
 {
 	SetVisibility(ESlateVisibility::Visible);
-	
+	TextBlockBox->SetVisibility(ESlateVisibility::Visible);
 	StartPos = Start;
 	FinishPos = Finish;
 	if(MySlotPtr == nullptr)
@@ -62,5 +62,6 @@ void UHitInfoFlow::UpdateHitNumFlowAnim(float Value)
 
 void UHitInfoFlow::FinishHitNumFlowAnim()
 {
+	TextBlockBox->SetVisibility(ESlateVisibility::Hidden);
 	SetVisibility(ESlateVisibility::Hidden);
 }
